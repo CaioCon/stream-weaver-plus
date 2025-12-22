@@ -2773,9 +2773,20 @@
           if (saved) {
             this.config = JSON.parse(saved);
           }
+
+          // Ajuste mínimo: evita Mixed Content quando a página está em HTTPS
+          this.config.server = this.normalizeServerUrl(this.config.server);
         } catch (error) {
           console.error('Erro ao carregar configuração:', error);
         }
+      }
+
+      normalizeServerUrl(serverUrl) {
+        if (!serverUrl || typeof serverUrl !== 'string') return serverUrl;
+        if (location.protocol === 'https:' && serverUrl.startsWith('http://')) {
+          return 'https://' + serverUrl.slice('http://'.length);
+        }
+        return serverUrl;
       }
 
       saveConfig() {
