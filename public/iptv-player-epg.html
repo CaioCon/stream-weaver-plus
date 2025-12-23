@@ -99,6 +99,38 @@
       background-attachment: fixed;
     }
     
+    /* Transparência nos elementos quando há background (exceto player) */
+    body.has-background .header {
+      background: linear-gradient(135deg, rgba(0, 168, 72, 0.85), rgba(0, 200, 81, 0.85));
+    }
+    body.has-background .main-nav {
+      background-color: rgba(37, 37, 37, 0.85);
+    }
+    body.has-background .tab-bar {
+      background-color: rgba(48, 48, 48, 0.85);
+    }
+    body.has-background .content-list {
+      background-color: rgba(48, 48, 48, 0.85);
+    }
+    body.has-background .content-section-landscape {
+      background: rgba(37, 37, 37, 0.85);
+    }
+    body.has-background .content-item {
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+    body.has-background .content-item:hover {
+      background-color: rgba(64, 64, 64, 0.9);
+    }
+    body.has-background .favorites-header {
+      background: rgba(37, 37, 37, 0.85);
+    }
+    body.has-background .modal-content {
+      background-color: rgba(48, 48, 48, 0.95);
+    }
+    body.has-background .app-container {
+      background: transparent;
+    }
+    
     /* Header Styles - SEMPRE NO TOPO EM PAISAGEM */
     .header {
       background: var(--primary-gradient);
