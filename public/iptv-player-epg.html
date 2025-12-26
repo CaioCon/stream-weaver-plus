@@ -659,11 +659,10 @@
     border-radius: 3px;
   }
   
-  /* MELHORIA: Content item com layout flexível para EPG ocupar largura total */
   .content-item {
     display: flex;
-    flex-wrap: wrap; /* Permite que o EPG vá para a próxima linha */
-    align-items: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
     padding: clamp(0.5rem, 2vw, 1rem);
     border-bottom: 1px solid var(--bg-quaternary);
     cursor: pointer;
@@ -694,12 +693,13 @@
     box-shadow: 0 2px 8px rgba(220, 20, 60, 0.3);
     background-size: cover;
     background-position: center;
-    flex-shrink: 0; /* Avatar não encolhe */
   }
   
   .content-info {
     flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
   }
   .content-name {
     font-weight: 600;
@@ -769,20 +769,18 @@
     50% { opacity: 0.7; }
   }
   
-  /* EPG Info Styles - MELHORIA: EPG ocupa largura total abaixo do nome e ao lado do coração */
+  /* EPG Info Styles - Nova linha após Reproduzindo agora */
   .epg-line {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.3rem;
     margin-top: 0.5rem;
-    padding: 0.4rem 0.6rem;
-    background: linear-gradient(135deg, rgba(var(--primary-color-rgb, 0, 123, 255), 0.15), rgba(0, 0, 0, 0.3));
-    border-radius: 0.4rem;
-    border-left: 3px solid var(--primary-color);
-    font-size: 0.75rem;
+    padding: 0.5rem 0;
+    font-size: 0.8rem;
     animation: fadeIn 0.3s ease;
     overflow: hidden;
-    width: 100%; /* EPG ocupa largura total do content-info */
+    width: 100%;
+    flex-basis: 100%;
   }
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-5px); }
@@ -872,11 +870,8 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.6);
-    padding-top: 0.25rem;
-    margin-top: 0.2rem;
-    border-top: 1px dashed rgba(255, 255, 255, 0.15);
     width: 100%;
   }
   .epg-line-next-label {
