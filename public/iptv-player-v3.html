@@ -30,7 +30,7 @@
             --border-radius: 12px;
             --transition-speed: 0.3s;
             --glow-color: rgba(204, 24, 24, 0.5);
-            --header-height: 60px;
+            --header-height: 55px;
         }
 
         body {
@@ -42,7 +42,7 @@
             overflow-x: hidden;
         }
 
-        /* Header Styles */
+        /* ========== HEADER STYLES (NOVO) ========== */
         .app-header {
             position: fixed;
             top: 0;
@@ -66,7 +66,7 @@
         }
 
         .app-title {
-            font-size: 1.2em;
+            font-size: 1.1em;
             font-weight: 600;
             background: var(--primary-gradient);
             -webkit-background-clip: text;
@@ -76,18 +76,18 @@
 
         .search-container {
             flex: 1;
-            max-width: 400px;
-            margin: 0 20px;
+            max-width: 350px;
+            margin: 0 15px;
         }
 
         .search-input {
             width: 100%;
-            padding: 10px 15px;
+            padding: 8px 12px;
             border: 2px solid rgba(204, 24, 24, 0.3);
             border-radius: var(--border-radius);
             background: rgba(0, 0, 0, 0.5);
             color: white;
-            font-size: 0.95em;
+            font-size: 0.9em;
             transition: all var(--transition-speed) ease;
         }
 
@@ -108,13 +108,13 @@
         }
 
         .add-url-btn {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background: var(--primary-gradient);
             border: none;
             color: white;
-            font-size: 1.5em;
+            font-size: 1.4em;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -128,7 +128,7 @@
             box-shadow: 0 6px 25px var(--glow-color);
         }
 
-        /* URL Modal */
+        /* ========== URL MODAL (NOVO) ========== */
         .url-modal {
             display: none;
             position: fixed;
@@ -158,14 +158,8 @@
         }
 
         @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9) translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
+            from { opacity: 0; transform: scale(0.9) translateY(-20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .url-modal-header {
@@ -176,14 +170,14 @@
         }
 
         .url-modal-title {
-            font-size: 1.3em;
+            font-size: 1.2em;
             font-weight: 600;
             color: white;
         }
 
         .url-modal-close {
-            width: 35px;
-            height: 35px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.1);
             border: none;
@@ -218,6 +212,7 @@
             color: white;
             font-size: 0.95em;
             transition: all var(--transition-speed) ease;
+            box-sizing: border-box;
         }
 
         .url-input:focus {
@@ -245,12 +240,6 @@
             box-shadow: 0 6px 25px var(--glow-color);
         }
 
-        .url-submit-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
         .current-url-display {
             margin-top: 15px;
             padding: 10px;
@@ -265,6 +254,46 @@
             color: var(--primary-red);
         }
 
+        /* ========== WELCOME MESSAGE (NOVO) ========== */
+        .welcome-message {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            z-index: 100;
+        }
+
+        .welcome-message.visible {
+            display: block;
+        }
+
+        .welcome-message h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-message p {
+            font-size: 1em;
+            opacity: 0.7;
+        }
+
+        /* ========== HIDDEN CLASS FOR SEARCH (NOVO) ========== */
+        .item.hidden {
+            display: none !important;
+        }
+
+        .category-title.hidden {
+            display: none !important;
+        }
+
+        /* ========== PLAYER CONTAINER (ORIGINAL - AJUSTADO) ========== */
         #player-container {
             position: fixed;
             top: var(--header-height);
@@ -302,6 +331,7 @@
             transform: scale(1.1);
         }
 
+        /* ========== CATEGORY SECTION (ORIGINAL - AJUSTADO) ========== */
         .category-section {
             display: flex;
             margin-top: calc(56.25vw + var(--header-height));
@@ -437,27 +467,6 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
-        .item.hidden {
-            display: none !important;
-        }
-
-        .category-title.hidden {
-            display: none !important;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 40px 20px;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 1.1em;
-        }
-
-        .no-results-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
-            opacity: 0.5;
-        }
-
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -480,30 +489,6 @@
             animation: spin 1s linear infinite;
         }
 
-        .welcome-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            z-index: 100;
-        }
-
-        .welcome-message h2 {
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .welcome-message p {
-            font-size: 1em;
-            opacity: 0.7;
-        }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -515,10 +500,6 @@
         }
 
         @media (max-width: 768px) {
-            .app-header {
-                padding: 0 10px;
-            }
-
             .app-title {
                 display: none;
             }
@@ -618,7 +599,7 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
+    <!-- ========== HEADER (NOVO) ========== -->
     <header class="app-header">
         <div class="header-left">
             <span class="app-title">📺 TV SILVA</span>
@@ -633,7 +614,7 @@
         </div>
     </header>
 
-    <!-- URL Modal -->
+    <!-- ========== URL MODAL (NOVO) ========== -->
     <div class="url-modal" id="urlModal">
         <div class="url-modal-content">
             <div class="url-modal-header">
@@ -655,48 +636,50 @@
         </div>
     </div>
 
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
-        <div class="spinner"></div>
-    </div>
-
-    <!-- Welcome Message -->
+    <!-- ========== WELCOME MESSAGE (NOVO) ========== -->
     <div class="welcome-message" id="welcomeMessage">
         <h2>Bem-vindo ao TV SILVA</h2>
         <p>Clique no botão + para adicionar sua playlist IPTV</p>
     </div>
 
-    <!-- Player Container -->
+    <!-- ========== LOADING OVERLAY (ORIGINAL) ========== -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- ========== PLAYER CONTAINER (ORIGINAL) ========== -->
     <div id="player-container">
         <video id="videoPlayer" class="video-js vjs-default-skin vjs-big-play-centered" playsinline>
-            <p class="vjs-no-js">Para ver este vídeo, ative o JavaScript</p>
+            <p class="vjs-no-js">Para ver este vídeo, ative o JavaScript e considere atualizar para um navegador que suporte vídeo HTML5</p>
         </video>
         <img id="channelLogo" class="logo" src="https://i.ibb.co/wYHRkPj/Text-Toos-Apk.png" alt="Logo">
     </div>
 
-    <!-- Category Section -->
+    <!-- ========== CATEGORY SECTION (ORIGINAL) ========== -->
     <div class="category-section">
         <div class="category-list" id="categoryList"></div>
         <div id="itemListContainer"></div>
     </div>
 
-    <!-- Scripts -->
+    <!-- ========== SCRIPTS (ORIGINAL) ========== -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // ========== VARIÁVEIS (ORIGINAL + NOVO) ==========
+            let inputUrl = '';
             let cachedData = {};
             let displayedCategories = new Set();
             let urlOrigin;
             let username, password;
-            let currentInputUrl = '';
-            
             const categoryList = document.getElementById('categoryList');
             const itemListContainer = document.getElementById('itemListContainer');
             const loadingOverlay = document.getElementById('loadingOverlay');
             const channelLogo = document.getElementById('channelLogo');
+            
+            // Novos elementos
             const searchInput = document.getElementById('searchInput');
             const addUrlBtn = document.getElementById('addUrlBtn');
             const urlModal = document.getElementById('urlModal');
@@ -707,7 +690,7 @@
             const currentUrlText = document.getElementById('currentUrlText');
             const welcomeMessage = document.getElementById('welcomeMessage');
             
-            // Configuração inicial do player
+            // ========== CONFIGURAÇÃO DO PLAYER (ORIGINAL) ==========
             const player = videojs('videoPlayer', {
                 fluid: true,
                 html5: {
@@ -741,24 +724,28 @@
                 }
             });
 
-            // Array de User Agents
+            // ========== USER AGENTS (ORIGINAL) ==========
             const userAgents = [
                 'MXPlayer/1.86.0 (Linux; Android 14; pt-BR; SM-A057M Build/UP1A.231005.007.A057MUBS6CXJ2)',
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1.2 Mobile/15E148 Safari/604.1'
+                'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1.2 Mobile/15E148 Safari/604.1',
+                'Mozilla/5.0 (iPad; CPU OS 17_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1.2 Mobile/15E148 Safari/604.1',
+                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1.2 Safari/605.1.15',
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/120.0.0.0 Safari/537.36'
             ];
 
             function getRandomUserAgent() {
                 return userAgents[Math.floor(Math.random() * userAgents.length)];
             }
 
-            // URL Modal Functions
+            // ========== FUNÇÕES DO MODAL URL (NOVO) ==========
             addUrlBtn.addEventListener('click', () => {
                 urlModal.classList.add('active');
-                if (currentInputUrl) {
-                    playlistUrlInput.value = currentInputUrl;
+                if (inputUrl) {
+                    playlistUrlInput.value = inputUrl;
                     currentUrlDisplay.style.display = 'block';
-                    currentUrlText.textContent = currentInputUrl.substring(0, 50) + '...';
+                    currentUrlText.textContent = inputUrl.length > 60 ? inputUrl.substring(0, 60) + '...' : inputUrl;
                 }
             });
 
@@ -775,8 +762,10 @@
             urlSubmitBtn.addEventListener('click', () => {
                 const url = playlistUrlInput.value.trim();
                 if (url) {
-                    loadPlaylist(url);
+                    inputUrl = url;
+                    localStorage.setItem('tvsilva_playlist_url', url);
                     urlModal.classList.remove('active');
+                    loadPlaylist(url);
                 }
             });
 
@@ -786,7 +775,7 @@
                 }
             });
 
-            // Search Function
+            // ========== FUNÇÃO DE BUSCA (NOVO) ==========
             searchInput.addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase().trim();
                 filterChannels(searchTerm);
@@ -798,14 +787,12 @@
                 const itemLists = document.querySelectorAll('.item-list');
                 
                 if (!searchTerm) {
-                    // Reset all
                     items.forEach(item => item.classList.remove('hidden'));
                     categories.forEach(cat => cat.classList.remove('hidden'));
                     itemLists.forEach(list => list.style.display = 'none');
                     return;
                 }
 
-                // Filter items
                 items.forEach(item => {
                     const name = item.querySelector('span').textContent.toLowerCase();
                     if (name.includes(searchTerm)) {
@@ -815,47 +802,41 @@
                     }
                 });
 
-                // Show/hide categories based on visible items
                 itemLists.forEach((list, index) => {
                     const visibleItems = list.querySelectorAll('.item:not(.hidden)');
                     const category = categories[index];
                     
                     if (visibleItems.length > 0) {
-                        category.classList.remove('hidden');
+                        if (category) category.classList.remove('hidden');
                         list.style.display = 'flex';
                     } else {
-                        category.classList.add('hidden');
+                        if (category) category.classList.add('hidden');
                         list.style.display = 'none';
                     }
                 });
             }
 
-            function loadPlaylist(inputUrl) {
-                // Reset state
+            // ========== FUNÇÃO PARA CARREGAR PLAYLIST (NOVO) ==========
+            function loadPlaylist(url) {
                 cachedData = {};
                 displayedCategories = new Set();
                 categoryList.innerHTML = '';
                 itemListContainer.innerHTML = '';
-                currentInputUrl = inputUrl;
-                welcomeMessage.style.display = 'none';
+                welcomeMessage.classList.remove('visible');
                 
                 try {
-                    const url = new URL(inputUrl.trim());
-                    const params = new URLSearchParams(url.search);
+                    const parsedUrl = new URL(url.trim());
+                    const params = new URLSearchParams(parsedUrl.search);
                     username = params.get('username');
                     password = params.get('password');
-                    urlOrigin = url.origin;
+                    urlOrigin = parsedUrl.origin;
                     
                     if (!username || !password) {
                         throw new Error('Credenciais inválidas');
                     }
 
-                    // Save to localStorage
-                    localStorage.setItem('tvsilva_playlist_url', inputUrl);
-                    
-                    // Update display
                     currentUrlDisplay.style.display = 'block';
-                    currentUrlText.textContent = inputUrl.substring(0, 50) + '...';
+                    currentUrlText.textContent = url.length > 60 ? url.substring(0, 60) + '...' : url;
 
                     console.log('URL Origin:', urlOrigin);
                     console.log('Username:', username);
@@ -867,17 +848,49 @@
                 }
             }
 
-            // Função para remover prefixos das categorias
+            // ========== FUNÇÃO PARA REMOVER PREFIXOS (ORIGINAL) ==========
             function removePrefixesFromName(categoryName) {
                 const prefixesToHide = [
-                    "CANAIS | ", "CANAIS •  ", "Canais | ", "📡 CANAIS | ", "🎬 CANAIS | ",
-                    "🍿 CANAIS | ", "⭐ CANAIS | ", "🎯 CANAIS | ", "🔥 CANAIS | ", "💎 CANAIS | ",
-                    "👑 CANAIS | ", "🌟 CANAIS | ", "✅ CANAIS | ", "🚀 CANAIS | ", "🏆 CANAIS | ",
-                    "💫 CANAIS | ", "🎪 CANAIS | ", "🎊 CANAIS | ", "🎉 CANAIS | ", "CANAIS | ",
-                    "✨ CANAIS |", "📺 CANAIS |", "🔴 CANAIS |", "📡 CANAIS |", "🎬 CANAIS |",
-                    "🍿 CANAIS |", "⭐ CANAIS |", "🎯 CANAIS |", "🔥 CANAIS |", "💎 CANAIS |",
-                    "👑 CANAIS |", "🌟 CANAIS |", "✅ CANAIS |", "🚀 CANAIS |", "🏆 CANAIS |",
-                    "💫 CANAIS |", "🎪 CANAIS |", "🎊 CANAIS |", "🎉 CANAIS |", "CANAIS |"
+                    "CANAIS | ",
+                    "CANAIS •  ",
+                    "Canais | ",
+                    "📡 CANAIS | ",
+                    "🎬 CANAIS | ",
+                    "🍿 CANAIS | ",
+                    "⭐ CANAIS | ",
+                    "🎯 CANAIS | ",
+                    "🔥 CANAIS | ",
+                    "💎 CANAIS | ",
+                    "👑 CANAIS | ",
+                    "🌟 CANAIS | ",
+                    "✅ CANAIS | ",
+                    "🚀 CANAIS | ",
+                    "🏆 CANAIS | ",
+                    "💫 CANAIS | ",
+                    "🎪 CANAIS | ",
+                    "🎊 CANAIS | ",
+                    "🎉 CANAIS | ",
+                    "CANAIS | ",
+                    "✨ CANAIS |",
+                    "📺 CANAIS |",
+                    "🔴 CANAIS |",
+                    "📡 CANAIS |",
+                    "🎬 CANAIS |",
+                    "🍿 CANAIS |",
+                    "⭐ CANAIS |",
+                    "🎯 CANAIS |",
+                    "🔥 CANAIS |",
+                    "💎 CANAIS |",
+                    "👑 CANAIS |",
+                    "🌟 CANAIS |",
+                    "✅ CANAIS |",
+                    "🚀 CANAIS |",
+                    "🏆 CANAIS |",
+                    "💫 CANAIS |",
+                    "🎪 CANAIS |",
+                    "🎊 CANAIS |",
+                    "🎉 CANAIS |",
+                    "CANAIS |"
                 ];
                 
                 let displayName = categoryName;
@@ -893,6 +906,7 @@
                 return displayName.trim();
             }
 
+            // ========== FUNÇÃO DE ERRO (ORIGINAL) ==========
             function showError(message) {
                 console.log('Erro:', message);
                 const errorDiv = document.createElement('div');
@@ -907,6 +921,7 @@
                 }, 5000);
             }
 
+            // ========== FETCH CATEGORIES (ORIGINAL) ==========
             async function fetchCategories() {
                 loadingOverlay.style.display = 'flex';
                 try {
@@ -915,14 +930,21 @@
                         `${urlOrigin}/player_api.php?username=${username}&password=${password}&action=get_live_categories`,
                         {
                             timeout: 15000,
-                            headers: { 'User-Agent': getRandomUserAgent() }
+                            headers: {
+                                'User-Agent': getRandomUserAgent()
+                            }
                         }
                     );
 
+                    console.log('Resposta das categorias:', response.data);
+
                     if (Array.isArray(response.data) && response.data.length > 0) {
                         console.log(`Encontradas ${response.data.length} categorias`);
+                        
                         const promises = response.data.map(category => fetchItems(category));
                         await Promise.allSettled(promises);
+                        
+                        console.log('Todas as categorias processadas');
                     } else {
                         throw new Error('Nenhuma categoria encontrada');
                     }
@@ -934,8 +956,11 @@
                 }
             }
 
+            // ========== FETCH ITEMS (ORIGINAL) ==========
             async function fetchItems(category) {
                 try {
+                    console.log(`Buscando itens para categoria: ${category.category_name}`);
+                    
                     if (cachedData[category.category_name]) {
                         displayCategory(category.category_name, cachedData[category.category_name]);
                         return;
@@ -945,11 +970,14 @@
                         `${urlOrigin}/player_api.php?username=${username}&password=${password}&action=get_live_streams&category_id=${category.category_id}`,
                         {
                             timeout: 15000,
-                            headers: { 'User-Agent': getRandomUserAgent() }
+                            headers: {
+                                'User-Agent': getRandomUserAgent()
+                            }
                         }
                     );
 
                     const items = Array.isArray(response.data) ? response.data : [];
+                    console.log(`Encontrados ${items.length} itens para ${category.category_name}`);
                     cachedData[category.category_name] = items;
                     displayCategory(category.category_name, items);
                     
@@ -960,12 +988,16 @@
                 }
             }
 
+            // ========== DISPLAY CATEGORY (ORIGINAL) ==========
             function displayCategory(categoryName, items) {
-                if (displayedCategories.has(categoryName)) return;
+                if (displayedCategories.has(categoryName)) {
+                    return;
+                }
                 displayedCategories.add(categoryName);
 
                 const displayName = removePrefixesFromName(categoryName);
                 const finalDisplayName = displayName || categoryName;
+                console.log(`Exibindo categoria: ${finalDisplayName} (${items.length} itens)`);
 
                 const categoryTitle = document.createElement('div');
                 categoryTitle.className = 'category-title';
@@ -997,7 +1029,11 @@
 
                     itemDiv.appendChild(itemImg);
                     itemDiv.appendChild(itemName);
-                    itemDiv.addEventListener('click', () => playVideo(item));
+
+                    itemDiv.addEventListener('click', () => {
+                        playVideo(item);
+                    });
+
                     itemList.appendChild(itemDiv);
                 });
 
@@ -1005,9 +1041,29 @@
                 categoryList.appendChild(categoryTitle);
             }
 
+            // ========== DETECT VIDEO TYPE (ORIGINAL) ==========
+            function detectVideoType(url) {
+                const extension = url.split('.').pop().toLowerCase();
+                const typeMap = {
+                    'm3u8': 'application/x-mpegURL',
+                    'mpd': 'application/dash+xml',
+                    'mp4': 'video/mp4',
+                    'webm': 'video/webm',
+                    'ogv': 'video/ogg',
+                    'mkv': 'video/x-matroska',
+                    'ts': 'video/MP2T',
+                    'avi': 'video/x-msvideo',
+                    'm3u': 'application/x-mpegURL'
+                };
+                return typeMap[extension] || 'application/x-mpegURL';
+            }
+
+            // ========== PLAY VIDEO (ORIGINAL) ==========
             function playVideo(item) {
-                console.log('Reproduzindo:', item.name);
+                console.log('Reproduzindo:', item.name, 'ID:', item.stream_id);
+
                 const videoUrl = `${urlOrigin}/live/${username}/${password}/${item.stream_id}.m3u8`;
+                console.log('URL do vídeo:', videoUrl);
 
                 player.src({
                     src: videoUrl,
@@ -1017,31 +1073,74 @@
 
                 player.ready(() => {
                     player.play().then(() => {
+                        console.log('Reprodução iniciada com sucesso');
                         channelLogo.style.display = 'block';
                     }).catch(error => {
+                        console.error('Erro ao reproduzir:', error);
+                        showError('Erro ao iniciar a reprodução: ' + error.message);
+                        
                         const altUrl = `${urlOrigin}/live/${username}/${password}/${item.stream_id}.ts`;
-                        player.src({ src: altUrl, type: 'video/MP2T', withCredentials: false });
-                        player.play().catch(e => showError('Não foi possível reproduzir o vídeo'));
+                        console.log('Tentando formato alternativo:', altUrl);
+                        
+                        player.src({
+                            src: altUrl,
+                            type: 'video/MP2T',
+                            withCredentials: false
+                        });
+                        
+                        player.play().catch(e => {
+                            console.error('Erro no formato alternativo:', e);
+                            showError('Não foi possível reproduzir o vídeo');
+                        });
                     });
                 });
 
                 player.poster('https://i.ibb.co/wYHRkPj/Text-Toos-Apk.png');
             }
 
-            // Player Events
-            player.on('error', () => showError('Erro na reprodução do vídeo'));
-            player.on('pause', () => channelLogo.style.display = 'none');
-            player.on('ended', () => channelLogo.style.display = 'none');
-            player.on('fullscreenchange', () => {
+            // ========== EVENT LISTENERS DO PLAYER (ORIGINAL) ==========
+            player.on('error', function(error) {
+                console.error('Erro do player:', error);
+                showError('Erro na reprodução do vídeo');
+            });
+
+            player.on('loadstart', function() {
+                console.log('Iniciando carregamento...');
+            });
+
+            player.on('waiting', function() {
+                console.log('Buffering...');
+            });
+
+            player.on('canplay', function() {
+                console.log('Vídeo pronto para reproduzir');
+            });
+
+            player.on('pause', function() {
+                channelLogo.style.display = 'none';
+            });
+
+            player.on('ended', function() {
+                channelLogo.style.display = 'none';
+            });
+
+            player.on('fullscreenchange', function() {
                 channelLogo.style.display = player.isFullscreen() ? 'block' : 'none';
             });
 
-            // Load saved URL from localStorage
+            // ========== INICIALIZAÇÃO (NOVO) ==========
+            // Verifica se há URL salva no localStorage
             const savedUrl = localStorage.getItem('tvsilva_playlist_url');
             if (savedUrl) {
+                inputUrl = savedUrl;
                 playlistUrlInput.value = savedUrl;
                 loadPlaylist(savedUrl);
+            } else {
+                // Mostra mensagem de boas-vindas
+                loadingOverlay.style.display = 'none';
+                welcomeMessage.classList.add('visible');
             }
+
         });
     </script>
 </body>
