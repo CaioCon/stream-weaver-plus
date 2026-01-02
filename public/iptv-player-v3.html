@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TV SILVA - Player IPTV</title>
+    
+    <!-- Video.js CSS -->
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Players Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dash.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/shaka-player@latest"></script>
+    
+    <style>
+        :root {
+            --category-width: 180px;
+            --primary-red: #cc1818;
+            --primary-gradient: linear-gradient(135deg, #cc1818 0%, #ff4b4b 100%);
+            --dark-bg: #000000;
+            --card-bg: #1a1a1a;
+            --card-hover: #2a2a2a;
+            --border-radius: 12px;
+            --transition-speed: 0.3s;
+            --glow-color: rgba(204, 24, 24, 0.5);
+            --header-height: 60px;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #000000, #1a1a1a);
+            color: white;
+            font-family: 'Inter', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: linear-gradient(to right, #0a0a0a, #1a1a1a);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            z-index: 1001;
+            border-bottom: 2px solid var(--primary-red);
+            box-shadow: 0 4px 20px rgba(204, 24, 24, 0.3);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .app-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid rgba(204, 24, 24, 0.3);
+            border-radius: var(--border-radius);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-size: 0.95em;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 15px var(--glow-color);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .add-url-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-speed) ease;
+            box-shadow: 0 4px 15px var(--glow-color);
+        }
+
+        .add-url-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px var(--glow-color);
+        }
+
+        /* URL Modal */
+        .url-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .url-modal.active {
+            display: flex;
+        }
+
+        .url-modal-content {
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            border: 2px solid var(--primary-red);
+            box-shadow: 0 10px 40px var(--glow-color);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .url-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .url-modal-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: white;
+        }
+
+        .url-modal-close {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .url-modal-close:hover {
+            background: var(--primary-red);
+            transform: rotate(90deg);
+        }
+
+        .url-input-group {
+            margin-bottom: 20px;
+        }
+
+        .url-input-label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9em;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(204, 24, 24, 0.3);
+            border-radius: var(--border-radius);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-size: 0.95em;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 15px var(--glow-color);
+        }
+
+        .url-submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: var(--border-radius);
+            color: white;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            box-shadow: 0 4px 15px var(--glow-color);
+        }
+
+        .url-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px var(--glow-color);
+        }
+
+        .url-submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .current-url-display {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            font-size: 0.85em;
+            color: rgba(255, 255, 255, 0.6);
+            word-break: break-all;
+        }
+
+        .current-url-display strong {
+            color: var(--primary-red);
+        }
+
+        #player-container {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            width: 100%;
+            height: 56.25vw;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 999;
+            box-shadow: 0 4px 20px rgba(204, 24, 24, 0.3);
+            border-bottom: 2px solid var(--primary-red);
+        }
+
+        .video-js {
+            width: 100%;
+            height: 100%;
+            box-shadow: 0 0 30px rgba(204, 24, 24, 0.2);
+        }
+
+        .vjs-error-display {
+            display: none;
+        }
+
+        .logo {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            width: 40px;
+            display: none;
+            z-index: 1000;
+            filter: drop-shadow(0 2px 8px rgba(204, 24, 24, 0.6));
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.1);
+        }
+
+        .category-section {
+            display: flex;
+            margin-top: calc(56.25vw + var(--header-height));
+            width: 100%;
+            height: calc(100vh - 56.25vw - var(--header-height));
+            background: linear-gradient(to right, #000000, #1a1a1a);
+        }
+
+        .category-list {
+            width: var(--category-width);
+            min-width: var(--category-width);
+            background: linear-gradient(to right, #000000, #0d0d0d);
+            height: calc(100vh - 56.25vw - var(--header-height) - 20px);
+            overflow-y: auto;
+            position: fixed;
+            left: 0;
+            padding: 15px 10px 50px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-red) var(--card-bg);
+            border-right: 1px solid rgba(204, 24, 24, 0.2);
+        }
+
+        .category-title {
+            padding: 12px;
+            margin: 8px 0;
+            background: linear-gradient(145deg, var(--card-bg), #222);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            font-size: 0.95em;
+            color: #fff;
+            border-left: 4px solid var(--primary-red);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-title:hover {
+            background: linear-gradient(145deg, var(--card-hover), #333);
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(204, 24, 24, 0.15);
+        }
+
+        .category-title::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+        }
+
+        .category-title:hover::after {
+            transform: translateX(100%);
+            transition: transform 0.6s ease;
+        }
+
+        #itemListContainer {
+            flex: 1;
+            margin-left: var(--category-width);
+            padding: 15px;
+            overflow-y: auto;
+            background: linear-gradient(to right, #0d0d0d, #1a1a1a);
+            height: calc(100% - 20px);
+        }
+
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: linear-gradient(145deg, var(--card-bg), #222);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            margin: 0;
+            border-left: 4px solid var(--primary-red);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item:hover {
+            background: linear-gradient(145deg, var(--card-hover), #333);
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(204, 24, 24, 0.15);
+        }
+
+        .item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+        }
+
+        .item:hover::after {
+            transform: translateX(100%);
+            transition: transform 0.6s ease;
+        }
+
+        .item img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            margin-right: 15px;
+            border: 2px solid rgba(204, 24, 24, 0.3);
+            transition: all var(--transition-speed) ease;
+            object-fit: cover;
+        }
+
+        .item:hover img {
+            transform: scale(1.1);
+            border-color: var(--primary-red);
+            box-shadow: 0 0 15px var(--glow-color);
+        }
+
+        .item span {
+            color: white;
+            font-size: 1em;
+            font-weight: 500;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .item.hidden {
+            display: none !important;
+        }
+
+        .category-title.hidden {
+            display: none !important;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.1em;
+        }
+
+        .no-results-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--primary-red);
+            border-top: 5px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .welcome-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            z-index: 100;
+        }
+
+        .welcome-message h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-message p {
+            font-size: 1em;
+            opacity: 0.7;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .app-header {
+                padding: 0 10px;
+            }
+
+            .app-title {
+                display: none;
+            }
+
+            .search-container {
+                margin: 0 10px;
+            }
+
+            .category-list {
+                width: 140px;
+                min-width: 140px;
+            }
+
+            #itemListContainer {
+                margin-left: 140px;
+            }
+
+            .category-title {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+
+            .item {
+                padding: 8px;
+            }
+
+            .item img {
+                width: 35px;
+                height: 35px;
+                margin-right: 10px;
+            }
+
+            .item span {
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .category-list {
+                width: 120px;
+                min-width: 120px;
+            }
+
+            #itemListContainer {
+                margin-left: 120px;
+            }
+
+            .category-title {
+                padding: 8px;
+                font-size: 0.85em;
+            }
+
+            .item img {
+                width: 30px;
+                height: 30px;
+            }
+
+            .item span {
+                font-size: 0.85em;
+            }
+
+            .url-modal-content {
+                padding: 20px;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--card-bg);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-red);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff4b4b;
+        }
+
+        .error-message {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-red);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-left">
+            <span class="app-title">📺 TV SILVA</span>
+        </div>
+        
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="🔍 Buscar canais...">
+        </div>
+        
+        <div class="header-right">
+            <button class="add-url-btn" id="addUrlBtn" title="Configurar URL">+</button>
+        </div>
+    </header>
+
+    <!-- URL Modal -->
+    <div class="url-modal" id="urlModal">
+        <div class="url-modal-content">
+            <div class="url-modal-header">
+                <span class="url-modal-title">⚙️ Configurar Playlist</span>
+                <button class="url-modal-close" id="urlModalClose">×</button>
+            </div>
+            
+            <div class="url-input-group">
+                <label class="url-input-label">URL da Playlist M3U:</label>
+                <input type="text" class="url-input" id="playlistUrlInput" 
+                    placeholder="http://exemplo.com/get.php?username=user&password=pass&type=m3u_plus">
+            </div>
+            
+            <button class="url-submit-btn" id="urlSubmitBtn">🚀 Carregar Playlist</button>
+            
+            <div class="current-url-display" id="currentUrlDisplay" style="display: none;">
+                <strong>URL atual:</strong> <span id="currentUrlText"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Welcome Message -->
+    <div class="welcome-message" id="welcomeMessage">
+        <h2>Bem-vindo ao TV SILVA</h2>
+        <p>Clique no botão + para adicionar sua playlist IPTV</p>
+    </div>
+
+    <!-- Player Container -->
+    <div id="player-container">
+        <video id="videoPlayer" class="video-js vjs-default-skin vjs-big-play-centered" playsinline>
+            <p class="vjs-no-js">Para ver este vídeo, ative o JavaScript</p>
+        </video>
+        <img id="channelLogo" class="logo" src="https://i.ibb.co/wYHRkPj/Text-Toos-Apk.png" alt="Logo">
+    </div>
+
+    <!-- Category Section -->
+    <div class="category-section">
+        <div class="category-list" id="categoryList"></div>
+        <div id="itemListContainer"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let cachedData = {};
+            let displayedCategories = new Set();
+            let urlOrigin;
+            let username, password;
+            let currentInputUrl = '';
+            
+            const categoryList = document.getElementById('categoryList');
+            const itemListContainer = document.getElementById('itemListContainer');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const channelLogo = document.getElementById('channelLogo');
+            const searchInput = document.getElementById('searchInput');
+            const addUrlBtn = document.getElementById('addUrlBtn');
+            const urlModal = document.getElementById('urlModal');
+            const urlModalClose = document.getElementById('urlModalClose');
+            const playlistUrlInput = document.getElementById('playlistUrlInput');
+            const urlSubmitBtn = document.getElementById('urlSubmitBtn');
+            const currentUrlDisplay = document.getElementById('currentUrlDisplay');
+            const currentUrlText = document.getElementById('currentUrlText');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            
+            // Configuração inicial do player
+            const player = videojs('videoPlayer', {
+                fluid: true,
+                html5: {
+                    hls: {
+                        enableLowInitialPlaylist: true,
+                        smoothQualityChange: true,
+                        overrideNative: true,
+                        maxBufferLength: 30,
+                        maxMaxBufferLength: 600,
+                        fastQualityChange: true,
+                    }
+                },
+                liveui: true,
+                responsive: true,
+                playbackRates: [0.5, 1, 1.5, 2],
+                controlBar: {
+                    children: [
+                        'playToggle',
+                        'volumePanel',
+                        'currentTimeDisplay',
+                        'timeDivider',
+                        'durationDisplay',
+                        'progressControl',
+                        'liveDisplay',
+                        'remainingTimeDisplay',
+                        'customControlSpacer',
+                        'playbackRateMenuButton',
+                        'qualitySelector',
+                        'fullscreenToggle'
+                    ]
+                }
+            });
+
+            // Array de User Agents
+            const userAgents = [
+                'MXPlayer/1.86.0 (Linux; Android 14; pt-BR; SM-A057M Build/UP1A.231005.007.A057MUBS6CXJ2)',
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1.2 Mobile/15E148 Safari/604.1'
+            ];
+
+            function getRandomUserAgent() {
+                return userAgents[Math.floor(Math.random() * userAgents.length)];
+            }
+
+            // URL Modal Functions
+            addUrlBtn.addEventListener('click', () => {
+                urlModal.classList.add('active');
+                if (currentInputUrl) {
+                    playlistUrlInput.value = currentInputUrl;
+                    currentUrlDisplay.style.display = 'block';
+                    currentUrlText.textContent = currentInputUrl.substring(0, 50) + '...';
+                }
+            });
+
+            urlModalClose.addEventListener('click', () => {
+                urlModal.classList.remove('active');
+            });
+
+            urlModal.addEventListener('click', (e) => {
+                if (e.target === urlModal) {
+                    urlModal.classList.remove('active');
+                }
+            });
+
+            urlSubmitBtn.addEventListener('click', () => {
+                const url = playlistUrlInput.value.trim();
+                if (url) {
+                    loadPlaylist(url);
+                    urlModal.classList.remove('active');
+                }
+            });
+
+            playlistUrlInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    urlSubmitBtn.click();
+                }
+            });
+
+            // Search Function
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                filterChannels(searchTerm);
+            });
+
+            function filterChannels(searchTerm) {
+                const items = document.querySelectorAll('.item');
+                const categories = document.querySelectorAll('.category-title');
+                const itemLists = document.querySelectorAll('.item-list');
+                
+                if (!searchTerm) {
+                    // Reset all
+                    items.forEach(item => item.classList.remove('hidden'));
+                    categories.forEach(cat => cat.classList.remove('hidden'));
+                    itemLists.forEach(list => list.style.display = 'none');
+                    return;
+                }
+
+                // Filter items
+                items.forEach(item => {
+                    const name = item.querySelector('span').textContent.toLowerCase();
+                    if (name.includes(searchTerm)) {
+                        item.classList.remove('hidden');
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                });
+
+                // Show/hide categories based on visible items
+                itemLists.forEach((list, index) => {
+                    const visibleItems = list.querySelectorAll('.item:not(.hidden)');
+                    const category = categories[index];
+                    
+                    if (visibleItems.length > 0) {
+                        category.classList.remove('hidden');
+                        list.style.display = 'flex';
+                    } else {
+                        category.classList.add('hidden');
+                        list.style.display = 'none';
+                    }
+                });
+            }
+
+            function loadPlaylist(inputUrl) {
+                // Reset state
+                cachedData = {};
+                displayedCategories = new Set();
+                categoryList.innerHTML = '';
+                itemListContainer.innerHTML = '';
+                currentInputUrl = inputUrl;
+                welcomeMessage.style.display = 'none';
+                
+                try {
+                    const url = new URL(inputUrl.trim());
+                    const params = new URLSearchParams(url.search);
+                    username = params.get('username');
+                    password = params.get('password');
+                    urlOrigin = url.origin;
+                    
+                    if (!username || !password) {
+                        throw new Error('Credenciais inválidas');
+                    }
+
+                    // Save to localStorage
+                    localStorage.setItem('tvsilva_playlist_url', inputUrl);
+                    
+                    // Update display
+                    currentUrlDisplay.style.display = 'block';
+                    currentUrlText.textContent = inputUrl.substring(0, 50) + '...';
+
+                    console.log('URL Origin:', urlOrigin);
+                    console.log('Username:', username);
+
+                    fetchCategories();
+                } catch (error) {
+                    showError(error.message);
+                    loadingOverlay.style.display = 'none';
+                }
+            }
+
+            // Função para remover prefixos das categorias
+            function removePrefixesFromName(categoryName) {
+                const prefixesToHide = [
+                    "CANAIS | ", "CANAIS •  ", "Canais | ", "📡 CANAIS | ", "🎬 CANAIS | ",
+                    "🍿 CANAIS | ", "⭐ CANAIS | ", "🎯 CANAIS | ", "🔥 CANAIS | ", "💎 CANAIS | ",
+                    "👑 CANAIS | ", "🌟 CANAIS | ", "✅ CANAIS | ", "🚀 CANAIS | ", "🏆 CANAIS | ",
+                    "💫 CANAIS | ", "🎪 CANAIS | ", "🎊 CANAIS | ", "🎉 CANAIS | ", "CANAIS | ",
+                    "✨ CANAIS |", "📺 CANAIS |", "🔴 CANAIS |", "📡 CANAIS |", "🎬 CANAIS |",
+                    "🍿 CANAIS |", "⭐ CANAIS |", "🎯 CANAIS |", "🔥 CANAIS |", "💎 CANAIS |",
+                    "👑 CANAIS |", "🌟 CANAIS |", "✅ CANAIS |", "🚀 CANAIS |", "🏆 CANAIS |",
+                    "💫 CANAIS |", "🎪 CANAIS |", "🎊 CANAIS |", "🎉 CANAIS |", "CANAIS |"
+                ];
+                
+                let displayName = categoryName;
+                const sortedPrefixes = prefixesToHide.sort((a, b) => b.length - a.length);
+                
+                for (const prefix of sortedPrefixes) {
+                    if (displayName.startsWith(prefix)) {
+                        displayName = displayName.substring(prefix.length);
+                        break;
+                    }
+                }
+                
+                return displayName.trim();
+            }
+
+            function showError(message) {
+                console.log('Erro:', message);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = message;
+                document.body.appendChild(errorDiv);
+                
+                setTimeout(() => {
+                    if (errorDiv.parentNode) {
+                        errorDiv.parentNode.removeChild(errorDiv);
+                    }
+                }, 5000);
+            }
+
+            async function fetchCategories() {
+                loadingOverlay.style.display = 'flex';
+                try {
+                    console.log('Buscando categorias...');
+                    const response = await axios.get(
+                        `${urlOrigin}/player_api.php?username=${username}&password=${password}&action=get_live_categories`,
+                        {
+                            timeout: 15000,
+                            headers: { 'User-Agent': getRandomUserAgent() }
+                        }
+                    );
+
+                    if (Array.isArray(response.data) && response.data.length > 0) {
+                        console.log(`Encontradas ${response.data.length} categorias`);
+                        const promises = response.data.map(category => fetchItems(category));
+                        await Promise.allSettled(promises);
+                    } else {
+                        throw new Error('Nenhuma categoria encontrada');
+                    }
+                } catch (error) {
+                    console.error('Erro ao buscar categorias:', error);
+                    showError('Erro ao carregar categorias: ' + error.message);
+                } finally {
+                    loadingOverlay.style.display = 'none';
+                }
+            }
+
+            async function fetchItems(category) {
+                try {
+                    if (cachedData[category.category_name]) {
+                        displayCategory(category.category_name, cachedData[category.category_name]);
+                        return;
+                    }
+
+                    const response = await axios.get(
+                        `${urlOrigin}/player_api.php?username=${username}&password=${password}&action=get_live_streams&category_id=${category.category_id}`,
+                        {
+                            timeout: 15000,
+                            headers: { 'User-Agent': getRandomUserAgent() }
+                        }
+                    );
+
+                    const items = Array.isArray(response.data) ? response.data : [];
+                    cachedData[category.category_name] = items;
+                    displayCategory(category.category_name, items);
+                    
+                } catch (error) {
+                    console.error(`Erro ao carregar itens da categoria ${category.category_name}:`, error);
+                    displayCategory(category.category_name, []);
+                    cachedData[category.category_name] = [];
+                }
+            }
+
+            function displayCategory(categoryName, items) {
+                if (displayedCategories.has(categoryName)) return;
+                displayedCategories.add(categoryName);
+
+                const displayName = removePrefixesFromName(categoryName);
+                const finalDisplayName = displayName || categoryName;
+
+                const categoryTitle = document.createElement('div');
+                categoryTitle.className = 'category-title';
+                categoryTitle.textContent = finalDisplayName;
+
+                const itemList = document.createElement('div');
+                itemList.className = 'item-list';
+                itemList.style.display = 'none';
+
+                categoryTitle.addEventListener('click', () => {
+                    const isVisible = itemList.style.display === 'flex';
+                    document.querySelectorAll('.item-list').forEach(list => list.style.display = 'none');
+                    itemList.style.display = isVisible ? 'none' : 'flex';
+                });
+
+                items.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'item';
+
+                    const itemImg = document.createElement('img');
+                    itemImg.src = item.stream_icon || 'https://i.ibb.co/wYHRkPj/Text-Toos-Apk.png';
+                    itemImg.alt = item.name;
+                    itemImg.onerror = () => {
+                        itemImg.src = 'https://i.ibb.co/wYHRkPj/Text-Toos-Apk.png';
+                    };
+
+                    const itemName = document.createElement('span');
+                    itemName.textContent = item.name;
+
+                    itemDiv.appendChild(itemImg);
+                    itemDiv.appendChild(itemName);
+                    itemDiv.addEventListener('click', () => playVideo(item));
+                    itemList.appendChild(itemDiv);
+                });
+
+                itemListContainer.appendChild(itemList);
+                categoryList.appendChild(categoryTitle);
+            }
+
+            function playVideo(item) {
+                console.log('Reproduzindo:', item.name);
+                const videoUrl = `${urlOrigin}/live/${username}/${password}/${item.stream_id}.m3u8`;
+
+                player.src({
+                    src: videoUrl,
+                    type: 'application/x-mpegURL',
+                    withCredentials: false
+                });
+
+                player.ready(() => {
+                    player.play().then(() => {
+                        channelLogo.style.display = 'block';
+                    }).catch(error => {
+                        const altUrl = `${urlOrigin}/live/${username}/${password}/${item.stream_id}.ts`;
+                        player.src({ src: altUrl, type: 'video/MP2T', withCredentials: false });
+                        player.play().catch(e => showError('Não foi possível reproduzir o vídeo'));
+                    });
+                });
+
+                player.poster('https://i.ibb.co/wYHRkPj/Text-Toos-Apk.png');
+            }
+
+            // Player Events
+            player.on('error', () => showError('Erro na reprodução do vídeo'));
+            player.on('pause', () => channelLogo.style.display = 'none');
+            player.on('ended', () => channelLogo.style.display = 'none');
+            player.on('fullscreenchange', () => {
+                channelLogo.style.display = player.isFullscreen() ? 'block' : 'none';
+            });
+
+            // Load saved URL from localStorage
+            const savedUrl = localStorage.getItem('tvsilva_playlist_url');
+            if (savedUrl) {
+                playlistUrlInput.value = savedUrl;
+                loadPlaylist(savedUrl);
+            }
+        });
+    </script>
+</body>
+</html>
