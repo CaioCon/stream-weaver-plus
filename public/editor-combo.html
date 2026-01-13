@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor De Combo</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #343a40;
+      color: #716e9d;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      margin-top: 0px;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: rgba(0, 0, 0, 0.7);
+      border: 2px solid #6c757d;
+      max-width: 100%;
+    }
+    .input-fields {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+    .input-fields textarea {
+      width: calc(50% - 5px);
+      height: 200px;
+      padding: 10px;
+      border: 1px solid #716e9d;
+      border-radius: 4px;
+      background-color: #000000;
+      color: white;
+      resize: vertical;
+    }
+    .additional-fields {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      margin-top: 5px;
+      padding: 5px;
+      gap: 10px;
+    }
+    .additional-fields input {
+      width: 47%;
+      padding: 10px;
+      border: 1px solid #716e9d;
+      border-radius: 4px;
+      background-color: #000000;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+    .additional-fields button {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .divider-input {
+      width: 50%;
+      padding: 10px;
+      border: 1px solid #716e9d;
+      border-radius: 4px;
+      background-color: #000000;
+      color: #ffffff;
+      margin: auto;
+      display: block;
+      margin-bottom: 0px;
+    }
+    .button-border {
+      border: 1px solid #ff0000;
+    }
+    .button-spacing1 {
+      margin-right: 0px;
+      margin-bottom: 10px;
+    }
+    .button-spacing2 {
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    .generate-button {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background-color: #ff0000;
+      background-image: linear-gradient(to bottom, #716e9d, #716e9d);
+      color: #ffffff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s, background-image 0.3s;
+    }
+    .generate-button:hover {
+      background-color: blue;
+      background-image: linear-gradient(to bottom, blue, blue);
+    }
+    .output-field {
+      padding: 10px;
+      border: 1px solid #716e9d;
+      border-radius: 4px;
+      max-height: 300px;
+      overflow-y: auto;
+      overflow-x: auto;
+      background-color: #000000;
+      color: #ffffff;
+      position: relative;
+      white-space: pre-wrap;
+      user-select: none;
+      margin-bottom: 10px;
+      margin-top: 10px;
+    }
+    .output-field div {
+      margin-bottom: 5px;
+    }
+    .output-field a {
+      display: block;
+      color: #ffffff;
+      text-decoration: none;
+      word-break: break-all;
+    }
+    .copy-button {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: #716e9d;
+      color: #ffffff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .copy-button:hover {
+      background-color: blue;
+    }
+    .button-container1 {
+      margin-bottom: 10px;
+      width: 100%;
+      display: flex;
+      overflow-x: auto;
+      align-items: center;
+      position: relative;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .button-container1::-webkit-scrollbar {
+      height: 8px;
+    }
+    .button-container1::-webkit-scrollbar-thumb {
+      background-color: grey;
+      border-radius: 5px;
+    }
+    .button-container1 button {
+      flex-shrink: 0;
+      padding: 10px;
+    }
+    .scroll-indicator {
+      position: absolute;
+      bottom: 0;
+      left: 1;
+      width: 100%;
+      height: 8px;
+      background-color: rgba(100, 102, 10, 0.0);
+      z-index: 1;
+    }
+    .button-container {
+      margin-bottom: 10px;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-primary {
+      background-color: #716e9d;
+      border-radius: 5px;
+      border-color: #716e9d;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    #Nomes-button {
+      display: none;
+    }
+
+    /* Dropdown Styles */
+    .dropdown-container {
+      position: relative;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .dropdown-btn {
+      padding: 10px 15px;
+      border: 1px solid #ff0000;
+      border-radius: 4px;
+      background-image: linear-gradient(to bottom, #716e9d, #716e9d);
+      color: #ffffff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      white-space: nowrap;
+    }
+    .dropdown-btn:hover {
+      background-image: linear-gradient(to bottom, blue, blue);
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #1a1a2e;
+      min-width: 180px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+      z-index: 100;
+      border-radius: 4px;
+      border: 1px solid #716e9d;
+      left: 0;
+      top: 100%;
+    }
+    .dropdown-content button {
+      color: white;
+      padding: 10px 15px;
+      text-decoration: none;
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .dropdown-content button:hover {
+      background-color: #716e9d;
+    }
+    .dropdown-container:hover .dropdown-content,
+    .dropdown-container.active .dropdown-content {
+      display: block;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+        margin: 5px;
+      }
+      .input-fields {
+        flex-direction: column;
+      }
+      .input-fields textarea {
+        width: 100%;
+        height: 150px;
+        margin-bottom: 10px;
+      }
+      .additional-fields {
+        flex-direction: column;
+        padding: 0;
+      }
+      .additional-fields input {
+        width: 100%;
+      }
+      .additional-fields button {
+        width: 100%;
+      }
+      .divider-input {
+        width: 100%;
+      }
+      .button-container1 {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 10px;
+      }
+      .dropdown-container {
+        min-width: 140px;
+      }
+      .dropdown-btn {
+        width: 100%;
+        font-size: 12px;
+        padding: 10px 8px;
+      }
+      .dropdown-content {
+        min-width: 160px;
+      }
+      .generate-button {
+        padding: 12px 15px;
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 8px;
+        margin: 2px;
+        border-radius: 5px;
+      }
+      .input-fields textarea {
+        height: 120px;
+        font-size: 14px;
+      }
+      .dropdown-btn {
+        font-size: 11px;
+        padding: 8px 6px;
+      }
+      .dropdown-content button {
+        font-size: 12px;
+        padding: 8px 10px;
+      }
+    }
+
+    @media (min-width: 992px) {
+      .container {
+        max-width: 900px;
+        margin: 20px auto;
+      }
+      .input-fields textarea {
+        height: 250px;
+      }
+      .output-field {
+        max-height: 400px;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .container {
+        max-width: 1100px;
+      }
+      .input-fields textarea {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="button-container">
+      <button id="Nomes-button" class="generate-button button-border button-spacing1">Nomes</button>
+    </div>
+    <div class="input-fields">
+      <textarea id="input1" placeholder="Nomes 1"></textarea>
+      <textarea id="input2" placeholder="Nomes 2"></textarea>
+    </div>
+    <div class="button-container1">
+      <!-- Dropdown Maiúsculas -->
+      <div class="dropdown-container">
+        <button class="dropdown-btn">MAIÚSCULAS ▼</button>
+        <div class="dropdown-content">
+          <button onclick="transformCase('upper', 'both')">Ambos os Lados</button>
+          <button onclick="transformCase('upper', 'left')">Apenas Lado Esquerdo</button>
+          <button onclick="transformCase('upper', 'right')">Apenas Lado Direito</button>
+        </div>
+      </div>
+
+      <!-- Dropdown Minúsculas -->
+      <div class="dropdown-container">
+        <button class="dropdown-btn">minúsculas ▼</button>
+        <div class="dropdown-content">
+          <button onclick="transformCase('lower', 'both')">Ambos os Lados</button>
+          <button onclick="transformCase('lower', 'left')">Apenas Lado Esquerdo</button>
+          <button onclick="transformCase('lower', 'right')">Apenas Lado Direito</button>
+        </div>
+      </div>
+
+      <!-- Dropdown Primeira Letra -->
+      <div class="dropdown-container">
+        <button class="dropdown-btn">Primeira Letra ▼</button>
+        <div class="dropdown-content">
+          <button onclick="transformCase('capitalize', 'both')">Ambos os Lados</button>
+          <button onclick="transformCase('capitalize', 'left')">Apenas Lado Esquerdo</button>
+          <button onclick="transformCase('capitalize', 'right')">Apenas Lado Direito</button>
+        </div>
+      </div>
+
+      <div class="scroll-indicator"></div>
+    </div>
+    <div class="additional-fields">
+      <input id="prefix-input" placeholder="Prefixo">
+      <input id="suffix-input" placeholder="Sufixo">
+    </div>
+    <input id="divider-input" class="divider-input" placeholder="Divisor">
+    <div class="additional-fields">
+      <button id="load-file-button" class="generate-button button-border button-spacing2">Carregar Arquivo</button>
+      <button id="filter-url-button" class="generate-button button-border button-spacing3">Extrair URL</button>
+    </div>
+    <button id="generate-button" class="generate-button">Gerar</button>
+    <div class="output-field" id="output"></div>
+    <div class="copy-container">
+      <button id="copy-button" class="copy-button">Copiar</button>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      const input1 = document.getElementById('input1');
+      const input2 = document.getElementById('input2');
+      const prefixInput = document.getElementById('prefix-input');
+      const suffixInput = document.getElementById('suffix-input');
+      const dividerInput = document.getElementById('divider-input');
+      const generateButton = document.getElementById('generate-button');
+      const filterUrlButton = document.getElementById('filter-url-button');
+      const output = document.getElementById('output');
+      const copyButton = document.getElementById('copy-button');
+      const loadFileButton = document.getElementById('load-file-button');
+      const NomesButton = document.getElementById('Nomes-button');
+
+      // Função para capitalizar primeira letra de cada palavra
+      function capitalizeFirstLetter(text) {
+        return text.split('\n').map(line => {
+          return line.split(' ').map(word => {
+            if (word.length === 0) return word;
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+          }).join(' ');
+        }).join('\n');
+      }
+
+      // Função principal de transformação
+      function transformCase(type, side) {
+        let transform;
+        
+        switch(type) {
+          case 'upper':
+            transform = (text) => text.toUpperCase();
+            break;
+          case 'lower':
+            transform = (text) => text.toLowerCase();
+            break;
+          case 'capitalize':
+            transform = capitalizeFirstLetter;
+            break;
+          default:
+            return;
+        }
+
+        switch(side) {
+          case 'both':
+            input1.value = transform(input1.value);
+            input2.value = transform(input2.value);
+            break;
+          case 'left':
+            input1.value = transform(input1.value);
+            break;
+          case 'right':
+            input2.value = transform(input2.value);
+            break;
+        }
+
+        // Fechar dropdown após seleção em mobile
+        document.querySelectorAll('.dropdown-container').forEach(d => d.classList.remove('active'));
+      }
+
+      // Toggle dropdown em dispositivos touch
+      document.querySelectorAll('.dropdown-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const container = this.parentElement;
+          const isActive = container.classList.contains('active');
+          
+          // Fechar todos os dropdowns
+          document.querySelectorAll('.dropdown-container').forEach(d => d.classList.remove('active'));
+          
+          // Abrir o clicado se não estava ativo
+          if (!isActive) {
+            container.classList.add('active');
+          }
+        });
+      });
+
+      // Fechar dropdowns ao clicar fora
+      document.addEventListener('click', function() {
+        document.querySelectorAll('.dropdown-container').forEach(d => d.classList.remove('active'));
+      });
+
+      NomesButton.addEventListener('click', () => {
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        const requestOptions = {
+          method: 'GET',
+          headers: myHeaders,
+          redirect: 'follow'
+        };
+        fetch("https://getpantry.cloud/apiv1/pantry/66d481b4-324a-4f06-9982-a1fad8751d36/basket/Nomes", requestOptions)
+          .then(response => response.json())
+          .then(result => {
+            const names = Object.values(result);
+            input1.value = names.join('\n');
+            input2.value = names.join('\n');
+          })
+          .catch(error => console.error('Erro ao obter dados:', error));
+      });
+
+      generateButton.addEventListener('click', () => {
+        const text1 = input1.value.trim();
+        const text2 = input2.value.trim();
+        const prefix = prefixInput.value.trim();
+        const suffix = suffixInput.value.trim();
+        const divider = dividerInput.value.trim();
+        const lines1 = text1.split('\n');
+        const lines2 = text2.split('\n');
+        const maxLines = Math.max(lines1.length, lines2.length);
+        output.innerHTML = '';
+        for (let i = 0; i < maxLines; i++) {
+          const line1 = lines1[i] ? lines1[i].trim() : '';
+          const line2 = lines2[i] ? lines2[i].trim() : '';
+          const combinedLine = `${prefix}${line1}${divider}${line2}${suffix}`;
+          const lineDiv = document.createElement('div');
+          const link = document.createElement('a');
+          link.textContent = combinedLine;
+          link.href = line1;
+          lineDiv.appendChild(link);
+          output.appendChild(lineDiv);
+        }
+      });
+
+      filterUrlButton.addEventListener('click', () => {
+        const text1 = input1.value.trim();
+        const text2 = input2.value.trim();
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const urls1 = text1.match(urlRegex) || [];
+        const urls2 = text2.match(urlRegex) || [];
+        const combinedUrls = [...new Set([...urls1, ...urls2])];
+        output.innerHTML = '';
+        combinedUrls.forEach(url => {
+          const lineDiv = document.createElement('div');
+          const link = document.createElement('a');
+          link.textContent = url;
+          link.href = url;
+          lineDiv.appendChild(link);
+          output.appendChild(lineDiv);
+        });
+      });
+
+      copyButton.addEventListener('click', () => {
+        const outputText = output.innerText;
+        if (outputText.trim() === '') {
+          alert('Nenhum resultado para copiar!');
+          return;
+        }
+        const tempTextArea = document.createElement('textarea');
+        tempTextArea.value = outputText;
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempTextArea);
+        copyButton.textContent = 'Copiado!';
+        setTimeout(() => {
+          copyButton.textContent = 'Copiar';
+        }, 2000);
+      });
+
+      loadFileButton.addEventListener('click', () => {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.txt';
+        fileInput.multiple = true;
+        fileInput.addEventListener('change', () => {
+          const files = fileInput.files;
+          if (files && files.length > 0) {
+            const reader = new FileReader();
+            let loadedText = '';
+            reader.onload = function (e) {
+              const fileContent = e.target.result;
+              loadedText += fileContent;
+              if (reader.readyState === FileReader.DONE) {
+                input1.value += loadedText;
+                loadedText = '';
+              }
+            };
+            const maxFileSize = 1000000;
+            for (let i = 0; i < files.length; i++) {
+              const file = files[i];
+              const fileSize = file.size;
+              const chunks = Math.ceil(fileSize / maxFileSize);
+              let currentPosition = 0;
+              for (let j = 0; j < chunks; j++) {
+                const chunkSize = Math.min(maxFileSize, fileSize - currentPosition);
+                const chunk = file.slice(currentPosition, currentPosition + chunkSize);
+                reader.readAsText(chunk);
+                currentPosition += chunkSize;
+              }
+            }
+          }
+        });
+        fileInput.click();
+      });
+    </script>
+  </div>
+</body>
+</html>
