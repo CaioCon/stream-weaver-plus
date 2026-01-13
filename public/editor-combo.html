@@ -247,12 +247,12 @@
         margin: 5px;
       }
       .input-fields {
-        flex-direction: column;
+        flex-direction: row;
       }
       .input-fields textarea {
-        width: 100%;
+        width: calc(50% - 5px);
         height: 150px;
-        margin-bottom: 10px;
+        font-size: 12px;
       }
       .additional-fields {
         flex-direction: column;
@@ -270,6 +270,7 @@
       .button-container1 {
         flex-wrap: nowrap;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
         -webkit-overflow-scrolling: touch;
         padding-bottom: 10px;
       }
@@ -298,7 +299,7 @@
       }
       .input-fields textarea {
         height: 120px;
-        font-size: 14px;
+        font-size: 11px;
       }
       .dropdown-btn {
         font-size: 11px;
