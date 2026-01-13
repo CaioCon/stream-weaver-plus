@@ -39,6 +39,7 @@
     }
     .additional-fields {
       display: flex;
+      flex-direction: row;
       justify-content: space-between;
       margin-bottom: 10px;
       margin-top: 5px;
@@ -46,7 +47,7 @@
       gap: 10px;
     }
     .additional-fields input {
-      width: 47%;
+      width: calc(50% - 5px);
       padding: 10px;
       border: 1px solid #716e9d;
       border-radius: 4px;
@@ -55,7 +56,7 @@
       margin-bottom: 10px;
     }
     .additional-fields button {
-      width: 100%;
+      width: calc(50% - 5px);
       margin-bottom: 10px;
     }
     .divider-input {
@@ -255,14 +256,14 @@
         font-size: 12px;
       }
       .additional-fields {
-        flex-direction: column;
+        flex-direction: row;
         padding: 0;
       }
       .additional-fields input {
-        width: 100%;
+        width: calc(50% - 5px);
       }
       .additional-fields button {
-        width: 100%;
+        width: calc(50% - 5px);
       }
       .divider-input {
         width: 100%;
