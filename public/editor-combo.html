@@ -449,18 +449,17 @@
       let currentTransformType = null;
 
       /* ========================================
-       * FUNÇÃO: capitalizeFirstLetter
-       * Descrição: Capitaliza a primeira letra de cada palavra
+       * FUNÇÃO: capitalizeFirstLetterOfLine
+       * Descrição: Capitaliza APENAS a primeira letra de cada LINHA
        * Parâmetro: text - texto a ser transformado
-       * Retorno: texto com primeira letra maiúscula
+       * Retorno: texto com primeira letra de cada linha em maiúscula
        * AJUSTE: Modifique a lógica aqui se quiser comportamento diferente
        * ======================================== */
-      function capitalizeFirstLetter(text) {
+      function capitalizeFirstLetterOfLine(text) {
         return text.split('\n').map(line => {
-          return line.split(' ').map(word => {
-            if (word.length === 0) return word;
-            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-          }).join(' ');
+          if (line.length === 0) return line;
+          // Deixa a primeira letra maiúscula e o resto em minúscula
+          return line.charAt(0).toUpperCase() + line.slice(1).toLowerCase();
         }).join('\n');
       }
 
@@ -528,7 +527,7 @@
             transform = (text) => text.toLowerCase();
             break;
           case 'capitalize':
-            transform = capitalizeFirstLetter;
+            transform = capitalizeFirstLetterOfLine;
             break;
           default:
             return;
