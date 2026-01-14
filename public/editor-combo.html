@@ -27,9 +27,10 @@
       margin-bottom: 10px;
       gap: 10px;
     }
+    /* AJUSTE: Altura dos campos de texto (campo 1 e campo 2) - altere 'height' */
     .input-fields textarea {
       width: calc(50% - 5px);
-      height: 200px;
+      height: 280px; /* AJUSTE: Aumente ou diminua este valor para altura desejada */
       padding: 10px;
       border: 1px solid #716e9d;
       border-radius: 4px;
@@ -59,8 +60,10 @@
       width: calc(50% - 5px);
       margin-bottom: 10px;
     }
+    /* AJUSTE: Largura do campo divisor - altere 'width' e 'max-width' */
     .divider-input {
-      width: 50%;
+      width: 30%; /* AJUSTE: Diminua este valor para deixar mais estreito */
+      max-width: 200px; /* AJUSTE: Largura máxima do divisor */
       padding: 10px;
       border: 1px solid #716e9d;
       border-radius: 4px;
@@ -189,7 +192,7 @@
       display: none;
     }
 
-    /* Dropdown Styles */
+    /* AJUSTE: Estilos dos botões de dropdown */
     .dropdown-container {
       position: relative;
       display: inline-block;
@@ -209,35 +212,70 @@
     .dropdown-btn:hover {
       background-image: linear-gradient(to bottom, blue, blue);
     }
-    .dropdown-content {
+
+    /* AJUSTE: Modal/Dialog de opções - sobreposição centralizada */
+    .modal-overlay {
       display: none;
-      position: absolute;
-      background-color: #1a1a2e;
-      min-width: 180px;
-      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
-      z-index: 9999;
-      border-radius: 4px;
-      border: 1px solid #716e9d;
+      position: fixed;
+      top: 0;
       left: 0;
-      top: 100%;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 99999;
+      justify-content: center;
+      align-items: center;
     }
-    .dropdown-content button {
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-dialog {
+      background-color: #1a1a2e;
+      border: 2px solid #716e9d;
+      border-radius: 8px;
+      padding: 15px;
+      min-width: 250px;
+      max-width: 90%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    }
+    .modal-title {
+      color: #716e9d;
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #716e9d;
+    }
+    /* AJUSTE: Botões dentro do modal - altere padding, font-size, cores */
+    .modal-dialog button {
       color: white;
-      padding: 10px 15px;
+      padding: 12px 15px;
       text-decoration: none;
       display: block;
       width: 100%;
-      text-align: left;
-      background: #1a1a2e;
-      border: none;
+      text-align: center;
+      background: #343a40;
+      border: 1px solid #716e9d;
+      border-radius: 4px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 14px;
+      margin-bottom: 8px;
+      transition: background-color 0.3s;
     }
-    .dropdown-content button:hover {
+    .modal-dialog button:last-child {
+      margin-bottom: 0;
+    }
+    .modal-dialog button:hover {
       background-color: #716e9d;
     }
-    .dropdown-container.active .dropdown-content {
-      display: block;
+    .modal-close {
+      background: #ff4444 !important;
+      border-color: #ff4444 !important;
+      margin-top: 10px !important;
+    }
+    .modal-close:hover {
+      background: #cc0000 !important;
     }
 
     /* Responsive Styles */
@@ -249,9 +287,10 @@
       .input-fields {
         flex-direction: row;
       }
+      /* AJUSTE: Altura em tablets - altere 'height' */
       .input-fields textarea {
         width: calc(50% - 5px);
-        height: 150px;
+        height: 200px; /* AJUSTE: Altura em telas médias */
         font-size: 12px;
       }
       .additional-fields {
@@ -264,8 +303,10 @@
       .additional-fields button {
         width: calc(50% - 5px);
       }
+      /* AJUSTE: Largura do divisor em mobile */
       .divider-input {
-        width: 100%;
+        width: 50%; /* AJUSTE: Largura do divisor em mobile */
+        max-width: 150px;
       }
       .button-container1 {
         flex-wrap: nowrap;
@@ -297,8 +338,9 @@
         margin: 2px;
         border-radius: 5px;
       }
+      /* AJUSTE: Altura em celulares pequenos */
       .input-fields textarea {
-        height: 120px;
+        height: 180px; /* AJUSTE: Altura em telas pequenas */
         font-size: 11px;
       }
       .dropdown-btn {
@@ -344,37 +386,33 @@
       <textarea id="input2" placeholder="Nomes 2"></textarea>
     </div>
     <div class="button-container1">
-      <!-- Dropdown Maiúsculas -->
+      <!-- Botão MAIÚSCULAS - abre modal -->
       <div class="dropdown-container">
-        <button class="dropdown-btn">MAIÚSCULAS ▼</button>
-        <div class="dropdown-content">
-          <button onclick="transformCase('upper', 'both')">Ambos os Lados</button>
-          <button onclick="transformCase('upper', 'left')">Apenas Lado Esquerdo</button>
-          <button onclick="transformCase('upper', 'right')">Apenas Lado Direito</button>
-        </div>
+        <button class="dropdown-btn" onclick="openModal('upper')">MAIÚSCULAS ▼</button>
       </div>
 
-      <!-- Dropdown Minúsculas -->
+      <!-- Botão minúsculas - abre modal -->
       <div class="dropdown-container">
-        <button class="dropdown-btn">minúsculas ▼</button>
-        <div class="dropdown-content">
-          <button onclick="transformCase('lower', 'both')">Ambos os Lados</button>
-          <button onclick="transformCase('lower', 'left')">Apenas Lado Esquerdo</button>
-          <button onclick="transformCase('lower', 'right')">Apenas Lado Direito</button>
-        </div>
+        <button class="dropdown-btn" onclick="openModal('lower')">minúsculas ▼</button>
       </div>
 
-      <!-- Dropdown Primeira Letra -->
+      <!-- Botão Primeira Letra - abre modal -->
       <div class="dropdown-container">
-        <button class="dropdown-btn">Primeira Letra ▼</button>
-        <div class="dropdown-content">
-          <button onclick="transformCase('capitalize', 'both')">Ambos os Lados</button>
-          <button onclick="transformCase('capitalize', 'left')">Apenas Lado Esquerdo</button>
-          <button onclick="transformCase('capitalize', 'right')">Apenas Lado Direito</button>
-        </div>
+        <button class="dropdown-btn" onclick="openModal('capitalize')">Primeira Letra ▼</button>
       </div>
 
       <div class="scroll-indicator"></div>
+    </div>
+
+    <!-- MODAL: Caixa de diálogo para opções de transformação -->
+    <div class="modal-overlay" id="transform-modal">
+      <div class="modal-dialog">
+        <div class="modal-title" id="modal-title">Selecione o Lado</div>
+        <button onclick="selectSide('both')">Ambos os Lados</button>
+        <button onclick="selectSide('left')">Apenas Lado Esquerdo</button>
+        <button onclick="selectSide('right')">Apenas Lado Direito</button>
+        <button class="modal-close" onclick="closeModal()">Cancelar</button>
+      </div>
     </div>
     <div class="additional-fields">
       <input id="prefix-input" placeholder="Prefixo">
@@ -404,8 +442,19 @@
       const copyButton = document.getElementById('copy-button');
       const loadFileButton = document.getElementById('load-file-button');
       const NomesButton = document.getElementById('Nomes-button');
+      const modal = document.getElementById('transform-modal');
+      const modalTitle = document.getElementById('modal-title');
+      
+      // AJUSTE: Variável que guarda o tipo de transformação selecionado
+      let currentTransformType = null;
 
-      // Função para capitalizar primeira letra de cada palavra
+      /* ========================================
+       * FUNÇÃO: capitalizeFirstLetter
+       * Descrição: Capitaliza a primeira letra de cada palavra
+       * Parâmetro: text - texto a ser transformado
+       * Retorno: texto com primeira letra maiúscula
+       * AJUSTE: Modifique a lógica aqui se quiser comportamento diferente
+       * ======================================== */
       function capitalizeFirstLetter(text) {
         return text.split('\n').map(line => {
           return line.split(' ').map(word => {
@@ -415,10 +464,62 @@
         }).join('\n');
       }
 
-      // Função principal de transformação
+      /* ========================================
+       * FUNÇÃO: openModal
+       * Descrição: Abre o modal de opções de transformação
+       * Parâmetro: type - 'upper', 'lower', ou 'capitalize'
+       * AJUSTE: Altere os títulos do modal aqui
+       * ======================================== */
+      function openModal(type) {
+        currentTransformType = type;
+        
+        // Define o título do modal baseado no tipo
+        const titles = {
+          'upper': 'MAIÚSCULAS - Selecione o Lado',
+          'lower': 'minúsculas - Selecione o Lado',
+          'capitalize': 'Primeira Letra - Selecione o Lado'
+        };
+        modalTitle.textContent = titles[type] || 'Selecione o Lado';
+        
+        modal.classList.add('active');
+      }
+
+      /* ========================================
+       * FUNÇÃO: closeModal
+       * Descrição: Fecha o modal de opções
+       * AJUSTE: Adicione animações de fechamento aqui se desejar
+       * ======================================== */
+      function closeModal() {
+        modal.classList.remove('active');
+        currentTransformType = null;
+      }
+
+      /* ========================================
+       * FUNÇÃO: selectSide
+       * Descrição: Aplica a transformação no lado selecionado e fecha o modal
+       * Parâmetro: side - 'both', 'left', ou 'right'
+       * AJUSTE: Adicione mais opções de lado aqui se necessário
+       * ======================================== */
+      function selectSide(side) {
+        if (currentTransformType) {
+          transformCase(currentTransformType, side);
+        }
+        closeModal();
+      }
+
+      /* ========================================
+       * FUNÇÃO: transformCase
+       * Descrição: Função principal que aplica a transformação de texto
+       * Parâmetros: 
+       *   - type: 'upper' (maiúsculas), 'lower' (minúsculas), 'capitalize' (primeira letra)
+       *   - side: 'both' (ambos campos), 'left' (campo 1), 'right' (campo 2)
+       * AJUSTE: Adicione novos tipos de transformação no switch(type)
+       * AJUSTE: Adicione novos lados no switch(side)
+       * ======================================== */
       function transformCase(type, side) {
         let transform;
         
+        // AJUSTE: Tipos de transformação disponíveis
         switch(type) {
           case 'upper':
             transform = (text) => text.toUpperCase();
@@ -433,6 +534,7 @@
             return;
         }
 
+        // AJUSTE: Lados onde aplicar a transformação
         switch(side) {
           case 'both':
             input1.value = transform(input1.value);
@@ -445,31 +547,13 @@
             input2.value = transform(input2.value);
             break;
         }
-
-        // Fechar dropdown após seleção em mobile
-        document.querySelectorAll('.dropdown-container').forEach(d => d.classList.remove('active'));
       }
 
-      // Toggle dropdown em dispositivos touch
-      document.querySelectorAll('.dropdown-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          const container = this.parentElement;
-          const isActive = container.classList.contains('active');
-          
-          // Fechar todos os dropdowns
-          document.querySelectorAll('.dropdown-container').forEach(d => d.classList.remove('active'));
-          
-          // Abrir o clicado se não estava ativo
-          if (!isActive) {
-            container.classList.add('active');
-          }
-        });
-      });
-
-      // Fechar dropdowns ao clicar fora
-      document.addEventListener('click', function() {
-        document.querySelectorAll('.dropdown-container').forEach(d => d.classList.remove('active'));
+      // Fechar modal ao clicar fora do diálogo
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+          closeModal();
+        }
       });
 
       NomesButton.addEventListener('click', () => {
