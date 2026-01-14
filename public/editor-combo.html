@@ -6,214 +6,191 @@
   <title>Editor De Combo</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
+    /* ========================================
+     * ESTILOS GLOBAIS
+     * AJUSTE: Cores principais, fonte, background
+     * ======================================== */
+    * {
+      box-sizing: border-box;
+    }
     body {
-      font-family: Arial, sans-serif;
-      background-color: #343a40;
-      color: #716e9d;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: #e0e0e0;
       margin: 0;
       padding: 0;
+      min-height: 100vh;
     }
+    
+    /* ========================================
+     * CONTAINER PRINCIPAL
+     * AJUSTE: Padding, bordas, sombras
+     * ======================================== */
     .container {
-      margin-top: 0px;
-      padding: 20px;
-      border-radius: 10px;
-      background-color: rgba(0, 0, 0, 0.7);
-      border: 2px solid #6c757d;
+      margin-top: 10px;
+      padding: 25px;
+      border-radius: 12px;
+      background: rgba(26, 26, 46, 0.95);
+      border: 1px solid rgba(113, 110, 157, 0.5);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       max-width: 100%;
+      backdrop-filter: blur(10px);
     }
+    
+    /* ========================================
+     * CAMPOS DE TEXTO (CAMPO 1 E CAMPO 2)
+     * AJUSTE: height - altura dos campos
+     * AJUSTE: font-size - tamanho da fonte
+     * ======================================== */
     .input-fields {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 10px;
-      gap: 10px;
+      margin-bottom: 15px;
+      gap: 12px;
     }
-    /* AJUSTE: Altura dos campos de texto (campo 1 e campo 2) - altere 'height' */
     .input-fields textarea {
-      width: calc(50% - 5px);
-      height: 280px; /* AJUSTE: Aumente ou diminua este valor para altura desejada */
-      padding: 10px;
-      border: 1px solid #716e9d;
-      border-radius: 4px;
-      background-color: #000000;
-      color: white;
+      width: calc(50% - 6px);
+      height: 300px; /* AJUSTE: Altura dos campos de texto */
+      padding: 12px;
+      border: 1px solid rgba(113, 110, 157, 0.6);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #0d0d1a 0%, #1a1a2e 100%);
+      color: #ffffff;
       resize: vertical;
+      font-size: 13px;
+      line-height: 1.5;
+      font-family: 'Consolas', 'Monaco', monospace;
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
+    .input-fields textarea:focus {
+      outline: none;
+      border-color: #716e9d;
+      box-shadow: 0 0 0 3px rgba(113, 110, 157, 0.2);
+    }
+    .input-fields textarea::placeholder {
+      color: #666;
+    }
+    
+    /* ========================================
+     * CAMPOS ADICIONAIS (PREFIXO/SUFIXO)
+     * ======================================== */
     .additional-fields {
       display: flex;
       flex-direction: row;
       justify-content: space-between;
-      margin-bottom: 10px;
-      margin-top: 5px;
-      padding: 5px;
-      gap: 10px;
+      margin-bottom: 12px;
+      margin-top: 8px;
+      gap: 12px;
     }
     .additional-fields input {
-      width: calc(50% - 5px);
-      padding: 10px;
-      border: 1px solid #716e9d;
-      border-radius: 4px;
-      background-color: #000000;
-      color: #ffffff;
-      margin-bottom: 10px;
-    }
-    .additional-fields button {
-      width: calc(50% - 5px);
-      margin-bottom: 10px;
-    }
-    /* AJUSTE: Largura do campo divisor - altere 'width' e 'max-width' */
-    .divider-input {
-      width: 30%; /* AJUSTE: Diminua este valor para deixar mais estreito */
-      max-width: 200px; /* AJUSTE: Largura máxima do divisor */
-      padding: 10px;
-      border: 1px solid #716e9d;
-      border-radius: 4px;
-      background-color: #000000;
-      color: #ffffff;
-      margin: auto;
-      display: block;
-      margin-bottom: 0px;
-    }
-    .button-border {
-      border: 1px solid #ff0000;
-    }
-    .button-spacing1 {
-      margin-right: 0px;
-      margin-bottom: 10px;
-    }
-    .button-spacing2 {
-      margin-right: 10px;
-      margin-bottom: 10px;
-    }
-    .generate-button {
-      display: block;
-      width: 100%;
-      margin-top: 10px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      background-color: #ff0000;
-      background-image: linear-gradient(to bottom, #716e9d, #716e9d);
-      color: #ffffff;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s, background-image 0.3s;
-    }
-    .generate-button:hover {
-      background-color: blue;
-      background-image: linear-gradient(to bottom, blue, blue);
-    }
-    .output-field {
-      padding: 10px;
-      border: 1px solid #716e9d;
-      border-radius: 4px;
-      max-height: 300px;
-      overflow-y: auto;
-      overflow-x: auto;
-      background-color: #000000;
-      color: #ffffff;
-      position: relative;
-      white-space: pre-wrap;
-      user-select: none;
-      margin-bottom: 10px;
-      margin-top: 10px;
-    }
-    .output-field div {
-      margin-bottom: 5px;
-    }
-    .output-field a {
-      display: block;
-      color: #ffffff;
-      text-decoration: none;
-      word-break: break-all;
-    }
-    .copy-button {
-      display: block;
-      width: 100%;
-      margin-top: 10px;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 4px;
-      background-color: #716e9d;
+      width: calc(50% - 6px);
+      padding: 12px;
+      border: 1px solid rgba(113, 110, 157, 0.6);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #0d0d1a 0%, #1a1a2e 100%);
       color: #ffffff;
       font-size: 14px;
-      cursor: pointer;
-      transition: background-color 0.3s;
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
-    .copy-button:hover {
-      background-color: blue;
+    .additional-fields input:focus {
+      outline: none;
+      border-color: #716e9d;
+      box-shadow: 0 0 0 3px rgba(113, 110, 157, 0.2);
     }
+    .additional-fields input::placeholder {
+      color: #666;
+    }
+    .additional-fields button {
+      width: calc(50% - 6px);
+    }
+    
+    /* ========================================
+     * CAMPO DIVISOR
+     * AJUSTE: width - largura do campo
+     * AJUSTE: max-width - largura máxima
+     * ======================================== */
+    .divider-input {
+      width: 25%; /* AJUSTE: Largura do divisor */
+      max-width: 180px; /* AJUSTE: Largura máxima */
+      padding: 12px;
+      border: 1px solid rgba(113, 110, 157, 0.6);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #0d0d1a 0%, #1a1a2e 100%);
+      color: #ffffff;
+      margin: 0 auto 15px;
+      display: block;
+      text-align: center;
+      font-size: 14px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .divider-input:focus {
+      outline: none;
+      border-color: #716e9d;
+      box-shadow: 0 0 0 3px rgba(113, 110, 157, 0.2);
+    }
+    .divider-input::placeholder {
+      color: #666;
+    }
+    
+    /* ========================================
+     * CONTAINER DE BOTÕES DE TRANSFORMAÇÃO
+     * ======================================== */
     .button-container1 {
-      margin-bottom: 10px;
+      margin-bottom: 15px;
       width: 100%;
       display: flex;
       overflow-x: auto;
       align-items: center;
-      position: relative;
       gap: 10px;
       flex-wrap: wrap;
+      padding: 5px 0;
     }
     .button-container1::-webkit-scrollbar {
-      height: 8px;
+      height: 6px;
     }
     .button-container1::-webkit-scrollbar-thumb {
-      background-color: grey;
-      border-radius: 5px;
-    }
-    .button-container1 button {
-      flex-shrink: 0;
-      padding: 10px;
-    }
-    .scroll-indicator {
-      position: absolute;
-      bottom: 0;
-      left: 1;
-      width: 100%;
-      height: 8px;
-      background-color: rgba(100, 102, 10, 0.0);
-      z-index: 1;
-    }
-    .button-container {
-      margin-bottom: 10px;
-      border-radius: 4px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .btn-primary {
       background-color: #716e9d;
-      border-radius: 5px;
-      border-color: #716e9d;
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 8px 12px;
-      cursor: pointer;
+      border-radius: 3px;
     }
-    #Nomes-button {
-      display: none;
+    .button-container1::-webkit-scrollbar-track {
+      background: rgba(113, 110, 157, 0.1);
     }
-
-    /* AJUSTE: Estilos dos botões de dropdown */
+    
+    /* ========================================
+     * BOTÕES DE DROPDOWN (MAIÚSCULAS, etc.)
+     * AJUSTE: padding, font-size, cores
+     * ======================================== */
     .dropdown-container {
       position: relative;
       display: inline-block;
       flex-shrink: 0;
     }
     .dropdown-btn {
-      padding: 10px 15px;
-      border: 1px solid #ff0000;
-      border-radius: 4px;
-      background-image: linear-gradient(to bottom, #716e9d, #716e9d);
+      padding: 10px 18px;
+      border: 1px solid rgba(255, 107, 107, 0.6);
+      border-radius: 8px;
+      background: linear-gradient(135deg, #716e9d 0%, #5a5887 100%);
       color: #ffffff;
-      font-size: 14px;
+      font-size: 13px;
+      font-weight: 500;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: all 0.3s ease;
       white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(113, 110, 157, 0.3);
     }
     .dropdown-btn:hover {
-      background-image: linear-gradient(to bottom, blue, blue);
+      background: linear-gradient(135deg, #8a87b8 0%, #716e9d 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(113, 110, 157, 0.4);
     }
-
-    /* AJUSTE: Modal/Dialog de opções - sobreposição centralizada */
+    .dropdown-btn:active {
+      transform: translateY(0);
+    }
+    
+    /* ========================================
+     * MODAL/DIALOG DE OPÇÕES
+     * AJUSTE: cores, tamanhos, animações
+     * ======================================== */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -221,157 +198,324 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.8);
       z-index: 99999;
       justify-content: center;
       align-items: center;
+      animation: fadeIn 0.2s ease;
     }
     .modal-overlay.active {
       display: flex;
     }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideIn {
+      from { transform: scale(0.9) translateY(-20px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
     .modal-dialog {
-      background-color: #1a1a2e;
+      background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
       border: 2px solid #716e9d;
-      border-radius: 8px;
-      padding: 15px;
-      min-width: 250px;
+      border-radius: 12px;
+      padding: 20px;
+      min-width: 280px;
       max-width: 90%;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.3s ease;
     }
     .modal-title {
-      color: #716e9d;
+      color: #e0e0e0;
       font-size: 16px;
-      font-weight: bold;
+      font-weight: 600;
       text-align: center;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #716e9d;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(113, 110, 157, 0.4);
     }
-    /* AJUSTE: Botões dentro do modal - altere padding, font-size, cores */
     .modal-dialog button {
       color: white;
-      padding: 12px 15px;
-      text-decoration: none;
+      padding: 14px 18px;
       display: block;
       width: 100%;
       text-align: center;
-      background: #343a40;
-      border: 1px solid #716e9d;
-      border-radius: 4px;
+      background: linear-gradient(135deg, #343a40 0%, #2d3339 100%);
+      border: 1px solid rgba(113, 110, 157, 0.5);
+      border-radius: 8px;
       cursor: pointer;
       font-size: 14px;
-      margin-bottom: 8px;
-      transition: background-color 0.3s;
+      font-weight: 500;
+      margin-bottom: 10px;
+      transition: all 0.3s ease;
     }
     .modal-dialog button:last-child {
       margin-bottom: 0;
     }
     .modal-dialog button:hover {
-      background-color: #716e9d;
+      background: linear-gradient(135deg, #716e9d 0%, #5a5887 100%);
+      transform: translateX(3px);
     }
     .modal-close {
-      background: #ff4444 !important;
-      border-color: #ff4444 !important;
-      margin-top: 10px !important;
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+      border-color: #dc3545 !important;
+      margin-top: 15px !important;
     }
     .modal-close:hover {
-      background: #cc0000 !important;
+      background: linear-gradient(135deg, #e04555 0%, #dc3545 100%) !important;
     }
-
-    /* Responsive Styles */
+    
+    /* ========================================
+     * BOTÕES DE AÇÃO (GERAR, CARREGAR, ETC.)
+     * ======================================== */
+    .generate-button {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #716e9d 0%, #5a5887 100%);
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(113, 110, 157, 0.3);
+    }
+    .generate-button:hover {
+      background: linear-gradient(135deg, #8a87b8 0%, #716e9d 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(113, 110, 157, 0.4);
+    }
+    .generate-button:active {
+      transform: translateY(0);
+    }
+    .button-border {
+      border: 1px solid rgba(255, 107, 107, 0.5);
+    }
+    .button-spacing2 {
+      margin-right: 0;
+    }
+    
+    /* ========================================
+     * CAMPO DE SAÍDA (OUTPUT)
+     * ======================================== */
+    .output-field {
+      padding: 15px;
+      border: 1px solid rgba(113, 110, 157, 0.5);
+      border-radius: 8px;
+      max-height: 350px;
+      overflow-y: auto;
+      overflow-x: auto;
+      background: linear-gradient(180deg, #0d0d1a 0%, #1a1a2e 100%);
+      color: #ffffff;
+      position: relative;
+      white-space: pre-wrap;
+      user-select: text;
+      margin-bottom: 12px;
+      margin-top: 15px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .output-field::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    .output-field::-webkit-scrollbar-thumb {
+      background-color: #716e9d;
+      border-radius: 4px;
+    }
+    .output-field::-webkit-scrollbar-track {
+      background: rgba(113, 110, 157, 0.1);
+    }
+    .output-field div {
+      margin-bottom: 4px;
+    }
+    .output-field a {
+      display: block;
+      color: #a8d4ff;
+      text-decoration: none;
+      word-break: break-all;
+      transition: color 0.2s;
+    }
+    .output-field a:hover {
+      color: #ffffff;
+    }
+    
+    /* ========================================
+     * BOTÃO DE COPIAR
+     * ======================================== */
+    .copy-button {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px 15px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .copy-button:hover {
+      background: linear-gradient(135deg, #34ce57 0%, #28a745 100%);
+    }
+    .copy-button.copied {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+    
+    /* ========================================
+     * INDICADOR DE PROGRESSO
+     * ======================================== */
+    .progress-container {
+      display: none;
+      margin: 15px 0;
+    }
+    .progress-container.active {
+      display: block;
+    }
+    .progress-bar {
+      height: 6px;
+      background: rgba(113, 110, 157, 0.2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #716e9d, #8a87b8);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .progress-text {
+      text-align: center;
+      font-size: 12px;
+      color: #a0a0a0;
+      margin-top: 5px;
+    }
+    
+    /* ========================================
+     * CONTADOR DE LINHAS
+     * ======================================== */
+    .line-counter {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 8px;
+      padding: 0 5px;
+    }
+    
+    #Nomes-button {
+      display: none;
+    }
+    .button-container {
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    /* ========================================
+     * ESTILOS RESPONSIVOS - TABLETS
+     * ======================================== */
     @media (max-width: 768px) {
       .container {
-        padding: 10px;
-        margin: 5px;
+        padding: 15px;
+        margin: 8px;
+        border-radius: 10px;
       }
       .input-fields {
         flex-direction: row;
       }
-      /* AJUSTE: Altura em tablets - altere 'height' */
       .input-fields textarea {
-        width: calc(50% - 5px);
-        height: 200px; /* AJUSTE: Altura em telas médias */
+        width: calc(50% - 6px);
+        height: 220px; /* AJUSTE: Altura em tablets */
         font-size: 12px;
       }
       .additional-fields {
         flex-direction: row;
-        padding: 0;
       }
-      .additional-fields input {
-        width: calc(50% - 5px);
-      }
+      .additional-fields input,
       .additional-fields button {
-        width: calc(50% - 5px);
+        width: calc(50% - 6px);
       }
-      /* AJUSTE: Largura do divisor em mobile */
       .divider-input {
-        width: 50%; /* AJUSTE: Largura do divisor em mobile */
-        max-width: 150px;
+        width: 40%;
+        max-width: 140px;
       }
       .button-container1 {
         flex-wrap: nowrap;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        -webkit-overflow-scrolling: touch;
         padding-bottom: 10px;
       }
       .dropdown-container {
-        min-width: 140px;
+        min-width: 130px;
       }
       .dropdown-btn {
         width: 100%;
         font-size: 12px;
-        padding: 10px 8px;
-      }
-      .dropdown-content {
-        min-width: 160px;
+        padding: 10px 12px;
       }
       .generate-button {
-        padding: 12px 15px;
+        padding: 12px 18px;
         font-size: 14px;
       }
     }
-
+    
+    /* ========================================
+     * ESTILOS RESPONSIVOS - CELULARES
+     * ======================================== */
     @media (max-width: 480px) {
       .container {
-        padding: 8px;
-        margin: 2px;
-        border-radius: 5px;
+        padding: 12px;
+        margin: 5px;
+        border-radius: 8px;
       }
-      /* AJUSTE: Altura em celulares pequenos */
       .input-fields textarea {
-        height: 180px; /* AJUSTE: Altura em telas pequenas */
+        height: 180px; /* AJUSTE: Altura em celulares */
         font-size: 11px;
       }
       .dropdown-btn {
         font-size: 11px;
-        padding: 8px 6px;
-      }
-      .dropdown-content button {
-        font-size: 12px;
         padding: 8px 10px;
       }
+      .modal-dialog {
+        min-width: 260px;
+        padding: 15px;
+      }
+      .modal-dialog button {
+        padding: 12px 15px;
+        font-size: 13px;
+      }
     }
-
+    
+    /* ========================================
+     * ESTILOS RESPONSIVOS - DESKTOP
+     * ======================================== */
     @media (min-width: 992px) {
       .container {
-        max-width: 900px;
-        margin: 20px auto;
+        max-width: 950px;
+        margin: 25px auto;
       }
       .input-fields textarea {
-        height: 250px;
+        height: 320px;
       }
       .output-field {
-        max-height: 400px;
+        max-height: 450px;
       }
     }
-
+    
     @media (min-width: 1200px) {
       .container {
-        max-width: 1100px;
+        max-width: 1150px;
       }
       .input-fields textarea {
-        height: 300px;
+        height: 350px;
       }
     }
   </style>
@@ -379,58 +523,89 @@
 <body>
   <div class="container">
     <div class="button-container">
-      <button id="Nomes-button" class="generate-button button-border button-spacing1">Nomes</button>
+      <button id="Nomes-button" class="generate-button button-border">Nomes</button>
     </div>
+    
+    <!-- CONTADOR DE LINHAS -->
+    <div class="line-counter">
+      <span id="count1">Campo 1: 0 linhas</span>
+      <span id="count2">Campo 2: 0 linhas</span>
+    </div>
+    
+    <!-- CAMPOS DE TEXTO PRINCIPAIS -->
     <div class="input-fields">
-      <textarea id="input1" placeholder="Nomes 1"></textarea>
-      <textarea id="input2" placeholder="Nomes 2"></textarea>
+      <textarea id="input1" placeholder="Campo 1 - Cole ou digite aqui"></textarea>
+      <textarea id="input2" placeholder="Campo 2 - Cole ou digite aqui"></textarea>
     </div>
+    
+    <!-- BOTÕES DE TRANSFORMAÇÃO -->
     <div class="button-container1">
-      <!-- Botão MAIÚSCULAS - abre modal -->
       <div class="dropdown-container">
         <button class="dropdown-btn" onclick="openModal('upper')">MAIÚSCULAS ▼</button>
       </div>
-
-      <!-- Botão minúsculas - abre modal -->
       <div class="dropdown-container">
         <button class="dropdown-btn" onclick="openModal('lower')">minúsculas ▼</button>
       </div>
-
-      <!-- Botão Primeira Letra - abre modal -->
       <div class="dropdown-container">
         <button class="dropdown-btn" onclick="openModal('capitalize')">Primeira Letra ▼</button>
       </div>
-
-      <div class="scroll-indicator"></div>
+      <div class="dropdown-container">
+        <button class="dropdown-btn" onclick="openModal('removeDuplicates')">Remover Duplicados ▼</button>
+      </div>
+      <div class="dropdown-container">
+        <button class="dropdown-btn" onclick="clearAll()">Limpar Tudo</button>
+      </div>
     </div>
 
-    <!-- MODAL: Caixa de diálogo para opções de transformação -->
+    <!-- MODAL: CAIXA DE DIÁLOGO PARA OPÇÕES -->
     <div class="modal-overlay" id="transform-modal">
       <div class="modal-dialog">
         <div class="modal-title" id="modal-title">Selecione o Lado</div>
-        <button onclick="selectSide('both')">Ambos os Lados</button>
-        <button onclick="selectSide('left')">Apenas Lado Esquerdo</button>
-        <button onclick="selectSide('right')">Apenas Lado Direito</button>
+        <button onclick="selectSide('left')">Apenas Campo 1 (Esquerdo)</button>
+        <button onclick="selectSide('right')">Apenas Campo 2 (Direito)</button>
+        <button onclick="selectSide('both')">Ambos os Campos</button>
         <button class="modal-close" onclick="closeModal()">Cancelar</button>
       </div>
     </div>
+    
+    <!-- CAMPOS DE PREFIXO E SUFIXO -->
     <div class="additional-fields">
-      <input id="prefix-input" placeholder="Prefixo">
-      <input id="suffix-input" placeholder="Sufixo">
-    </div>
-    <input id="divider-input" class="divider-input" placeholder="Divisor">
-    <div class="additional-fields">
-      <button id="load-file-button" class="generate-button button-border button-spacing2">Carregar Arquivo</button>
-      <button id="filter-url-button" class="generate-button button-border button-spacing3">Extrair URL</button>
-    </div>
-    <button id="generate-button" class="generate-button">Gerar</button>
-    <div class="output-field" id="output"></div>
-    <div class="copy-container">
-      <button id="copy-button" class="copy-button">Copiar</button>
+      <input id="prefix-input" placeholder="Prefixo (adiciona antes)">
+      <input id="suffix-input" placeholder="Sufixo (adiciona depois)">
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- CAMPO DIVISOR -->
+    <input id="divider-input" class="divider-input" placeholder="Divisor">
+    
+    <!-- BOTÕES DE ARQUIVO E EXTRAÇÃO -->
+    <div class="additional-fields">
+      <button id="load-file-button" class="generate-button button-border button-spacing2">📁 Carregar Arquivo</button>
+      <button id="filter-url-button" class="generate-button button-border">🔗 Extrair URL</button>
+    </div>
+    
+    <!-- INDICADOR DE PROGRESSO -->
+    <div class="progress-container" id="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-text" id="progress-text">Carregando...</div>
+    </div>
+    
+    <!-- BOTÃO GERAR -->
+    <button id="generate-button" class="generate-button">⚡ Gerar Combinação</button>
+    
+    <!-- CAMPO DE SAÍDA -->
+    <div class="output-field" id="output"></div>
+    
+    <!-- BOTÃO COPIAR -->
+    <div class="copy-container">
+      <button id="copy-button" class="copy-button">📋 Copiar Resultado</button>
+    </div>
+    
     <script>
+      /* ========================================
+       * REFERÊNCIAS DOS ELEMENTOS DOM
+       * ======================================== */
       const input1 = document.getElementById('input1');
       const input2 = document.getElementById('input2');
       const prefixInput = document.getElementById('prefix-input');
@@ -444,29 +619,76 @@
       const NomesButton = document.getElementById('Nomes-button');
       const modal = document.getElementById('transform-modal');
       const modalTitle = document.getElementById('modal-title');
+      const progressContainer = document.getElementById('progress-container');
+      const progressFill = document.getElementById('progress-fill');
+      const progressText = document.getElementById('progress-text');
+      const count1 = document.getElementById('count1');
+      const count2 = document.getElementById('count2');
       
-      // AJUSTE: Variável que guarda o tipo de transformação selecionado
+      /* ========================================
+       * VARIÁVEL: Tipo de transformação atual
+       * ======================================== */
       let currentTransformType = null;
+
+      /* ========================================
+       * FUNÇÃO: updateLineCounts
+       * Descrição: Atualiza os contadores de linhas
+       * ======================================== */
+      function updateLineCounts() {
+        const lines1 = input1.value ? input1.value.split('\n').length : 0;
+        const lines2 = input2.value ? input2.value.split('\n').length : 0;
+        count1.textContent = `Campo 1: ${lines1.toLocaleString()} linhas`;
+        count2.textContent = `Campo 2: ${lines2.toLocaleString()} linhas`;
+      }
+      
+      // Atualizar contadores ao digitar
+      input1.addEventListener('input', updateLineCounts);
+      input2.addEventListener('input', updateLineCounts);
 
       /* ========================================
        * FUNÇÃO: capitalizeFirstLetterOfLine
        * Descrição: Capitaliza APENAS a primeira letra de cada LINHA
+       *            e converte o resto para minúscula
        * Parâmetro: text - texto a ser transformado
-       * Retorno: texto com primeira letra de cada linha em maiúscula
-       * AJUSTE: Modifique a lógica aqui se quiser comportamento diferente
+       * Retorno: texto transformado
+       * AJUSTE: Modifique a lógica se quiser comportamento diferente
        * ======================================== */
       function capitalizeFirstLetterOfLine(text) {
+        if (!text) return text;
         return text.split('\n').map(line => {
           if (line.length === 0) return line;
-          // Deixa a primeira letra maiúscula e o resto em minúscula
+          // Primeira letra maiúscula, resto minúsculo
           return line.charAt(0).toUpperCase() + line.slice(1).toLowerCase();
         }).join('\n');
       }
 
       /* ========================================
+       * FUNÇÃO: removeDuplicateLines
+       * Descrição: Remove linhas duplicadas mantendo a ordem
+       * Parâmetro: text - texto a ser processado
+       * Retorno: texto sem duplicatas
+       * ======================================== */
+      function removeDuplicateLines(text) {
+        if (!text) return text;
+        const lines = text.split('\n');
+        const seen = new Set();
+        const uniqueLines = [];
+        for (const line of lines) {
+          const trimmedLine = line.trim();
+          if (trimmedLine && !seen.has(trimmedLine)) {
+            seen.add(trimmedLine);
+            uniqueLines.push(line);
+          } else if (!trimmedLine) {
+            uniqueLines.push(line); // Mantém linhas vazias
+          }
+        }
+        return uniqueLines.join('\n');
+      }
+
+      /* ========================================
        * FUNÇÃO: openModal
        * Descrição: Abre o modal de opções de transformação
-       * Parâmetro: type - 'upper', 'lower', ou 'capitalize'
+       * Parâmetro: type - 'upper', 'lower', 'capitalize', 'removeDuplicates'
        * AJUSTE: Altere os títulos do modal aqui
        * ======================================== */
       function openModal(type) {
@@ -474,9 +696,10 @@
         
         // Define o título do modal baseado no tipo
         const titles = {
-          'upper': 'MAIÚSCULAS - Selecione o Lado',
-          'lower': 'minúsculas - Selecione o Lado',
-          'capitalize': 'Primeira Letra - Selecione o Lado'
+          'upper': 'MAIÚSCULAS - Selecione onde aplicar',
+          'lower': 'minúsculas - Selecione onde aplicar',
+          'capitalize': 'Primeira Letra - Selecione onde aplicar',
+          'removeDuplicates': 'Remover Duplicados - Selecione onde aplicar'
         };
         modalTitle.textContent = titles[type] || 'Selecione o Lado';
         
@@ -486,7 +709,6 @@
       /* ========================================
        * FUNÇÃO: closeModal
        * Descrição: Fecha o modal de opções
-       * AJUSTE: Adicione animações de fechamento aqui se desejar
        * ======================================== */
       function closeModal() {
         modal.classList.remove('active');
@@ -495,9 +717,8 @@
 
       /* ========================================
        * FUNÇÃO: selectSide
-       * Descrição: Aplica a transformação no lado selecionado e fecha o modal
+       * Descrição: Aplica a transformação no lado selecionado
        * Parâmetro: side - 'both', 'left', ou 'right'
-       * AJUSTE: Adicione mais opções de lado aqui se necessário
        * ======================================== */
       function selectSide(side) {
         if (currentTransformType) {
@@ -510,15 +731,14 @@
        * FUNÇÃO: transformCase
        * Descrição: Função principal que aplica a transformação de texto
        * Parâmetros: 
-       *   - type: 'upper' (maiúsculas), 'lower' (minúsculas), 'capitalize' (primeira letra)
+       *   - type: 'upper', 'lower', 'capitalize', 'removeDuplicates'
        *   - side: 'both' (ambos campos), 'left' (campo 1), 'right' (campo 2)
        * AJUSTE: Adicione novos tipos de transformação no switch(type)
-       * AJUSTE: Adicione novos lados no switch(side)
        * ======================================== */
       function transformCase(type, side) {
         let transform;
         
-        // AJUSTE: Tipos de transformação disponíveis
+        // Define a função de transformação baseada no tipo
         switch(type) {
           case 'upper':
             transform = (text) => text.toUpperCase();
@@ -529,11 +749,15 @@
           case 'capitalize':
             transform = capitalizeFirstLetterOfLine;
             break;
+          case 'removeDuplicates':
+            transform = removeDuplicateLines;
+            break;
           default:
+            console.error('Tipo de transformação desconhecido:', type);
             return;
         }
 
-        // AJUSTE: Lados onde aplicar a transformação
+        // Aplica a transformação no(s) campo(s) selecionado(s)
         switch(side) {
           case 'both':
             input1.value = transform(input1.value);
@@ -545,7 +769,61 @@
           case 'right':
             input2.value = transform(input2.value);
             break;
+          default:
+            console.error('Lado desconhecido:', side);
+            return;
         }
+        
+        // Atualiza contadores após transformação
+        updateLineCounts();
+        
+        // Feedback visual
+        showNotification(`Transformação aplicada com sucesso!`);
+      }
+
+      /* ========================================
+       * FUNÇÃO: clearAll
+       * Descrição: Limpa todos os campos
+       * ======================================== */
+      function clearAll() {
+        if (confirm('Deseja limpar todos os campos?')) {
+          input1.value = '';
+          input2.value = '';
+          prefixInput.value = '';
+          suffixInput.value = '';
+          dividerInput.value = '';
+          output.innerHTML = '';
+          updateLineCounts();
+          showNotification('Todos os campos foram limpos!');
+        }
+      }
+
+      /* ========================================
+       * FUNÇÃO: showNotification
+       * Descrição: Mostra uma notificação temporária
+       * ======================================== */
+      function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(135deg, #28a745, #218838);
+          color: white;
+          padding: 12px 20px;
+          border-radius: 8px;
+          z-index: 999999;
+          font-size: 14px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+          animation: slideInRight 0.3s ease;
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.style.animation = 'fadeOut 0.3s ease';
+          setTimeout(() => notification.remove(), 300);
+        }, 2000);
       }
 
       // Fechar modal ao clicar fora do diálogo
@@ -555,6 +833,16 @@
         }
       });
 
+      // Fechar modal com tecla ESC
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+          closeModal();
+        }
+      });
+
+      /* ========================================
+       * EVENTO: Botão Nomes (API externa)
+       * ======================================== */
       NomesButton.addEventListener('click', () => {
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
@@ -569,104 +857,275 @@
             const names = Object.values(result);
             input1.value = names.join('\n');
             input2.value = names.join('\n');
+            updateLineCounts();
           })
           .catch(error => console.error('Erro ao obter dados:', error));
       });
 
+      /* ========================================
+       * EVENTO: Botão Gerar
+       * Descrição: Combina os textos dos dois campos
+       * Otimizado para arquivos grandes (50k+ linhas)
+       * ======================================== */
       generateButton.addEventListener('click', () => {
         const text1 = input1.value.trim();
         const text2 = input2.value.trim();
-        const prefix = prefixInput.value.trim();
-        const suffix = suffixInput.value.trim();
-        const divider = dividerInput.value.trim();
+        const prefix = prefixInput.value;
+        const suffix = suffixInput.value;
+        const divider = dividerInput.value;
+        
+        if (!text1 && !text2) {
+          showNotification('Por favor, insira texto em pelo menos um campo!');
+          return;
+        }
+        
         const lines1 = text1.split('\n');
         const lines2 = text2.split('\n');
         const maxLines = Math.max(lines1.length, lines2.length);
+        
+        // Para arquivos grandes, usar processamento em lotes
+        if (maxLines > 10000) {
+          processLargeFile(lines1, lines2, prefix, suffix, divider, maxLines);
+        } else {
+          processNormalFile(lines1, lines2, prefix, suffix, divider, maxLines);
+        }
+      });
+
+      /* ========================================
+       * FUNÇÃO: processNormalFile
+       * Descrição: Processa arquivos normais (< 10k linhas)
+       * ======================================== */
+      function processNormalFile(lines1, lines2, prefix, suffix, divider, maxLines) {
         output.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+        
         for (let i = 0; i < maxLines; i++) {
           const line1 = lines1[i] ? lines1[i].trim() : '';
           const line2 = lines2[i] ? lines2[i].trim() : '';
           const combinedLine = `${prefix}${line1}${divider}${line2}${suffix}`;
+          
           const lineDiv = document.createElement('div');
           const link = document.createElement('a');
           link.textContent = combinedLine;
-          link.href = line1;
+          link.href = '#';
           lineDiv.appendChild(link);
-          output.appendChild(lineDiv);
+          fragment.appendChild(lineDiv);
         }
-      });
+        
+        output.appendChild(fragment);
+        showNotification(`${maxLines.toLocaleString()} linhas geradas!`);
+      }
 
+      /* ========================================
+       * FUNÇÃO: processLargeFile
+       * Descrição: Processa arquivos grandes (> 10k linhas)
+       *            usando processamento assíncrono em lotes
+       * AJUSTE: Altere BATCH_SIZE para performance
+       * ======================================== */
+      function processLargeFile(lines1, lines2, prefix, suffix, divider, maxLines) {
+        const BATCH_SIZE = 5000; // AJUSTE: Linhas por lote
+        let currentIndex = 0;
+        
+        output.innerHTML = '';
+        progressContainer.classList.add('active');
+        progressFill.style.width = '0%';
+        
+        function processBatch() {
+          const fragment = document.createDocumentFragment();
+          const endIndex = Math.min(currentIndex + BATCH_SIZE, maxLines);
+          
+          for (let i = currentIndex; i < endIndex; i++) {
+            const line1 = lines1[i] ? lines1[i].trim() : '';
+            const line2 = lines2[i] ? lines2[i].trim() : '';
+            const combinedLine = `${prefix}${line1}${divider}${line2}${suffix}`;
+            
+            const lineDiv = document.createElement('div');
+            const link = document.createElement('a');
+            link.textContent = combinedLine;
+            link.href = '#';
+            lineDiv.appendChild(link);
+            fragment.appendChild(lineDiv);
+          }
+          
+          output.appendChild(fragment);
+          currentIndex = endIndex;
+          
+          const progress = Math.round((currentIndex / maxLines) * 100);
+          progressFill.style.width = `${progress}%`;
+          progressText.textContent = `Processando: ${currentIndex.toLocaleString()} / ${maxLines.toLocaleString()} linhas (${progress}%)`;
+          
+          if (currentIndex < maxLines) {
+            requestAnimationFrame(processBatch);
+          } else {
+            progressContainer.classList.remove('active');
+            showNotification(`${maxLines.toLocaleString()} linhas geradas!`);
+          }
+        }
+        
+        requestAnimationFrame(processBatch);
+      }
+
+      /* ========================================
+       * EVENTO: Botão Extrair URL
+       * Descrição: Extrai URLs dos campos de texto
+       * ======================================== */
       filterUrlButton.addEventListener('click', () => {
         const text1 = input1.value.trim();
         const text2 = input2.value.trim();
-        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+)/gi;
         const urls1 = text1.match(urlRegex) || [];
         const urls2 = text2.match(urlRegex) || [];
         const combinedUrls = [...new Set([...urls1, ...urls2])];
+        
+        if (combinedUrls.length === 0) {
+          showNotification('Nenhuma URL encontrada!');
+          return;
+        }
+        
         output.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+        
         combinedUrls.forEach(url => {
           const lineDiv = document.createElement('div');
           const link = document.createElement('a');
           link.textContent = url;
           link.href = url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
           lineDiv.appendChild(link);
-          output.appendChild(lineDiv);
+          fragment.appendChild(lineDiv);
         });
+        
+        output.appendChild(fragment);
+        showNotification(`${combinedUrls.length} URLs extraídas!`);
       });
 
-      copyButton.addEventListener('click', () => {
+      /* ========================================
+       * EVENTO: Botão Copiar
+       * Descrição: Copia o conteúdo do output
+       * ======================================== */
+      copyButton.addEventListener('click', async () => {
         const outputText = output.innerText;
         if (outputText.trim() === '') {
-          alert('Nenhum resultado para copiar!');
+          showNotification('Nenhum resultado para copiar!');
           return;
         }
-        const tempTextArea = document.createElement('textarea');
-        tempTextArea.value = outputText;
-        document.body.appendChild(tempTextArea);
-        tempTextArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempTextArea);
-        copyButton.textContent = 'Copiado!';
-        setTimeout(() => {
-          copyButton.textContent = 'Copiar';
-        }, 2000);
+        
+        try {
+          await navigator.clipboard.writeText(outputText);
+          copyButton.textContent = '✅ Copiado!';
+          copyButton.classList.add('copied');
+          setTimeout(() => {
+            copyButton.textContent = '📋 Copiar Resultado';
+            copyButton.classList.remove('copied');
+          }, 2000);
+        } catch (err) {
+          // Fallback para navegadores antigos
+          const tempTextArea = document.createElement('textarea');
+          tempTextArea.value = outputText;
+          document.body.appendChild(tempTextArea);
+          tempTextArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(tempTextArea);
+          copyButton.textContent = '✅ Copiado!';
+          setTimeout(() => {
+            copyButton.textContent = '📋 Copiar Resultado';
+          }, 2000);
+        }
       });
 
+      /* ========================================
+       * EVENTO: Botão Carregar Arquivo
+       * Descrição: Carrega arquivo(s) .txt para o campo 1
+       * Suporta arquivos grandes (50k+ linhas)
+       * AJUSTE: CHUNK_SIZE para performance em arquivos muito grandes
+       * ======================================== */
       loadFileButton.addEventListener('click', () => {
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
-        fileInput.accept = '.txt';
+        fileInput.accept = '.txt,.csv,.log';
         fileInput.multiple = true;
-        fileInput.addEventListener('change', () => {
+        
+        fileInput.addEventListener('change', async () => {
           const files = fileInput.files;
-          if (files && files.length > 0) {
-            const reader = new FileReader();
-            let loadedText = '';
-            reader.onload = function (e) {
-              const fileContent = e.target.result;
-              loadedText += fileContent;
-              if (reader.readyState === FileReader.DONE) {
-                input1.value += loadedText;
-                loadedText = '';
-              }
-            };
-            const maxFileSize = 1000000;
-            for (let i = 0; i < files.length; i++) {
-              const file = files[i];
-              const fileSize = file.size;
-              const chunks = Math.ceil(fileSize / maxFileSize);
-              let currentPosition = 0;
-              for (let j = 0; j < chunks; j++) {
-                const chunkSize = Math.min(maxFileSize, fileSize - currentPosition);
-                const chunk = file.slice(currentPosition, currentPosition + chunkSize);
-                reader.readAsText(chunk);
-                currentPosition += chunkSize;
-              }
+          if (!files || files.length === 0) return;
+          
+          progressContainer.classList.add('active');
+          progressFill.style.width = '0%';
+          progressText.textContent = 'Carregando arquivos...';
+          
+          let totalLoaded = 0;
+          const totalSize = Array.from(files).reduce((acc, f) => acc + f.size, 0);
+          const allTexts = [];
+          
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            progressText.textContent = `Carregando: ${file.name}`;
+            
+            try {
+              const text = await readFileAsync(file, (loaded) => {
+                const progress = Math.round(((totalLoaded + loaded) / totalSize) * 100);
+                progressFill.style.width = `${progress}%`;
+              });
+              
+              allTexts.push(text);
+              totalLoaded += file.size;
+            } catch (error) {
+              console.error(`Erro ao carregar ${file.name}:`, error);
+              showNotification(`Erro ao carregar ${file.name}`);
             }
           }
+          
+          const combinedText = allTexts.join('\n');
+          input1.value = input1.value ? input1.value + '\n' + combinedText : combinedText;
+          
+          progressContainer.classList.remove('active');
+          updateLineCounts();
+          
+          const lineCount = combinedText.split('\n').length;
+          showNotification(`${files.length} arquivo(s) carregado(s) - ${lineCount.toLocaleString()} linhas!`);
         });
+        
         fileInput.click();
       });
+
+      /* ========================================
+       * FUNÇÃO: readFileAsync
+       * Descrição: Lê arquivo de forma assíncrona
+       *            Otimizado para arquivos grandes
+       * ======================================== */
+      function readFileAsync(file, onProgress) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = (e) => reject(e);
+          reader.onprogress = (e) => {
+            if (e.lengthComputable && onProgress) {
+              onProgress(e.loaded);
+            }
+          };
+          
+          reader.readAsText(file);
+        });
+      }
+
+      // CSS para animações adicionais
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideInRight {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+          from { opacity: 1; }
+          to { opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Inicializar contadores
+      updateLineCounts();
     </script>
   </div>
 </body>
