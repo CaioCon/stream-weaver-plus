@@ -3,193 +3,690 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editor De Combo</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <title>Editor De Combo Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     /* ========================================
-     * ESTILOS GLOBAIS
-     * AJUSTE: Cores principais, fonte, background
+     * VARIÁVEIS CSS - DESIGN SYSTEM
      * ======================================== */
-    * {
-      box-sizing: border-box;
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-tertiary: #1a1a25;
+      --bg-card: rgba(26, 26, 37, 0.95);
+      --bg-input: #0d0d14;
+      
+      --border-primary: rgba(99, 102, 241, 0.3);
+      --border-secondary: rgba(99, 102, 241, 0.15);
+      --border-accent: rgba(168, 85, 247, 0.4);
+      
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --accent-primary: #6366f1;
+      --accent-secondary: #8b5cf6;
+      --accent-tertiary: #a855f7;
+      --accent-success: #10b981;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      
+      --gradient-primary: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+      --gradient-dark: linear-gradient(180deg, #0a0a0f 0%, #12121a 50%, #0a0a0f 100%);
+      --gradient-card: linear-gradient(145deg, rgba(26, 26, 37, 0.9), rgba(18, 18, 26, 0.95));
+      
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+      --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.2);
+      
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      
+      --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s ease;
+      --transition-slow: 0.4s ease;
     }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      color: #e0e0e0;
+
+    /* ========================================
+     * RESET E ESTILOS BASE
+     * ======================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      min-height: 100vh;
     }
-    
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--gradient-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ========================================
+     * BACKGROUND ANIMADO
+     * ======================================== */
+    .bg-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+      background: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.15), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(168, 85, 247, 0.1), transparent);
+    }
+
     /* ========================================
      * CONTAINER PRINCIPAL
-     * AJUSTE: Padding, bordas, sombras
      * ======================================== */
-    .container {
-      margin-top: 10px;
-      padding: 25px;
-      border-radius: 12px;
-      background: rgba(26, 26, 46, 0.95);
-      border: 1px solid rgba(113, 110, 157, 0.5);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      max-width: 100%;
-      backdrop-filter: blur(10px);
-    }
-    
-    /* ========================================
-     * CAMPOS DE TEXTO (CAMPO 1 E CAMPO 2)
-     * AJUSTE: height - altura dos campos
-     * AJUSTE: font-size - tamanho da fonte
-     * ======================================== */
-    .input-fields {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 15px;
-      gap: 12px;
-    }
-    .input-fields textarea {
-      width: calc(50% - 6px);
-      height: 300px; /* AJUSTE: Altura dos campos de texto */
-      padding: 12px;
-      border: 1px solid rgba(113, 110, 157, 0.6);
-      border-radius: 8px;
-      background: linear-gradient(180deg, #0d0d1a 0%, #1a1a2e 100%);
-      color: #ffffff;
-      resize: vertical;
-      font-size: 13px;
-      line-height: 1.5;
-      font-family: 'Consolas', 'Monaco', monospace;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    .input-fields textarea:focus {
-      outline: none;
-      border-color: #716e9d;
-      box-shadow: 0 0 0 3px rgba(113, 110, 157, 0.2);
-    }
-    .input-fields textarea::placeholder {
-      color: #666;
-    }
-    
-    /* ========================================
-     * CAMPOS ADICIONAIS (PREFIXO/SUFIXO)
-     * ======================================== */
-    .additional-fields {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      margin-top: 8px;
-      gap: 12px;
-    }
-    .additional-fields input {
-      width: calc(50% - 6px);
-      padding: 12px;
-      border: 1px solid rgba(113, 110, 157, 0.6);
-      border-radius: 8px;
-      background: linear-gradient(180deg, #0d0d1a 0%, #1a1a2e 100%);
-      color: #ffffff;
-      font-size: 14px;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    .additional-fields input:focus {
-      outline: none;
-      border-color: #716e9d;
-      box-shadow: 0 0 0 3px rgba(113, 110, 157, 0.2);
-    }
-    .additional-fields input::placeholder {
-      color: #666;
-    }
-    .additional-fields button {
-      width: calc(50% - 6px);
-    }
-    
-    /* ========================================
-     * CAMPO DIVISOR
-     * AJUSTE: width - largura do campo
-     * AJUSTE: max-width - largura máxima
-     * ======================================== */
-    .divider-input {
-      width: 25%; /* AJUSTE: Largura do divisor */
-      max-width: 180px; /* AJUSTE: Largura máxima */
-      padding: 12px;
-      border: 1px solid rgba(113, 110, 157, 0.6);
-      border-radius: 8px;
-      background: linear-gradient(180deg, #0d0d1a 0%, #1a1a2e 100%);
-      color: #ffffff;
-      margin: 0 auto 15px;
-      display: block;
-      text-align: center;
-      font-size: 14px;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    .divider-input:focus {
-      outline: none;
-      border-color: #716e9d;
-      box-shadow: 0 0 0 3px rgba(113, 110, 157, 0.2);
-    }
-    .divider-input::placeholder {
-      color: #666;
-    }
-    
-    /* ========================================
-     * CONTAINER DE BOTÕES DE TRANSFORMAÇÃO
-     * ======================================== */
-    .button-container1 {
-      margin-bottom: 15px;
-      width: 100%;
-      display: flex;
-      overflow-x: auto;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      padding: 5px 0;
-    }
-    .button-container1::-webkit-scrollbar {
-      height: 6px;
-    }
-    .button-container1::-webkit-scrollbar-thumb {
-      background-color: #716e9d;
-      border-radius: 3px;
-    }
-    .button-container1::-webkit-scrollbar-track {
-      background: rgba(113, 110, 157, 0.1);
-    }
-    
-    /* ========================================
-     * BOTÕES DE DROPDOWN (MAIÚSCULAS, etc.)
-     * AJUSTE: padding, font-size, cores
-     * ======================================== */
-    .dropdown-container {
+    .app-container {
       position: relative;
-      display: inline-block;
-      flex-shrink: 0;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
     }
-    .dropdown-btn {
-      padding: 10px 18px;
-      border: 1px solid rgba(255, 107, 107, 0.6);
-      border-radius: 8px;
-      background: linear-gradient(135deg, #716e9d 0%, #5a5887 100%);
-      color: #ffffff;
-      font-size: 13px;
+
+    /* ========================================
+     * HEADER
+     * ======================================== */
+    .header {
+      text-align: center;
+      padding: 30px 0 25px;
+      margin-bottom: 25px;
+    }
+
+    .header-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+
+    .header-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-weight: 400;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      padding: 6px 14px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid var(--border-primary);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: var(--accent-primary);
+      font-weight: 500;
+    }
+
+    .header-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--accent-success);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    /* ========================================
+     * CARD PRINCIPAL
+     * ======================================== */
+    .main-card {
+      background: var(--gradient-card);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-lg), var(--shadow-glow);
+    }
+
+    /* ========================================
+     * ESTATÍSTICAS
+     * ======================================== */
+    .stats-bar {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      transition: all var(--transition-normal);
+    }
+
+    .stat-item:hover {
+      border-color: var(--border-primary);
+      background: rgba(99, 102, 241, 0.12);
+    }
+
+    .stat-icon {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-primary);
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-value {
+      color: var(--text-primary);
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    /* ========================================
+     * CAMPOS DE TEXTO
+     * ======================================== */
+    .fields-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .field-wrapper {
+      position: relative;
+    }
+
+    .field-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding: 0 4px;
+    }
+
+    .field-label-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field-label-text::before {
+      content: '';
+      width: 3px;
+      height: 14px;
+      background: var(--gradient-primary);
+      border-radius: 2px;
+    }
+
+    .field-counter {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      padding: 4px 10px;
+      background: var(--bg-input);
+      border-radius: var(--radius-sm);
+    }
+
+    .text-field {
+      width: 100%;
+      height: 280px;
+      padding: 16px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      resize: vertical;
+      transition: all var(--transition-normal);
+    }
+
+    .text-field:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), var(--shadow-sm);
+    }
+
+    .text-field::placeholder {
+      color: var(--text-muted);
+    }
+
+    .text-field::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .text-field::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .text-field::-webkit-scrollbar-thumb {
+      background: var(--border-primary);
+      border-radius: 4px;
+    }
+
+    /* ========================================
+     * TOOLBAR - BOTÕES DE TRANSFORMAÇÃO
+     * ======================================== */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: rgba(10, 10, 15, 0.6);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-secondary);
+    }
+
+    .toolbar-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-divider {
+      width: 1px;
+      background: var(--border-secondary);
+      margin: 0 8px;
+    }
+
+    .tool-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all var(--transition-fast);
       white-space: nowrap;
-      box-shadow: 0 2px 8px rgba(113, 110, 157, 0.3);
     }
-    .dropdown-btn:hover {
-      background: linear-gradient(135deg, #8a87b8 0%, #716e9d 100%);
+
+    .tool-btn:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: var(--border-primary);
+      color: var(--text-primary);
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(113, 110, 157, 0.4);
     }
-    .dropdown-btn:active {
+
+    .tool-btn:active {
       transform: translateY(0);
     }
-    
+
+    .tool-btn.primary {
+      background: var(--gradient-primary);
+      border-color: transparent;
+      color: white;
+    }
+
+    .tool-btn.primary:hover {
+      opacity: 0.9;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    .tool-btn.danger {
+      color: var(--accent-danger);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .tool-btn.danger:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+
+    .tool-btn-icon {
+      font-size: 1rem;
+    }
+
     /* ========================================
-     * MODAL/DIALOG DE OPÇÕES
-     * AJUSTE: cores, tamanhos, animações
+     * INPUTS ADICIONAIS (PREFIXO, SUFIXO, DIVISOR)
+     * ======================================== */
+    .inputs-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    .input-group-label {
+      position: absolute;
+      top: -8px;
+      left: 12px;
+      padding: 0 6px;
+      background: var(--bg-secondary);
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      transition: all var(--transition-normal);
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    .input-field::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* ========================================
+     * BOTÕES DE AÇÃO PRINCIPAIS
+     * ======================================== */
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 24px;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .action-btn-primary {
+      background: var(--gradient-primary);
+      color: white;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .action-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
+    }
+
+    .action-btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-secondary);
+    }
+
+    .action-btn-secondary:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: var(--border-primary);
+      color: var(--text-primary);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .action-btn-icon {
+      font-size: 1.2rem;
+    }
+
+    /* ========================================
+     * PROGRESS BAR
+     * ======================================== */
+    .progress-container {
+      display: none;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: rgba(10, 10, 15, 0.6);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-secondary);
+    }
+
+    .progress-container.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .progress-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .progress-percentage {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: var(--bg-input);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--gradient-primary);
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 4px;
+    }
+
+    .progress-text {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* ========================================
+     * OUTPUT
+     * ======================================== */
+    .output-section {
+      margin-top: 25px;
+    }
+
+    .output-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .output-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .output-title::before {
+      content: '';
+      width: 3px;
+      height: 16px;
+      background: var(--gradient-primary);
+      border-radius: 2px;
+    }
+
+    .output-count {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding: 4px 12px;
+      background: var(--bg-input);
+      border-radius: var(--radius-sm);
+    }
+
+    .output-field {
+      min-height: 200px;
+      max-height: 400px;
+      padding: 20px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-md);
+      overflow-y: auto;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      line-height: 1.8;
+      color: var(--text-primary);
+    }
+
+    .output-field::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    .output-field::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .output-field::-webkit-scrollbar-thumb {
+      background: var(--border-primary);
+      border-radius: 4px;
+    }
+
+    .output-field .line {
+      display: block;
+      padding: 2px 0;
+      transition: background var(--transition-fast);
+    }
+
+    .output-field .line:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 4px;
+      padding-left: 8px;
+    }
+
+    .output-field a {
+      color: var(--accent-primary);
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .output-field a:hover {
+      color: var(--accent-tertiary);
+      text-decoration: underline;
+    }
+
+    .output-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 150px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .output-empty-icon {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      opacity: 0.3;
+    }
+
+    /* ========================================
+     * COPY BUTTON
+     * ======================================== */
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      margin-top: 15px;
+      padding: 16px 24px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: none;
+      border-radius: var(--radius-md);
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .copy-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    }
+
+    .copy-btn.copied {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    }
+
+    /* ========================================
+     * MODAL
      * ======================================== */
     .modal-overlay {
       display: none;
@@ -198,935 +695,908 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
       z-index: 99999;
       justify-content: center;
       align-items: center;
-      animation: fadeIn 0.2s ease;
+      padding: 20px;
     }
+
     .modal-overlay.active {
       display: flex;
+      animation: fadeIn 0.2s ease;
     }
+
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
-    @keyframes slideIn {
-      from { transform: scale(0.9) translateY(-20px); opacity: 0; }
-      to { transform: scale(1) translateY(0); opacity: 1; }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px) scale(0.95); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
     }
+
     .modal-dialog {
-      background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-      border: 2px solid #716e9d;
-      border-radius: 12px;
-      padding: 20px;
-      min-width: 280px;
-      max-width: 90%;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-      animation: slideIn 0.3s ease;
-    }
-    .modal-title {
-      color: #e0e0e0;
-      font-size: 16px;
-      font-weight: 600;
-      text-align: center;
-      margin-bottom: 18px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgba(113, 110, 157, 0.4);
-    }
-    .modal-dialog button {
-      color: white;
-      padding: 14px 18px;
-      display: block;
+      background: var(--gradient-card);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      min-width: 320px;
+      max-width: 400px;
       width: 100%;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.3s ease;
+    }
+
+    .modal-header {
       text-align: center;
-      background: linear-gradient(135deg, #343a40 0%, #2d3339 100%);
-      border: 1px solid rgba(113, 110, 157, 0.5);
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .modal-icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+    }
+
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .modal-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .modal-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .modal-option-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 0.95rem;
       font-weight: 500;
-      margin-bottom: 10px;
-      transition: all 0.3s ease;
+      cursor: pointer;
+      transition: all var(--transition-normal);
     }
-    .modal-dialog button:last-child {
-      margin-bottom: 0;
+
+    .modal-option-btn:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: var(--accent-primary);
+      transform: translateX(5px);
     }
-    .modal-dialog button:hover {
-      background: linear-gradient(135deg, #716e9d 0%, #5a5887 100%);
+
+    .modal-option-btn::after {
+      content: '→';
+      color: var(--text-muted);
+      transition: all var(--transition-fast);
+    }
+
+    .modal-option-btn:hover::after {
+      color: var(--accent-primary);
       transform: translateX(3px);
     }
-    .modal-close {
-      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
-      border-color: #dc3545 !important;
-      margin-top: 15px !important;
-    }
-    .modal-close:hover {
-      background: linear-gradient(135deg, #e04555 0%, #dc3545 100%) !important;
-    }
-    
-    /* ========================================
-     * BOTÕES DE AÇÃO (GERAR, CARREGAR, ETC.)
-     * ======================================== */
-    .generate-button {
-      display: block;
+
+    .modal-cancel-btn {
       width: 100%;
-      margin-top: 12px;
-      padding: 14px 24px;
-      border: none;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #716e9d 0%, #5a5887 100%);
-      color: #ffffff;
-      font-size: 15px;
-      font-weight: 600;
+      padding: 14px;
+      background: transparent;
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+      font-size: 0.9rem;
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(113, 110, 157, 0.3);
+      transition: all var(--transition-normal);
     }
-    .generate-button:hover {
-      background: linear-gradient(135deg, #8a87b8 0%, #716e9d 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(113, 110, 157, 0.4);
+
+    .modal-cancel-btn:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: var(--accent-danger);
     }
-    .generate-button:active {
-      transform: translateY(0);
-    }
-    .button-border {
-      border: 1px solid rgba(255, 107, 107, 0.5);
-    }
-    .button-spacing2 {
-      margin-right: 0;
-    }
-    
+
     /* ========================================
-     * CAMPO DE SAÍDA (OUTPUT)
+     * NOTIFICAÇÕES
      * ======================================== */
-    .output-field {
-      padding: 15px;
-      border: 1px solid rgba(113, 110, 157, 0.5);
-      border-radius: 8px;
-      max-height: 350px;
-      overflow-y: auto;
-      overflow-x: auto;
-      background: linear-gradient(180deg, #0d0d1a 0%, #1a1a2e 100%);
-      color: #ffffff;
-      position: relative;
-      white-space: pre-wrap;
-      user-select: text;
-      margin-bottom: 12px;
-      margin-top: 15px;
-      font-family: 'Consolas', 'Monaco', monospace;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-    .output-field::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    .output-field::-webkit-scrollbar-thumb {
-      background-color: #716e9d;
-      border-radius: 4px;
-    }
-    .output-field::-webkit-scrollbar-track {
-      background: rgba(113, 110, 157, 0.1);
-    }
-    .output-field div {
-      margin-bottom: 4px;
-    }
-    .output-field a {
-      display: block;
-      color: #a8d4ff;
-      text-decoration: none;
-      word-break: break-all;
-      transition: color 0.2s;
-    }
-    .output-field a:hover {
-      color: #ffffff;
-    }
-    
-    /* ========================================
-     * BOTÃO DE COPIAR
-     * ======================================== */
-    .copy-button {
-      display: block;
-      width: 100%;
-      margin-top: 10px;
-      padding: 12px 15px;
-      border: none;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-      color: #ffffff;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .copy-button:hover {
-      background: linear-gradient(135deg, #34ce57 0%, #28a745 100%);
-    }
-    .copy-button.copied {
-      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-    }
-    
-    /* ========================================
-     * INDICADOR DE PROGRESSO
-     * ======================================== */
-    .progress-container {
-      display: none;
-      margin: 15px 0;
-    }
-    .progress-container.active {
-      display: block;
-    }
-    .progress-bar {
-      height: 6px;
-      background: rgba(113, 110, 157, 0.2);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #716e9d, #8a87b8);
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-    .progress-text {
-      text-align: center;
-      font-size: 12px;
-      color: #a0a0a0;
-      margin-top: 5px;
-    }
-    
-    /* ========================================
-     * CONTADOR DE LINHAS
-     * ======================================== */
-    .line-counter {
+    .notification {
+      position: fixed;
+      top: 24px;
+      right: 24px;
       display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: #888;
-      margin-bottom: 8px;
-      padding: 0 5px;
-    }
-    
-    #Nomes-button {
-      display: none;
-    }
-    .button-container {
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      background: var(--gradient-card);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      z-index: 999999;
+      animation: slideInNotif 0.4s ease;
     }
-    
+
+    @keyframes slideInNotif {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOutNotif {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(120%); opacity: 0; }
+    }
+
+    .notification.success {
+      border-color: rgba(16, 185, 129, 0.5);
+    }
+
+    .notification.success .notification-icon {
+      color: var(--accent-success);
+    }
+
+    .notification.error {
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+
+    .notification.error .notification-icon {
+      color: var(--accent-danger);
+    }
+
+    .notification-icon {
+      font-size: 1.3rem;
+    }
+
     /* ========================================
-     * ESTILOS RESPONSIVOS - TABLETS
+     * RESPONSIVO - TABLETS
      * ======================================== */
     @media (max-width: 768px) {
-      .container {
-        padding: 15px;
-        margin: 8px;
-        border-radius: 10px;
+      .app-container {
+        padding: 12px;
       }
-      .input-fields {
-        flex-direction: row;
+
+      .header {
+        padding: 20px 0;
       }
-      .input-fields textarea {
-        width: calc(50% - 6px);
-        height: 220px; /* AJUSTE: Altura em tablets */
-        font-size: 12px;
+
+      .header-title {
+        font-size: 1.8rem;
       }
-      .additional-fields {
-        flex-direction: row;
+
+      .main-card {
+        padding: 20px;
+        border-radius: var(--radius-lg);
       }
-      .additional-fields input,
-      .additional-fields button {
-        width: calc(50% - 6px);
+
+      .fields-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
       }
-      .divider-input {
-        width: 40%;
-        max-width: 140px;
+
+      .text-field {
+        height: 200px;
+        font-size: 0.85rem;
       }
-      .button-container1 {
-        flex-wrap: nowrap;
+
+      .inputs-row {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+      }
+
+      .toolbar {
         overflow-x: auto;
+        flex-wrap: nowrap;
         -webkit-overflow-scrolling: touch;
-        padding-bottom: 10px;
+        padding: 12px;
       }
-      .dropdown-container {
-        min-width: 130px;
+
+      .toolbar-group {
+        flex-wrap: nowrap;
       }
-      .dropdown-btn {
-        width: 100%;
-        font-size: 12px;
-        padding: 10px 12px;
+
+      .tool-btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
       }
-      .generate-button {
-        padding: 12px 18px;
-        font-size: 14px;
+
+      .action-buttons {
+        grid-template-columns: 1fr 1fr;
       }
     }
-    
+
     /* ========================================
-     * ESTILOS RESPONSIVOS - CELULARES
+     * RESPONSIVO - CELULARES
      * ======================================== */
     @media (max-width: 480px) {
-      .container {
-        padding: 12px;
-        margin: 5px;
-        border-radius: 8px;
+      .header-title {
+        font-size: 1.5rem;
       }
-      .input-fields textarea {
-        height: 180px; /* AJUSTE: Altura em celulares */
-        font-size: 11px;
+
+      .main-card {
+        padding: 16px;
       }
-      .dropdown-btn {
-        font-size: 11px;
-        padding: 8px 10px;
+
+      .stats-bar {
+        flex-direction: column;
+        gap: 8px;
       }
+
+      .text-field {
+        height: 160px;
+      }
+
+      .inputs-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .inputs-row .input-group:last-child {
+        grid-column: span 2;
+      }
+
+      .action-btn {
+        padding: 14px 16px;
+        font-size: 0.9rem;
+      }
+
       .modal-dialog {
-        min-width: 260px;
-        padding: 15px;
-      }
-      .modal-dialog button {
-        padding: 12px 15px;
-        font-size: 13px;
+        padding: 20px;
+        min-width: auto;
       }
     }
-    
+
     /* ========================================
-     * ESTILOS RESPONSIVOS - DESKTOP
+     * RESPONSIVO - DESKTOP GRANDE
      * ======================================== */
-    @media (min-width: 992px) {
-      .container {
-        max-width: 950px;
-        margin: 25px auto;
-      }
-      .input-fields textarea {
-        height: 320px;
-      }
-      .output-field {
-        max-height: 450px;
-      }
-    }
-    
     @media (min-width: 1200px) {
-      .container {
-        max-width: 1150px;
-      }
-      .input-fields textarea {
+      .text-field {
         height: 350px;
+      }
+
+      .output-field {
+        max-height: 500px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="button-container">
-      <button id="Nomes-button" class="generate-button button-border">Nomes</button>
-    </div>
-    
-    <!-- CONTADOR DE LINHAS -->
-    <div class="line-counter">
-      <span id="count1">Campo 1: 0 linhas</span>
-      <span id="count2">Campo 2: 0 linhas</span>
-    </div>
-    
-    <!-- CAMPOS DE TEXTO PRINCIPAIS -->
-    <div class="input-fields">
-      <textarea id="input1" placeholder="Campo 1 - Cole ou digite aqui"></textarea>
-      <textarea id="input2" placeholder="Campo 2 - Cole ou digite aqui"></textarea>
-    </div>
-    
-    <!-- BOTÕES DE TRANSFORMAÇÃO -->
-    <div class="button-container1">
-      <div class="dropdown-container">
-        <button class="dropdown-btn" onclick="openModal('upper')">MAIÚSCULAS ▼</button>
-      </div>
-      <div class="dropdown-container">
-        <button class="dropdown-btn" onclick="openModal('lower')">minúsculas ▼</button>
-      </div>
-      <div class="dropdown-container">
-        <button class="dropdown-btn" onclick="openModal('capitalize')">Primeira Letra ▼</button>
-      </div>
-      <div class="dropdown-container">
-        <button class="dropdown-btn" onclick="openModal('removeDuplicates')">Remover Duplicados ▼</button>
-      </div>
-      <div class="dropdown-container">
-        <button class="dropdown-btn" onclick="clearAll()">Limpar Tudo</button>
-      </div>
-    </div>
+  <!-- Background Pattern -->
+  <div class="bg-pattern"></div>
 
-    <!-- MODAL: CAIXA DE DIÁLOGO PARA OPÇÕES -->
-    <div class="modal-overlay" id="transform-modal">
-      <div class="modal-dialog">
-        <div class="modal-title" id="modal-title">Selecione o Lado</div>
-        <button onclick="selectSide('left')">Apenas Campo 1 (Esquerdo)</button>
-        <button onclick="selectSide('right')">Apenas Campo 2 (Direito)</button>
-        <button onclick="selectSide('both')">Ambos os Campos</button>
-        <button class="modal-close" onclick="closeModal()">Cancelar</button>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <h1 class="header-title">Editor De Combo</h1>
+      <p class="header-subtitle">Ferramenta profissional para edição e combinação de textos</p>
+      <span class="header-badge">PRO Edition • v2.0</span>
+    </header>
+
+    <!-- Main Card -->
+    <div class="main-card">
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <span class="stat-icon">📝</span>
+          <span class="stat-label">Campo 1</span>
+          <span class="stat-value" id="count1">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">📄</span>
+          <span class="stat-label">Campo 2</span>
+          <span class="stat-value" id="count2">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">📊</span>
+          <span class="stat-label">Output</span>
+          <span class="stat-value" id="countOutput">0</span>
+        </div>
+      </div>
+
+      <!-- Text Fields -->
+      <div class="fields-grid">
+        <div class="field-wrapper">
+          <div class="field-label">
+            <span class="field-label-text">Campo 1 (Esquerdo)</span>
+            <span class="field-counter" id="counter1">0 linhas</span>
+          </div>
+          <textarea id="input1" class="text-field" placeholder="Cole ou digite o conteúdo aqui..."></textarea>
+        </div>
+        <div class="field-wrapper">
+          <div class="field-label">
+            <span class="field-label-text">Campo 2 (Direito)</span>
+            <span class="field-counter" id="counter2">0 linhas</span>
+          </div>
+          <textarea id="input2" class="text-field" placeholder="Cole ou digite o conteúdo aqui..."></textarea>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button class="tool-btn" onclick="openModal('upper')">
+            <span class="tool-btn-icon">⬆️</span>
+            MAIÚSCULAS
+          </button>
+          <button class="tool-btn" onclick="openModal('lower')">
+            <span class="tool-btn-icon">⬇️</span>
+            minúsculas
+          </button>
+          <button class="tool-btn" onclick="openModal('capitalize')">
+            <span class="tool-btn-icon">🔤</span>
+            Primeira Letra
+          </button>
+        </div>
+        <div class="toolbar-divider"></div>
+        <div class="toolbar-group">
+          <button class="tool-btn" onclick="openModal('removeDuplicates')">
+            <span class="tool-btn-icon">🔄</span>
+            Remover Duplicados
+          </button>
+          <button class="tool-btn" onclick="openModal('removeEmpty')">
+            <span class="tool-btn-icon">🧹</span>
+            Remover Vazias
+          </button>
+          <button class="tool-btn" onclick="openModal('shuffle')">
+            <span class="tool-btn-icon">🎲</span>
+            Embaralhar
+          </button>
+        </div>
+        <div class="toolbar-divider"></div>
+        <div class="toolbar-group">
+          <button class="tool-btn danger" onclick="clearAll()">
+            <span class="tool-btn-icon">🗑️</span>
+            Limpar
+          </button>
+        </div>
+      </div>
+
+      <!-- Prefix, Suffix, Divider -->
+      <div class="inputs-row">
+        <div class="input-group">
+          <span class="input-group-label">Prefixo</span>
+          <input type="text" id="prefix-input" class="input-field" placeholder="Adiciona antes...">
+        </div>
+        <div class="input-group">
+          <span class="input-group-label">Sufixo</span>
+          <input type="text" id="suffix-input" class="input-field" placeholder="Adiciona depois...">
+        </div>
+        <div class="input-group">
+          <span class="input-group-label">Divisor</span>
+          <input type="text" id="divider-input" class="input-field" placeholder=":">
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button id="load-file-button" class="action-btn action-btn-secondary">
+          <span class="action-btn-icon">📁</span>
+          Carregar Arquivo
+        </button>
+        <button id="filter-url-button" class="action-btn action-btn-secondary">
+          <span class="action-btn-icon">🔗</span>
+          Extrair URLs
+        </button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-container" id="progress-container">
+        <div class="progress-header">
+          <span class="progress-title">Processando...</span>
+          <span class="progress-percentage" id="progress-percentage">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-text" id="progress-text">Aguarde...</div>
+      </div>
+
+      <!-- Generate Button -->
+      <button id="generate-button" class="action-btn action-btn-primary" style="width: 100%;">
+        <span class="action-btn-icon">⚡</span>
+        Gerar Combinação
+      </button>
+
+      <!-- Output Section -->
+      <div class="output-section">
+        <div class="output-header">
+          <span class="output-title">Resultado</span>
+          <span class="output-count" id="output-count">0 linhas</span>
+        </div>
+        <div class="output-field" id="output">
+          <div class="output-empty">
+            <span class="output-empty-icon">📋</span>
+            <span>O resultado aparecerá aqui</span>
+          </div>
+        </div>
+        <button id="copy-button" class="copy-btn">
+          <span>📋</span>
+          Copiar Resultado
+        </button>
       </div>
     </div>
-    
-    <!-- CAMPOS DE PREFIXO E SUFIXO -->
-    <div class="additional-fields">
-      <input id="prefix-input" placeholder="Prefixo (adiciona antes)">
-      <input id="suffix-input" placeholder="Sufixo (adiciona depois)">
-    </div>
-    
-    <!-- CAMPO DIVISOR -->
-    <input id="divider-input" class="divider-input" placeholder="Divisor">
-    
-    <!-- BOTÕES DE ARQUIVO E EXTRAÇÃO -->
-    <div class="additional-fields">
-      <button id="load-file-button" class="generate-button button-border button-spacing2">📁 Carregar Arquivo</button>
-      <button id="filter-url-button" class="generate-button button-border">🔗 Extrair URL</button>
-    </div>
-    
-    <!-- INDICADOR DE PROGRESSO -->
-    <div class="progress-container" id="progress-container">
-      <div class="progress-bar">
-        <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="transform-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-icon" id="modal-icon">🔧</div>
+        <div class="modal-title" id="modal-title">Selecione onde aplicar</div>
+        <div class="modal-subtitle" id="modal-subtitle">Escolha o campo para transformação</div>
       </div>
-      <div class="progress-text" id="progress-text">Carregando...</div>
+      <div class="modal-options">
+        <button class="modal-option-btn" onclick="selectSide('left')">
+          <span>Campo 1 (Esquerdo)</span>
+        </button>
+        <button class="modal-option-btn" onclick="selectSide('right')">
+          <span>Campo 2 (Direito)</span>
+        </button>
+        <button class="modal-option-btn" onclick="selectSide('both')">
+          <span>Ambos os Campos</span>
+        </button>
+      </div>
+      <button class="modal-cancel-btn" onclick="closeModal()">Cancelar</button>
     </div>
-    
-    <!-- BOTÃO GERAR -->
-    <button id="generate-button" class="generate-button">⚡ Gerar Combinação</button>
-    
-    <!-- CAMPO DE SAÍDA -->
-    <div class="output-field" id="output"></div>
-    
-    <!-- BOTÃO COPIAR -->
-    <div class="copy-container">
-      <button id="copy-button" class="copy-button">📋 Copiar Resultado</button>
-    </div>
-    
-    <script>
-      /* ========================================
-       * REFERÊNCIAS DOS ELEMENTOS DOM
-       * ======================================== */
-      const input1 = document.getElementById('input1');
-      const input2 = document.getElementById('input2');
-      const prefixInput = document.getElementById('prefix-input');
-      const suffixInput = document.getElementById('suffix-input');
-      const dividerInput = document.getElementById('divider-input');
-      const generateButton = document.getElementById('generate-button');
-      const filterUrlButton = document.getElementById('filter-url-button');
-      const output = document.getElementById('output');
-      const copyButton = document.getElementById('copy-button');
-      const loadFileButton = document.getElementById('load-file-button');
-      const NomesButton = document.getElementById('Nomes-button');
-      const modal = document.getElementById('transform-modal');
-      const modalTitle = document.getElementById('modal-title');
-      const progressContainer = document.getElementById('progress-container');
-      const progressFill = document.getElementById('progress-fill');
-      const progressText = document.getElementById('progress-text');
-      const count1 = document.getElementById('count1');
-      const count2 = document.getElementById('count2');
+  </div>
+
+  <script>
+    /* ========================================
+     * REFERÊNCIAS DOM
+     * ======================================== */
+    const input1 = document.getElementById('input1');
+    const input2 = document.getElementById('input2');
+    const prefixInput = document.getElementById('prefix-input');
+    const suffixInput = document.getElementById('suffix-input');
+    const dividerInput = document.getElementById('divider-input');
+    const generateButton = document.getElementById('generate-button');
+    const filterUrlButton = document.getElementById('filter-url-button');
+    const output = document.getElementById('output');
+    const copyButton = document.getElementById('copy-button');
+    const loadFileButton = document.getElementById('load-file-button');
+    const modal = document.getElementById('transform-modal');
+    const modalIcon = document.getElementById('modal-icon');
+    const modalTitle = document.getElementById('modal-title');
+    const modalSubtitle = document.getElementById('modal-subtitle');
+    const progressContainer = document.getElementById('progress-container');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    const progressPercentage = document.getElementById('progress-percentage');
+    const count1 = document.getElementById('count1');
+    const count2 = document.getElementById('count2');
+    const countOutput = document.getElementById('countOutput');
+    const counter1 = document.getElementById('counter1');
+    const counter2 = document.getElementById('counter2');
+    const outputCount = document.getElementById('output-count');
+
+    let currentTransformType = null;
+
+    /* ========================================
+     * ATUALIZAR CONTADORES
+     * ======================================== */
+    function updateLineCounts() {
+      const lines1 = input1.value ? input1.value.split('\n').filter(l => l.trim()).length : 0;
+      const lines2 = input2.value ? input2.value.split('\n').filter(l => l.trim()).length : 0;
       
-      /* ========================================
-       * VARIÁVEL: Tipo de transformação atual
-       * ======================================== */
-      let currentTransformType = null;
+      count1.textContent = lines1.toLocaleString();
+      count2.textContent = lines2.toLocaleString();
+      counter1.textContent = `${lines1.toLocaleString()} linhas`;
+      counter2.textContent = `${lines2.toLocaleString()} linhas`;
+    }
 
-      /* ========================================
-       * FUNÇÃO: updateLineCounts
-       * Descrição: Atualiza os contadores de linhas
-       * ======================================== */
-      function updateLineCounts() {
-        const lines1 = input1.value ? input1.value.split('\n').length : 0;
-        const lines2 = input2.value ? input2.value.split('\n').length : 0;
-        count1.textContent = `Campo 1: ${lines1.toLocaleString()} linhas`;
-        count2.textContent = `Campo 2: ${lines2.toLocaleString()} linhas`;
+    function updateOutputCount() {
+      const outputLines = output.querySelectorAll('.line').length;
+      countOutput.textContent = outputLines.toLocaleString();
+      outputCount.textContent = `${outputLines.toLocaleString()} linhas`;
+    }
+
+    input1.addEventListener('input', updateLineCounts);
+    input2.addEventListener('input', updateLineCounts);
+
+    /* ========================================
+     * FUNÇÕES DE TRANSFORMAÇÃO
+     * ======================================== */
+    function capitalizeFirstLetterOfLine(text) {
+      if (!text) return text;
+      return text.split('\n').map(line => {
+        if (line.length === 0) return line;
+        return line.charAt(0).toUpperCase() + line.slice(1).toLowerCase();
+      }).join('\n');
+    }
+
+    function removeDuplicateLines(text) {
+      if (!text) return text;
+      const lines = text.split('\n');
+      const seen = new Set();
+      const uniqueLines = [];
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (trimmedLine && !seen.has(trimmedLine)) {
+          seen.add(trimmedLine);
+          uniqueLines.push(line);
+        } else if (!trimmedLine) {
+          uniqueLines.push(line);
+        }
+      }
+      return uniqueLines.join('\n');
+    }
+
+    function removeEmptyLines(text) {
+      if (!text) return text;
+      return text.split('\n').filter(line => line.trim() !== '').join('\n');
+    }
+
+    function shuffleLines(text) {
+      if (!text) return text;
+      const lines = text.split('\n');
+      for (let i = lines.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [lines[i], lines[j]] = [lines[j], lines[i]];
+      }
+      return lines.join('\n');
+    }
+
+    /* ========================================
+     * MODAL
+     * ======================================== */
+    function openModal(type) {
+      currentTransformType = type;
+      
+      const configs = {
+        'upper': { icon: '⬆️', title: 'MAIÚSCULAS', subtitle: 'Converter texto para maiúsculas' },
+        'lower': { icon: '⬇️', title: 'minúsculas', subtitle: 'Converter texto para minúsculas' },
+        'capitalize': { icon: '🔤', title: 'Primeira Letra', subtitle: 'Capitalizar primeira letra de cada linha' },
+        'removeDuplicates': { icon: '🔄', title: 'Remover Duplicados', subtitle: 'Remover linhas duplicadas' },
+        'removeEmpty': { icon: '🧹', title: 'Remover Vazias', subtitle: 'Remover linhas em branco' },
+        'shuffle': { icon: '🎲', title: 'Embaralhar', subtitle: 'Ordenar linhas aleatoriamente' }
+      };
+      
+      const config = configs[type] || { icon: '🔧', title: 'Transformação', subtitle: '' };
+      modalIcon.textContent = config.icon;
+      modalTitle.textContent = config.title;
+      modalSubtitle.textContent = config.subtitle;
+      
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      modal.classList.remove('active');
+      currentTransformType = null;
+    }
+
+    function selectSide(side) {
+      if (currentTransformType) {
+        transformCase(currentTransformType, side);
+      }
+      closeModal();
+    }
+
+    function transformCase(type, side) {
+      let transform;
+      
+      switch(type) {
+        case 'upper':
+          transform = (text) => text.toUpperCase();
+          break;
+        case 'lower':
+          transform = (text) => text.toLowerCase();
+          break;
+        case 'capitalize':
+          transform = capitalizeFirstLetterOfLine;
+          break;
+        case 'removeDuplicates':
+          transform = removeDuplicateLines;
+          break;
+        case 'removeEmpty':
+          transform = removeEmptyLines;
+          break;
+        case 'shuffle':
+          transform = shuffleLines;
+          break;
+        default:
+          return;
+      }
+
+      switch(side) {
+        case 'both':
+          input1.value = transform(input1.value);
+          input2.value = transform(input2.value);
+          break;
+        case 'left':
+          input1.value = transform(input1.value);
+          break;
+        case 'right':
+          input2.value = transform(input2.value);
+          break;
       }
       
-      // Atualizar contadores ao digitar
-      input1.addEventListener('input', updateLineCounts);
-      input2.addEventListener('input', updateLineCounts);
+      updateLineCounts();
+      showNotification('Transformação aplicada com sucesso!', 'success');
+    }
 
-      /* ========================================
-       * FUNÇÃO: capitalizeFirstLetterOfLine
-       * Descrição: Capitaliza APENAS a primeira letra de cada LINHA
-       *            e converte o resto para minúscula
-       * Parâmetro: text - texto a ser transformado
-       * Retorno: texto transformado
-       * AJUSTE: Modifique a lógica se quiser comportamento diferente
-       * ======================================== */
-      function capitalizeFirstLetterOfLine(text) {
-        if (!text) return text;
-        return text.split('\n').map(line => {
-          if (line.length === 0) return line;
-          // Primeira letra maiúscula, resto minúsculo
-          return line.charAt(0).toUpperCase() + line.slice(1).toLowerCase();
-        }).join('\n');
+    function clearAll() {
+      if (confirm('Deseja limpar todos os campos?')) {
+        input1.value = '';
+        input2.value = '';
+        prefixInput.value = '';
+        suffixInput.value = '';
+        dividerInput.value = '';
+        output.innerHTML = '<div class="output-empty"><span class="output-empty-icon">📋</span><span>O resultado aparecerá aqui</span></div>';
+        updateLineCounts();
+        updateOutputCount();
+        showNotification('Todos os campos foram limpos!', 'success');
       }
+    }
 
-      /* ========================================
-       * FUNÇÃO: removeDuplicateLines
-       * Descrição: Remove linhas duplicadas mantendo a ordem
-       * Parâmetro: text - texto a ser processado
-       * Retorno: texto sem duplicatas
-       * ======================================== */
-      function removeDuplicateLines(text) {
-        if (!text) return text;
-        const lines = text.split('\n');
-        const seen = new Set();
-        const uniqueLines = [];
-        for (const line of lines) {
-          const trimmedLine = line.trim();
-          if (trimmedLine && !seen.has(trimmedLine)) {
-            seen.add(trimmedLine);
-            uniqueLines.push(line);
-          } else if (!trimmedLine) {
-            uniqueLines.push(line); // Mantém linhas vazias
-          }
-        }
-        return uniqueLines.join('\n');
-      }
+    /* ========================================
+     * NOTIFICAÇÕES
+     * ======================================== */
+    function showNotification(message, type = 'success') {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.innerHTML = `
+        <span class="notification-icon">${type === 'success' ? '✅' : '❌'}</span>
+        <span>${message}</span>
+      `;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideOutNotif 0.4s ease forwards';
+        setTimeout(() => notification.remove(), 400);
+      }, 2500);
+    }
 
-      /* ========================================
-       * FUNÇÃO: openModal
-       * Descrição: Abre o modal de opções de transformação
-       * Parâmetro: type - 'upper', 'lower', 'capitalize', 'removeDuplicates'
-       * AJUSTE: Altere os títulos do modal aqui
-       * ======================================== */
-      function openModal(type) {
-        currentTransformType = type;
-        
-        // Define o título do modal baseado no tipo
-        const titles = {
-          'upper': 'MAIÚSCULAS - Selecione onde aplicar',
-          'lower': 'minúsculas - Selecione onde aplicar',
-          'capitalize': 'Primeira Letra - Selecione onde aplicar',
-          'removeDuplicates': 'Remover Duplicados - Selecione onde aplicar'
-        };
-        modalTitle.textContent = titles[type] || 'Selecione o Lado';
-        
-        modal.classList.add('active');
-      }
+    // Fechar modal
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
 
-      /* ========================================
-       * FUNÇÃO: closeModal
-       * Descrição: Fecha o modal de opções
-       * ======================================== */
-      function closeModal() {
-        modal.classList.remove('active');
-        currentTransformType = null;
-      }
-
-      /* ========================================
-       * FUNÇÃO: selectSide
-       * Descrição: Aplica a transformação no lado selecionado
-       * Parâmetro: side - 'both', 'left', ou 'right'
-       * ======================================== */
-      function selectSide(side) {
-        if (currentTransformType) {
-          transformCase(currentTransformType, side);
-        }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
         closeModal();
       }
+    });
 
-      /* ========================================
-       * FUNÇÃO: transformCase
-       * Descrição: Função principal que aplica a transformação de texto
-       * Parâmetros: 
-       *   - type: 'upper', 'lower', 'capitalize', 'removeDuplicates'
-       *   - side: 'both' (ambos campos), 'left' (campo 1), 'right' (campo 2)
-       * AJUSTE: Adicione novos tipos de transformação no switch(type)
-       * ======================================== */
-      function transformCase(type, side) {
-        let transform;
-        
-        // Define a função de transformação baseada no tipo
-        switch(type) {
-          case 'upper':
-            transform = (text) => text.toUpperCase();
-            break;
-          case 'lower':
-            transform = (text) => text.toLowerCase();
-            break;
-          case 'capitalize':
-            transform = capitalizeFirstLetterOfLine;
-            break;
-          case 'removeDuplicates':
-            transform = removeDuplicateLines;
-            break;
-          default:
-            console.error('Tipo de transformação desconhecido:', type);
-            return;
-        }
-
-        // Aplica a transformação no(s) campo(s) selecionado(s)
-        switch(side) {
-          case 'both':
-            input1.value = transform(input1.value);
-            input2.value = transform(input2.value);
-            break;
-          case 'left':
-            input1.value = transform(input1.value);
-            break;
-          case 'right':
-            input2.value = transform(input2.value);
-            break;
-          default:
-            console.error('Lado desconhecido:', side);
-            return;
-        }
-        
-        // Atualiza contadores após transformação
-        updateLineCounts();
-        
-        // Feedback visual
-        showNotification(`Transformação aplicada com sucesso!`);
+    /* ========================================
+     * GERAR COMBINAÇÃO
+     * ======================================== */
+    generateButton.addEventListener('click', () => {
+      const text1 = input1.value.trim();
+      const text2 = input2.value.trim();
+      const prefix = prefixInput.value;
+      const suffix = suffixInput.value;
+      const divider = dividerInput.value;
+      
+      if (!text1 && !text2) {
+        showNotification('Por favor, insira texto em pelo menos um campo!', 'error');
+        return;
       }
-
-      /* ========================================
-       * FUNÇÃO: clearAll
-       * Descrição: Limpa todos os campos
-       * ======================================== */
-      function clearAll() {
-        if (confirm('Deseja limpar todos os campos?')) {
-          input1.value = '';
-          input2.value = '';
-          prefixInput.value = '';
-          suffixInput.value = '';
-          dividerInput.value = '';
-          output.innerHTML = '';
-          updateLineCounts();
-          showNotification('Todos os campos foram limpos!');
-        }
+      
+      const lines1 = text1.split('\n');
+      const lines2 = text2.split('\n');
+      const maxLines = Math.max(lines1.length, lines2.length);
+      
+      if (maxLines > 10000) {
+        processLargeFile(lines1, lines2, prefix, suffix, divider, maxLines);
+      } else {
+        processNormalFile(lines1, lines2, prefix, suffix, divider, maxLines);
       }
+    });
 
-      /* ========================================
-       * FUNÇÃO: showNotification
-       * Descrição: Mostra uma notificação temporária
-       * ======================================== */
-      function showNotification(message) {
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          background: linear-gradient(135deg, #28a745, #218838);
-          color: white;
-          padding: 12px 20px;
-          border-radius: 8px;
-          z-index: 999999;
-          font-size: 14px;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-          animation: slideInRight 0.3s ease;
-        `;
-        notification.textContent = message;
-        document.body.appendChild(notification);
+    function processNormalFile(lines1, lines2, prefix, suffix, divider, maxLines) {
+      output.innerHTML = '';
+      const fragment = document.createDocumentFragment();
+      
+      for (let i = 0; i < maxLines; i++) {
+        const line1 = lines1[i] ? lines1[i].trim() : '';
+        const line2 = lines2[i] ? lines2[i].trim() : '';
+        const combinedLine = `${prefix}${line1}${divider}${line2}${suffix}`;
         
-        setTimeout(() => {
-          notification.style.animation = 'fadeOut 0.3s ease';
-          setTimeout(() => notification.remove(), 300);
-        }, 2000);
+        const lineSpan = document.createElement('span');
+        lineSpan.className = 'line';
+        lineSpan.textContent = combinedLine;
+        fragment.appendChild(lineSpan);
       }
+      
+      output.appendChild(fragment);
+      updateOutputCount();
+      showNotification(`${maxLines.toLocaleString()} linhas geradas!`, 'success');
+    }
 
-      // Fechar modal ao clicar fora do diálogo
-      modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-          closeModal();
-        }
-      });
-
-      // Fechar modal com tecla ESC
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal.classList.contains('active')) {
-          closeModal();
-        }
-      });
-
-      /* ========================================
-       * EVENTO: Botão Nomes (API externa)
-       * ======================================== */
-      NomesButton.addEventListener('click', () => {
-        const myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-        const requestOptions = {
-          method: 'GET',
-          headers: myHeaders,
-          redirect: 'follow'
-        };
-        fetch("https://getpantry.cloud/apiv1/pantry/66d481b4-324a-4f06-9982-a1fad8751d36/basket/Nomes", requestOptions)
-          .then(response => response.json())
-          .then(result => {
-            const names = Object.values(result);
-            input1.value = names.join('\n');
-            input2.value = names.join('\n');
-            updateLineCounts();
-          })
-          .catch(error => console.error('Erro ao obter dados:', error));
-      });
-
-      /* ========================================
-       * EVENTO: Botão Gerar
-       * Descrição: Combina os textos dos dois campos
-       * Otimizado para arquivos grandes (50k+ linhas)
-       * ======================================== */
-      generateButton.addEventListener('click', () => {
-        const text1 = input1.value.trim();
-        const text2 = input2.value.trim();
-        const prefix = prefixInput.value;
-        const suffix = suffixInput.value;
-        const divider = dividerInput.value;
-        
-        if (!text1 && !text2) {
-          showNotification('Por favor, insira texto em pelo menos um campo!');
-          return;
-        }
-        
-        const lines1 = text1.split('\n');
-        const lines2 = text2.split('\n');
-        const maxLines = Math.max(lines1.length, lines2.length);
-        
-        // Para arquivos grandes, usar processamento em lotes
-        if (maxLines > 10000) {
-          processLargeFile(lines1, lines2, prefix, suffix, divider, maxLines);
-        } else {
-          processNormalFile(lines1, lines2, prefix, suffix, divider, maxLines);
-        }
-      });
-
-      /* ========================================
-       * FUNÇÃO: processNormalFile
-       * Descrição: Processa arquivos normais (< 10k linhas)
-       * ======================================== */
-      function processNormalFile(lines1, lines2, prefix, suffix, divider, maxLines) {
-        output.innerHTML = '';
+    function processLargeFile(lines1, lines2, prefix, suffix, divider, maxLines) {
+      const BATCH_SIZE = 5000;
+      let currentIndex = 0;
+      
+      output.innerHTML = '';
+      progressContainer.classList.add('active');
+      progressFill.style.width = '0%';
+      progressPercentage.textContent = '0%';
+      
+      function processBatch() {
         const fragment = document.createDocumentFragment();
+        const endIndex = Math.min(currentIndex + BATCH_SIZE, maxLines);
         
-        for (let i = 0; i < maxLines; i++) {
+        for (let i = currentIndex; i < endIndex; i++) {
           const line1 = lines1[i] ? lines1[i].trim() : '';
           const line2 = lines2[i] ? lines2[i].trim() : '';
           const combinedLine = `${prefix}${line1}${divider}${line2}${suffix}`;
           
-          const lineDiv = document.createElement('div');
-          const link = document.createElement('a');
-          link.textContent = combinedLine;
-          link.href = '#';
-          lineDiv.appendChild(link);
-          fragment.appendChild(lineDiv);
+          const lineSpan = document.createElement('span');
+          lineSpan.className = 'line';
+          lineSpan.textContent = combinedLine;
+          fragment.appendChild(lineSpan);
         }
         
         output.appendChild(fragment);
-        showNotification(`${maxLines.toLocaleString()} linhas geradas!`);
-      }
-
-      /* ========================================
-       * FUNÇÃO: processLargeFile
-       * Descrição: Processa arquivos grandes (> 10k linhas)
-       *            usando processamento assíncrono em lotes
-       * AJUSTE: Altere BATCH_SIZE para performance
-       * ======================================== */
-      function processLargeFile(lines1, lines2, prefix, suffix, divider, maxLines) {
-        const BATCH_SIZE = 5000; // AJUSTE: Linhas por lote
-        let currentIndex = 0;
+        currentIndex = endIndex;
         
-        output.innerHTML = '';
+        const progress = Math.round((currentIndex / maxLines) * 100);
+        progressFill.style.width = `${progress}%`;
+        progressPercentage.textContent = `${progress}%`;
+        progressText.textContent = `${currentIndex.toLocaleString()} / ${maxLines.toLocaleString()} linhas`;
+        
+        if (currentIndex < maxLines) {
+          requestAnimationFrame(processBatch);
+        } else {
+          progressContainer.classList.remove('active');
+          updateOutputCount();
+          showNotification(`${maxLines.toLocaleString()} linhas geradas!`, 'success');
+        }
+      }
+      
+      requestAnimationFrame(processBatch);
+    }
+
+    /* ========================================
+     * EXTRAIR URLs
+     * ======================================== */
+    filterUrlButton.addEventListener('click', () => {
+      const text1 = input1.value.trim();
+      const text2 = input2.value.trim();
+      const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+)/gi;
+      const urls1 = text1.match(urlRegex) || [];
+      const urls2 = text2.match(urlRegex) || [];
+      const combinedUrls = [...new Set([...urls1, ...urls2])];
+      
+      if (combinedUrls.length === 0) {
+        showNotification('Nenhuma URL encontrada!', 'error');
+        return;
+      }
+      
+      output.innerHTML = '';
+      const fragment = document.createDocumentFragment();
+      
+      combinedUrls.forEach(url => {
+        const lineSpan = document.createElement('span');
+        lineSpan.className = 'line';
+        const link = document.createElement('a');
+        link.textContent = url;
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        lineSpan.appendChild(link);
+        fragment.appendChild(lineSpan);
+      });
+      
+      output.appendChild(fragment);
+      updateOutputCount();
+      showNotification(`${combinedUrls.length} URLs extraídas!`, 'success');
+    });
+
+    /* ========================================
+     * COPIAR
+     * ======================================== */
+    copyButton.addEventListener('click', async () => {
+      const outputText = output.innerText;
+      if (outputText.trim() === '' || outputText.includes('O resultado aparecerá aqui')) {
+        showNotification('Nenhum resultado para copiar!', 'error');
+        return;
+      }
+      
+      try {
+        await navigator.clipboard.writeText(outputText);
+        copyButton.innerHTML = '<span>✅</span> Copiado!';
+        copyButton.classList.add('copied');
+        setTimeout(() => {
+          copyButton.innerHTML = '<span>📋</span> Copiar Resultado';
+          copyButton.classList.remove('copied');
+        }, 2000);
+      } catch (err) {
+        const tempTextArea = document.createElement('textarea');
+        tempTextArea.value = outputText;
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempTextArea);
+        copyButton.innerHTML = '<span>✅</span> Copiado!';
+        setTimeout(() => {
+          copyButton.innerHTML = '<span>📋</span> Copiar Resultado';
+        }, 2000);
+      }
+    });
+
+    /* ========================================
+     * CARREGAR ARQUIVO
+     * ======================================== */
+    loadFileButton.addEventListener('click', () => {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.txt,.csv,.log';
+      fileInput.multiple = true;
+      
+      fileInput.addEventListener('change', async () => {
+        const files = fileInput.files;
+        if (!files || files.length === 0) return;
+        
         progressContainer.classList.add('active');
         progressFill.style.width = '0%';
+        progressPercentage.textContent = '0%';
+        progressText.textContent = 'Carregando arquivos...';
         
-        function processBatch() {
-          const fragment = document.createDocumentFragment();
-          const endIndex = Math.min(currentIndex + BATCH_SIZE, maxLines);
+        let totalLoaded = 0;
+        const totalSize = Array.from(files).reduce((acc, f) => acc + f.size, 0);
+        const allTexts = [];
+        
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          progressText.textContent = `Carregando: ${file.name}`;
           
-          for (let i = currentIndex; i < endIndex; i++) {
-            const line1 = lines1[i] ? lines1[i].trim() : '';
-            const line2 = lines2[i] ? lines2[i].trim() : '';
-            const combinedLine = `${prefix}${line1}${divider}${line2}${suffix}`;
+          try {
+            const text = await readFileAsync(file, (loaded) => {
+              const progress = Math.round(((totalLoaded + loaded) / totalSize) * 100);
+              progressFill.style.width = `${progress}%`;
+              progressPercentage.textContent = `${progress}%`;
+            });
             
-            const lineDiv = document.createElement('div');
-            const link = document.createElement('a');
-            link.textContent = combinedLine;
-            link.href = '#';
-            lineDiv.appendChild(link);
-            fragment.appendChild(lineDiv);
-          }
-          
-          output.appendChild(fragment);
-          currentIndex = endIndex;
-          
-          const progress = Math.round((currentIndex / maxLines) * 100);
-          progressFill.style.width = `${progress}%`;
-          progressText.textContent = `Processando: ${currentIndex.toLocaleString()} / ${maxLines.toLocaleString()} linhas (${progress}%)`;
-          
-          if (currentIndex < maxLines) {
-            requestAnimationFrame(processBatch);
-          } else {
-            progressContainer.classList.remove('active');
-            showNotification(`${maxLines.toLocaleString()} linhas geradas!`);
+            allTexts.push(text);
+            totalLoaded += file.size;
+          } catch (error) {
+            console.error(`Erro ao carregar ${file.name}:`, error);
+            showNotification(`Erro ao carregar ${file.name}`, 'error');
           }
         }
         
-        requestAnimationFrame(processBatch);
-      }
-
-      /* ========================================
-       * EVENTO: Botão Extrair URL
-       * Descrição: Extrai URLs dos campos de texto
-       * ======================================== */
-      filterUrlButton.addEventListener('click', () => {
-        const text1 = input1.value.trim();
-        const text2 = input2.value.trim();
-        const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+)/gi;
-        const urls1 = text1.match(urlRegex) || [];
-        const urls2 = text2.match(urlRegex) || [];
-        const combinedUrls = [...new Set([...urls1, ...urls2])];
+        const combinedText = allTexts.join('\n');
+        input1.value = input1.value ? input1.value + '\n' + combinedText : combinedText;
         
-        if (combinedUrls.length === 0) {
-          showNotification('Nenhuma URL encontrada!');
-          return;
-        }
+        progressContainer.classList.remove('active');
+        updateLineCounts();
         
-        output.innerHTML = '';
-        const fragment = document.createDocumentFragment();
-        
-        combinedUrls.forEach(url => {
-          const lineDiv = document.createElement('div');
-          const link = document.createElement('a');
-          link.textContent = url;
-          link.href = url;
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-          lineDiv.appendChild(link);
-          fragment.appendChild(lineDiv);
-        });
-        
-        output.appendChild(fragment);
-        showNotification(`${combinedUrls.length} URLs extraídas!`);
+        const lineCount = combinedText.split('\n').length;
+        showNotification(`${files.length} arquivo(s) - ${lineCount.toLocaleString()} linhas!`, 'success');
       });
+      
+      fileInput.click();
+    });
 
-      /* ========================================
-       * EVENTO: Botão Copiar
-       * Descrição: Copia o conteúdo do output
-       * ======================================== */
-      copyButton.addEventListener('click', async () => {
-        const outputText = output.innerText;
-        if (outputText.trim() === '') {
-          showNotification('Nenhum resultado para copiar!');
-          return;
-        }
-        
-        try {
-          await navigator.clipboard.writeText(outputText);
-          copyButton.textContent = '✅ Copiado!';
-          copyButton.classList.add('copied');
-          setTimeout(() => {
-            copyButton.textContent = '📋 Copiar Resultado';
-            copyButton.classList.remove('copied');
-          }, 2000);
-        } catch (err) {
-          // Fallback para navegadores antigos
-          const tempTextArea = document.createElement('textarea');
-          tempTextArea.value = outputText;
-          document.body.appendChild(tempTextArea);
-          tempTextArea.select();
-          document.execCommand('copy');
-          document.body.removeChild(tempTextArea);
-          copyButton.textContent = '✅ Copiado!';
-          setTimeout(() => {
-            copyButton.textContent = '📋 Copiar Resultado';
-          }, 2000);
-        }
-      });
-
-      /* ========================================
-       * EVENTO: Botão Carregar Arquivo
-       * Descrição: Carrega arquivo(s) .txt para o campo 1
-       * Suporta arquivos grandes (50k+ linhas)
-       * AJUSTE: CHUNK_SIZE para performance em arquivos muito grandes
-       * ======================================== */
-      loadFileButton.addEventListener('click', () => {
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = '.txt,.csv,.log';
-        fileInput.multiple = true;
-        
-        fileInput.addEventListener('change', async () => {
-          const files = fileInput.files;
-          if (!files || files.length === 0) return;
-          
-          progressContainer.classList.add('active');
-          progressFill.style.width = '0%';
-          progressText.textContent = 'Carregando arquivos...';
-          
-          let totalLoaded = 0;
-          const totalSize = Array.from(files).reduce((acc, f) => acc + f.size, 0);
-          const allTexts = [];
-          
-          for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            progressText.textContent = `Carregando: ${file.name}`;
-            
-            try {
-              const text = await readFileAsync(file, (loaded) => {
-                const progress = Math.round(((totalLoaded + loaded) / totalSize) * 100);
-                progressFill.style.width = `${progress}%`;
-              });
-              
-              allTexts.push(text);
-              totalLoaded += file.size;
-            } catch (error) {
-              console.error(`Erro ao carregar ${file.name}:`, error);
-              showNotification(`Erro ao carregar ${file.name}`);
-            }
+    function readFileAsync(file, onProgress) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (e) => reject(e);
+        reader.onprogress = (e) => {
+          if (e.lengthComputable && onProgress) {
+            onProgress(e.loaded);
           }
-          
-          const combinedText = allTexts.join('\n');
-          input1.value = input1.value ? input1.value + '\n' + combinedText : combinedText;
-          
-          progressContainer.classList.remove('active');
-          updateLineCounts();
-          
-          const lineCount = combinedText.split('\n').length;
-          showNotification(`${files.length} arquivo(s) carregado(s) - ${lineCount.toLocaleString()} linhas!`);
-        });
-        
-        fileInput.click();
+        };
+        reader.readAsText(file);
       });
+    }
 
-      /* ========================================
-       * FUNÇÃO: readFileAsync
-       * Descrição: Lê arquivo de forma assíncrona
-       *            Otimizado para arquivos grandes
-       * ======================================== */
-      function readFileAsync(file, onProgress) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          
-          reader.onload = (e) => resolve(e.target.result);
-          reader.onerror = (e) => reject(e);
-          reader.onprogress = (e) => {
-            if (e.lengthComputable && onProgress) {
-              onProgress(e.loaded);
-            }
-          };
-          
-          reader.readAsText(file);
-        });
-      }
-
-      // CSS para animações adicionais
-      const style = document.createElement('style');
-      style.textContent = `
-        @keyframes slideInRight {
-          from { transform: translateX(100%); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes fadeOut {
-          from { opacity: 1; }
-          to { opacity: 0; }
-        }
-      `;
-      document.head.appendChild(style);
-
-      // Inicializar contadores
-      updateLineCounts();
-    </script>
-  </div>
+    // Inicializar
+    updateLineCounts();
+  </script>
 </body>
 </html>
