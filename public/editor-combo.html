@@ -870,91 +870,418 @@
       }
 
       .header {
-        padding: 20px 0;
+        padding: 20px 0 15px;
       }
 
       .header-title {
         font-size: 1.8rem;
       }
 
+      .header-subtitle {
+        font-size: 0.85rem;
+      }
+
       .main-card {
-        padding: 20px;
+        padding: 18px;
         border-radius: var(--radius-lg);
       }
 
+      .stats-bar {
+        gap: 10px;
+      }
+
+      .stat-item {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+      }
+
+      /* Mantém campos lado a lado */
       .fields-grid {
         grid-template-columns: 1fr 1fr;
         gap: 12px;
       }
 
-      .text-field {
-        height: 200px;
-        font-size: 0.85rem;
+      .field-label-text {
+        font-size: 0.75rem;
       }
 
+      .text-field {
+        height: 180px;
+        font-size: 0.8rem;
+        padding: 12px;
+      }
+
+      /* Inputs em linha */
       .inputs-row {
         grid-template-columns: 1fr 1fr 1fr;
         gap: 10px;
       }
 
+      .input-group-label {
+        font-size: 0.65rem;
+      }
+
+      .input-field {
+        padding: 12px;
+        font-size: 0.85rem;
+      }
+
+      /* Toolbar com scroll horizontal */
       .toolbar {
         overflow-x: auto;
         flex-wrap: nowrap;
         -webkit-overflow-scrolling: touch;
         padding: 12px;
+        gap: 8px;
+        scrollbar-width: thin;
+      }
+
+      .toolbar::-webkit-scrollbar {
+        height: 4px;
+      }
+
+      .toolbar::-webkit-scrollbar-thumb {
+        background: var(--border-primary);
+        border-radius: 2px;
       }
 
       .toolbar-group {
         flex-wrap: nowrap;
+        flex-shrink: 0;
+      }
+
+      .toolbar-divider {
+        margin: 0 4px;
       }
 
       .tool-btn {
         padding: 8px 12px;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+      }
+
+      .tool-btn-icon {
+        font-size: 0.9rem;
+      }
+
+      /* Botões de ação */
+      .action-buttons {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .action-btn {
+        padding: 14px 16px;
+        font-size: 0.85rem;
+      }
+
+      .action-btn-icon {
+        font-size: 1rem;
+      }
+
+      /* Output */
+      .output-field {
+        min-height: 150px;
+        max-height: 300px;
+        padding: 14px;
         font-size: 0.8rem;
       }
 
-      .action-buttons {
-        grid-template-columns: 1fr 1fr;
+      .copy-btn {
+        padding: 14px 20px;
+        font-size: 0.9rem;
+      }
+
+      /* Notificações */
+      .notification {
+        top: 12px;
+        right: 12px;
+        left: 12px;
+        padding: 12px 16px;
+        font-size: 0.85rem;
       }
     }
 
     /* ========================================
-     * RESPONSIVO - CELULARES
+     * RESPONSIVO - CELULARES (Mantém lado a lado)
      * ======================================== */
     @media (max-width: 480px) {
+      .app-container {
+        padding: 10px;
+      }
+
+      .header {
+        padding: 15px 0 12px;
+        margin-bottom: 15px;
+      }
+
       .header-title {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
+      }
+
+      .header-subtitle {
+        font-size: 0.8rem;
+      }
+
+      .header-badge {
+        padding: 4px 10px;
+        font-size: 0.65rem;
+        margin-top: 8px;
       }
 
       .main-card {
-        padding: 16px;
+        padding: 14px;
+        border-radius: var(--radius-md);
       }
 
+      /* Stats em linha com scroll */
       .stats-bar {
-        flex-direction: column;
+        flex-direction: row;
         gap: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+      }
+
+      .stat-item {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+        min-width: auto;
+      }
+
+      .stat-label {
+        font-size: 0.65rem;
+      }
+
+      .stat-value {
+        font-size: 0.8rem;
+      }
+
+      /* MANTÉM CAMPOS LADO A LADO */
+      .fields-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .field-label {
+        margin-bottom: 6px;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+
+      .field-label-text {
+        font-size: 0.7rem;
+      }
+
+      .field-label-text::before {
+        width: 2px;
+        height: 10px;
+      }
+
+      .field-counter {
+        font-size: 0.65rem;
+        padding: 3px 6px;
       }
 
       .text-field {
-        height: 160px;
+        height: 150px;
+        font-size: 0.75rem;
+        padding: 10px;
+        line-height: 1.5;
       }
 
+      /* Prefixo/Sufixo lado a lado, Divisor abaixo */
       .inputs-row {
         grid-template-columns: 1fr 1fr;
+        gap: 8px;
       }
 
       .inputs-row .input-group:last-child {
         grid-column: span 2;
       }
 
+      .input-group-label {
+        font-size: 0.6rem;
+        top: -6px;
+        left: 10px;
+        padding: 0 4px;
+      }
+
+      .input-field {
+        padding: 10px 12px;
+        font-size: 0.8rem;
+      }
+
+      /* Toolbar horizontal com scroll */
+      .toolbar {
+        padding: 10px;
+        gap: 6px;
+        margin-bottom: 15px;
+      }
+
+      .tool-btn {
+        padding: 7px 10px;
+        font-size: 0.7rem;
+        gap: 4px;
+      }
+
+      .tool-btn-icon {
+        font-size: 0.85rem;
+      }
+
+      .toolbar-divider {
+        margin: 0 3px;
+        min-height: 24px;
+      }
+
+      /* Botões lado a lado */
+      .action-buttons {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 15px;
+      }
+
       .action-btn {
-        padding: 14px 16px;
-        font-size: 0.9rem;
+        padding: 12px 10px;
+        font-size: 0.8rem;
+        gap: 6px;
+      }
+
+      .action-btn-icon {
+        font-size: 0.95rem;
+      }
+
+      /* Progress */
+      .progress-container {
+        padding: 12px;
+      }
+
+      .progress-title, .progress-percentage {
+        font-size: 0.8rem;
+      }
+
+      .progress-text {
+        font-size: 0.75rem;
+      }
+
+      /* Output */
+      .output-section {
+        margin-top: 18px;
+      }
+
+      .output-header {
+        margin-bottom: 10px;
+      }
+
+      .output-title {
+        font-size: 0.85rem;
+        gap: 6px;
+      }
+
+      .output-title::before {
+        width: 2px;
+        height: 12px;
+      }
+
+      .output-count {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+      }
+
+      .output-field {
+        min-height: 120px;
+        max-height: 250px;
+        padding: 12px;
+        font-size: 0.75rem;
+        line-height: 1.6;
+      }
+
+      .output-empty-icon {
+        font-size: 2rem;
+      }
+
+      .output-empty span:last-child {
+        font-size: 0.8rem;
+      }
+
+      .copy-btn {
+        margin-top: 12px;
+        padding: 12px 18px;
+        font-size: 0.85rem;
+      }
+
+      /* Modal */
+      .modal-overlay {
+        padding: 15px;
       }
 
       .modal-dialog {
-        padding: 20px;
+        padding: 18px;
         min-width: auto;
+        max-width: 100%;
+        border-radius: var(--radius-md);
+      }
+
+      .modal-header {
+        margin-bottom: 18px;
+      }
+
+      .modal-icon {
+        font-size: 2rem;
+        margin-bottom: 8px;
+      }
+
+      .modal-title {
+        font-size: 1rem;
+      }
+
+      .modal-subtitle {
+        font-size: 0.8rem;
+      }
+
+      .modal-options {
+        gap: 8px;
+        margin-bottom: 15px;
+      }
+
+      .modal-option-btn {
+        padding: 14px 16px;
+        font-size: 0.85rem;
+      }
+
+      .modal-cancel-btn {
+        padding: 12px;
+        font-size: 0.85rem;
+      }
+    }
+
+    /* ========================================
+     * RESPONSIVO - CELULARES MUITO PEQUENOS
+     * ======================================== */
+    @media (max-width: 360px) {
+      .header-title {
+        font-size: 1.2rem;
+      }
+
+      .text-field {
+        height: 130px;
+        font-size: 0.7rem;
+      }
+
+      .tool-btn {
+        padding: 6px 8px;
+        font-size: 0.65rem;
+      }
+
+      .action-btn {
+        padding: 10px 8px;
+        font-size: 0.75rem;
+      }
+
+      .output-field {
+        max-height: 200px;
+        font-size: 0.7rem;
       }
     }
 
