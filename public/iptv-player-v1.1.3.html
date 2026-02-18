@@ -266,6 +266,33 @@
     padding-top: 56.25%;
     background: #000;
     overflow: hidden;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Touch fullscreen indicator */
+  .video-container .touch-fullscreen-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    z-index: 200;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .video-container .touch-fullscreen-hint.show {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
   }
   #videoPlayer {
     position: absolute;
@@ -2153,80 +2180,6 @@
   .btn:active { transform: translateY(0); }
   *:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
   .video-placeholder h5 { opacity: .9; }
-
-  /* ========== EPG ABAIXO DO PLAYER ========== */
-  .player-epg-section {
-    background: linear-gradient(135deg, rgba(0,0,0,0.85), rgba(30,30,30,0.95));
-    border-top: 2px solid var(--primary-color);
-    padding: 0.6rem 1rem;
-    display: none;
-    animation: fadeIn 0.3s ease;
-  }
-  .player-epg-section.visible { display: block; }
-  .player-epg-channel {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.4rem;
-  }
-  .player-epg-channel-name {
-    font-weight: 700;
-    font-size: 0.85rem;
-    color: var(--primary-color);
-  }
-  .player-epg-live {
-    background: var(--primary-color);
-    color: #fff;
-    font-size: 0.6rem;
-    padding: 0.15rem 0.5rem;
-    border-radius: 0.3rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .player-epg-current, .player-epg-next {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.78rem;
-    color: #ddd;
-  }
-  .player-epg-next {
-    font-size: 0.72rem;
-    color: #aaa;
-    margin-top: 0.3rem;
-    padding-top: 0.3rem;
-    border-top: 1px dashed rgba(255,255,255,0.1);
-  }
-  .player-epg-current i, .player-epg-next i { color: var(--primary-color); font-size: 0.7rem; }
-  .player-epg-time {
-    margin-left: auto;
-    font-size: 0.65rem;
-    background: rgba(255,255,255,0.1);
-    padding: 0.1rem 0.4rem;
-    border-radius: 0.25rem;
-    white-space: nowrap;
-  }
-
-  /* ========== SCROLL SENTINEL ========== */
-  .scroll-sentinel {
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-  }
-  .scroll-sentinel .loading-spinner { width: 16px; height: 16px; border-width: 2px; margin-right: 0.5rem; }
-
-  /* ========== LOGOUT BUTTON ========== */
-  .header-btn.logout-btn { background: rgba(220,53,69,0.3); }
-  .header-btn.logout-btn:hover { background: rgba(220,53,69,0.5); }
-
-  @media (orientation: landscape) and (min-width: 768px) {
-    .player-epg-section { padding: 0.5rem 0.8rem; }
-    .player-epg-current, .player-epg-next { font-size: 0.72rem; }
-  }
 </style>
   <link rel="icon" href="/favicon.ico" />
   <link rel="canonical" href="/iptv-player-v7.html" />
@@ -2269,9 +2222,6 @@
         <button class="header-btn" id="addPlaylistBtn" title="Adicionar Playlist">
           <i class="fas fa-plus"></i>
         </button>
-        <button class="header-btn logout-btn" id="logoutBtn" title="Sair">
-          <i class="fas fa-sign-out-alt"></i>
-        </button>
       </div>
     </div>
 
@@ -2280,8 +2230,11 @@
       <!-- Video Section -->
       <div class="video-section">
         <!-- Video Player Container -->
-        <div class="video-container">
+        <div class="video-container" id="videoContainer">
           <video id="videoPlayer" class="video-js" controls preload="auto"></video>
+          <div class="touch-fullscreen-hint" id="touchFullscreenHint">
+            <i class="fas fa-expand"></i> Toque para tela cheia
+          </div>
 
           <!-- Logo padrão dentro do player no canto inferior esquerdo -->
           <img src="https://i.ibb.co/wYHRkPj/Text-Toos-Apk.png" alt="Logo Player" class="player-logo" id="playerLogo">
@@ -2339,25 +2292,6 @@
             <button class="control-btn" id="nextEpisodeBtn">
               Próximo <i class="fas fa-step-forward"></i>
             </button>
-          </div>
-        </div>
-
-        <!-- EPG Below Player Section -->
-        <div class="player-epg-section" id="playerEpgSection">
-          <div class="player-epg-channel">
-            <i class="fas fa-broadcast-tower"></i>
-            <span class="player-epg-channel-name" id="playerEpgChannelName">--</span>
-            <span class="player-epg-live">AO VIVO</span>
-          </div>
-          <div class="player-epg-current" id="playerEpgCurrent">
-            <i class="fas fa-play-circle"></i>
-            <span>Carregando programação...</span>
-          </div>
-          <div class="player-epg-next" id="playerEpgNext" style="display:none">
-            <i class="fas fa-clock"></i>
-            <span class="player-epg-next-label">A seguir:</span>
-            <span id="playerEpgNextTitle">--</span>
-            <span class="player-epg-time" id="playerEpgNextTime">--</span>
           </div>
         </div>
         
@@ -2861,16 +2795,6 @@ function loadPageBackground() {
         // EPG Cache - para armazenar dados do guia de programação
         this.epgCache = new Map();
         this.epgCacheExpiration = 5 * 60 * 1000; // 5 minutos
-
-        // MELHORIA: Cache global de busca (todos os itens carregados de todas as categorias)
-        this.globalSearchCache = { channels: [], movies: [], series: [] };
-        // MELHORIA: Controle de renderização em lotes (infinite scroll)
-        this.renderBatchSize = 60;
-        this.currentRenderCount = { channels: 0, movies: 0, series: 0 };
-        this.scrollObservers = {};
-        // MELHORIA: EPG refresh interval para player
-        this.playerEpgInterval = null;
-        this.currentPlayingChannel = null;
         
         this.config = {
           server: 'http://xonis.fun',
@@ -2952,6 +2876,9 @@ function loadPageBackground() {
           this.initPlayer();
           this.setupEventListeners();
           
+          // === USER IP + PLAYLIST JSON SYSTEM ===
+          await this.initUserRegistry();
+          
           await Promise.all([
             this.loadCategories(),
             this.loadMovieCategories(),
@@ -2960,8 +2887,6 @@ function loadPageBackground() {
           
           this.renderRadios();
           this.loadGames();
-          // MELHORIA: Verificar OttRun status
-          this.checkOttRunStatus();
         } catch (error) {
           console.error('Erro ao inicializar app:', error);
           this.showErrorOverlay('Erro ao inicializar aplicativo', () => this.init());
@@ -3007,6 +2932,101 @@ function loadPageBackground() {
             else if (this.currentRadio) this.playRadio(this.currentRadio);
           });
         });
+
+
+        // === TOUCH FULLSCREEN SYSTEM ===
+        this.setupTouchFullscreen();
+      }
+
+      setupTouchFullscreen() {
+        const videoContainer = document.getElementById('videoContainer');
+        const hint = document.getElementById('touchFullscreenHint');
+        let touchTimeout = null;
+        let lastTap = 0;
+        let hintShown = false;
+
+        // Show hint once when first content plays
+        this.player.on('play', () => {
+          if (!hintShown && 'ontouchstart' in window) {
+            hintShown = true;
+            hint.classList.add('show');
+            setTimeout(() => hint.classList.remove('show'), 3000);
+          }
+        });
+
+        // Double tap to fullscreen (prevents conflict with play/pause)
+        videoContainer.addEventListener('touchend', (e) => {
+          // Don't intercept clicks on controls
+          if (e.target.closest('.vjs-control-bar') || 
+              e.target.closest('.custom-controls') ||
+              e.target.closest('.radio-info-overlay') ||
+              e.target.closest('.player-logo')) return;
+
+          const now = Date.now();
+          const timeDiff = now - lastTap;
+          lastTap = now;
+
+          if (timeDiff < 300 && timeDiff > 0) {
+            // Double tap detected
+            e.preventDefault();
+            e.stopPropagation();
+            this.togglePlayerFullscreen();
+          }
+        }, { passive: false });
+
+        // Also handle single tap on the hint itself
+        hint.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.togglePlayerFullscreen();
+        });
+
+        // Listen for fullscreen changes
+        document.addEventListener('fullscreenchange', () => this.onFullscreenChange());
+        document.addEventListener('webkitfullscreenchange', () => this.onFullscreenChange());
+      }
+
+      togglePlayerFullscreen() {
+        const videoContainer = document.getElementById('videoContainer');
+        const videoEl = this.player.el();
+
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+          // Exit fullscreen
+          if (document.exitFullscreen) document.exitFullscreen();
+          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        } else {
+          // Enter fullscreen - try video element first (better mobile support)
+          const target = videoEl || videoContainer;
+          if (target.requestFullscreen) target.requestFullscreen();
+          else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+          else if (target.webkitEnterFullscreen) target.webkitEnterFullscreen(); // iOS
+        }
+      }
+
+      onFullscreenChange() {
+        const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+        const videoContainer = document.getElementById('videoContainer');
+        if (isFullscreen) {
+          videoContainer.style.paddingTop = '0';
+          videoContainer.style.height = '100vh';
+          videoContainer.style.position = 'fixed';
+          videoContainer.style.top = '0';
+          videoContainer.style.left = '0';
+          videoContainer.style.zIndex = '10000';
+          // Force landscape on mobile
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(() => {});
+          }
+        } else {
+          videoContainer.style.paddingTop = '';
+          videoContainer.style.height = '';
+          videoContainer.style.position = '';
+          videoContainer.style.top = '';
+          videoContainer.style.left = '';
+          videoContainer.style.zIndex = '';
+          if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
+          }
+        }
       }
 
       setupAdvancedPlayer(url, type) {
@@ -3211,9 +3231,6 @@ function loadPageBackground() {
         document.getElementById('closeErrorBtn').addEventListener('click', () => {
           document.getElementById('errorOverlay').style.display = 'none';
         });
-
-        // MELHORIA: Logout button
-        document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
       }
 
       showContentSection(contentType) {
@@ -3574,15 +3591,9 @@ function loadPageBackground() {
         }
         
         this.channels = channels;
-        // Add to global search content - accumulate across categories
-        this.allContent = this.allContent.filter(item => item.type !== 'channel' || !channels.find(c => c.id === item.id));
+        // Add to global search content
+        this.allContent = this.allContent.filter(item => item.type !== 'channel');
         this.allContent.push(...this.channels);
-        // MELHORIA: Acumula no cache global de busca
-        channels.forEach(ch => {
-          if (!this.globalSearchCache.channels.find(c => c.id === ch.id)) {
-            this.globalSearchCache.channels.push(ch);
-          }
-        });
         this.renderChannels();
       }
 
@@ -3620,14 +3631,8 @@ function loadPageBackground() {
         
         this.movies = movies;
         // Add to global search content
-        this.allContent = this.allContent.filter(item => item.type !== 'movie' || !movies.find(m => m.id === item.id));
+        this.allContent = this.allContent.filter(item => item.type !== 'movie');
         this.allContent.push(...this.movies);
-        // MELHORIA: Acumula no cache global de busca
-        movies.forEach(mv => {
-          if (!this.globalSearchCache.movies.find(m => m.id === mv.id)) {
-            this.globalSearchCache.movies.push(mv);
-          }
-        });
         this.renderMovies();
       }
 
@@ -3665,14 +3670,8 @@ function loadPageBackground() {
         
         this.series = series;
         // Add to global search content
-        this.allContent = this.allContent.filter(item => item.type !== 'series' || !series.find(s => s.id === item.id));
+        this.allContent = this.allContent.filter(item => item.type !== 'series');
         this.allContent.push(...this.series);
-        // MELHORIA: Acumula no cache global de busca
-        series.forEach(sr => {
-          if (!this.globalSearchCache.series.find(s => s.id === sr.id)) {
-            this.globalSearchCache.series.push(sr);
-          }
-        });
         this.renderSeries();
       }
 
@@ -3690,8 +3689,10 @@ function loadPageBackground() {
         }
 
         channelList.innerHTML = '';
-        this.currentRenderCount.channels = 0;
-        this._renderBatch('channels', channelList, this.channels, 'channel');
+        this.channels.forEach(channel => {
+          const item = this.createContentItem(channel, 'channel');
+          channelList.appendChild(item);
+        });
       }
 
       renderMovies() {
@@ -3708,8 +3709,10 @@ function loadPageBackground() {
         }
 
         movieList.innerHTML = '';
-        this.currentRenderCount.movies = 0;
-        this._renderBatch('movies', movieList, this.movies, 'movie');
+        this.movies.forEach(movie => {
+          const item = this.createContentItem(movie, 'movie');
+          movieList.appendChild(item);
+        });
       }
 
       renderSeries() {
@@ -3726,47 +3729,10 @@ function loadPageBackground() {
         }
 
         seriesList.innerHTML = '';
-        this.currentRenderCount.series = 0;
-        this._renderBatch('series', seriesList, this.series, 'series');
-      }
-
-      // MELHORIA: Renderização em lotes com IntersectionObserver (infinite scroll)
-      _renderBatch(key, container, items, type) {
-        // Disconnect previous observer
-        if (this.scrollObservers[key]) {
-          this.scrollObservers[key].disconnect();
-        }
-
-        const start = this.currentRenderCount[key];
-        const end = Math.min(start + this.renderBatchSize, items.length);
-
-        for (let i = start; i < end; i++) {
-          const item = this.createContentItem(items[i], type);
-          container.appendChild(item);
-        }
-        this.currentRenderCount[key] = end;
-
-        // Remove existing sentinel
-        const existingSentinel = container.querySelector('.scroll-sentinel');
-        if (existingSentinel) existingSentinel.remove();
-
-        // Add sentinel if more items exist
-        if (end < items.length) {
-          const sentinel = document.createElement('div');
-          sentinel.className = 'scroll-sentinel';
-          sentinel.innerHTML = `<div class="loading-spinner"></div> Carregando mais ${items.length - end} itens...`;
-          container.appendChild(sentinel);
-
-          const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
-              observer.disconnect();
-              this._renderBatch(key, container, items, type);
-            }
-          }, { rootMargin: '200px' });
-
-          observer.observe(sentinel);
-          this.scrollObservers[key] = observer;
-        }
+        this.series.forEach(series => {
+          const item = this.createContentItem(series, 'series');
+          seriesList.appendChild(item);
+        });
       }
 
       renderRadios() {
@@ -4229,8 +4195,6 @@ function loadPageBackground() {
             this.hideCustomControls();
             this.hideRadioInfo();
             this.hideRadioVisualDisplay();
-            // MELHORIA: Atualizar EPG abaixo do player
-            this.updatePlayerEPG(channel);
           } catch (error) {
             console.error('Erro ao reproduzir canal:', error);
             this.showErrorOverlay('Erro ao reproduzir canal', () => this.playChannel(channel));
@@ -4271,7 +4235,6 @@ function loadPageBackground() {
             this.hideCustomControls();
             this.hideRadioInfo();
             this.hideRadioVisualDisplay();
-            this.hidePlayerEPG();
           } catch (error) {
             console.error('Erro ao reproduzir filme:', error);
             this.showErrorOverlay('Erro ao reproduzir filme', () => this.playMovie(movie));
@@ -4682,7 +4645,6 @@ function loadPageBackground() {
             this.updateEpisodeNavigation();
             this.hideRadioInfo();
             this.hideRadioVisualDisplay();
-            this.hidePlayerEPG();
           } catch (error) {
             console.error('Erro ao reproduzir episódio:', error);
             this.showErrorOverlay('Erro ao reproduzir episódio', () => this.playEpisode(episode, index));
@@ -5176,30 +5138,32 @@ function loadPageBackground() {
         const searchRadios = document.getElementById('searchRadios').checked;
 
         let results = [];
-        const q = query.toLowerCase();
         
-        // MELHORIA: Busca GLOBAL usando cache acumulado de todas as categorias
+        // Search channels
         if (searchChannels) {
-          results.push(...this.globalSearchCache.channels.filter(item => 
-            item.name.toLowerCase().includes(q)
+          results.push(...this.channels.filter(item => 
+            item.name.toLowerCase().includes(query.toLowerCase())
           ));
         }
         
+        // Search movies
         if (searchMovies) {
-          results.push(...this.globalSearchCache.movies.filter(item => 
-            item.name.toLowerCase().includes(q)
+          results.push(...this.movies.filter(item => 
+            item.name.toLowerCase().includes(query.toLowerCase())
           ));
         }
         
+        // Search series
         if (searchSeries) {
-          results.push(...this.globalSearchCache.series.filter(item => 
-            item.name.toLowerCase().includes(q)
+          results.push(...this.series.filter(item => 
+            item.name.toLowerCase().includes(query.toLowerCase())
           ));
         }
         
+        // Search radios
         if (searchRadios) {
           results.push(...this.radios.filter(item => 
-            item.name.toLowerCase().includes(q)
+            item.name.toLowerCase().includes(query.toLowerCase())
           ));
         }
 
@@ -5284,6 +5248,9 @@ function loadPageBackground() {
           this.config = newConfig;
           this.saveConfig();
 
+          // === ATUALIZAR REGISTRO DO USUÁRIO COM NOVA PLAYLIST ===
+          await this.updateUserRegistry(url);
+
           const modal = bootstrap.Modal.getInstance(document.getElementById('playlistModal'));
           modal.hide();
           document.getElementById('playlistForm').reset();
@@ -5302,6 +5269,155 @@ function loadPageBackground() {
           console.error('Erro ao salvar playlist:', error);
           this.showError(error.message);
         }
+      }
+
+      // ========================================
+      // SISTEMA DE REGISTRO DE USUÁRIOS (IP + PLAYLIST JSON)
+      // ========================================
+      
+      async initUserRegistry() {
+        try {
+          // Buscar IP do usuário
+          this.userIP = await this.fetchUserIP();
+          
+          if (this.userIP) {
+            // Carregar registro existente
+            const registry = this.loadUserRegistry();
+            
+            // Atualizar com dados atuais
+            const playlistUrl = `${this.config.server}/get.php?username=${this.config.username}&password=${this.config.password}&type=m3u_plus&output=ts`;
+            
+            registry[this.userIP] = {
+              playlistUrl: playlistUrl,
+              server: this.config.server,
+              username: this.config.username,
+              lastAccess: new Date().toISOString(),
+              userAgent: navigator.userAgent,
+              screenResolution: `${screen.width}x${screen.height}`,
+              updatedAt: new Date().toISOString()
+            };
+            
+            // Salvar registro
+            this.saveUserRegistry(registry);
+            console.log('📋 Registro do usuário atualizado:', this.userIP);
+          }
+        } catch (error) {
+          console.error('Erro ao inicializar registro de usuário:', error);
+        }
+      }
+
+      async fetchUserIP() {
+        try {
+          // Tenta múltiplas APIs para obter o IP
+          const apis = [
+            'https://api.ipify.org?format=json',
+            'https://ipapi.co/json/',
+            'https://api.ip.sb/geoip'
+          ];
+          
+          for (const api of apis) {
+            try {
+              const response = await fetch(api, { timeout: 5000 });
+              if (response.ok) {
+                const data = await response.json();
+                return data.ip || data.query || null;
+              }
+            } catch (e) {
+              continue;
+            }
+          }
+          
+          // Fallback: gerar ID único baseado em fingerprint do navegador
+          return this.generateBrowserFingerprint();
+        } catch (error) {
+          console.error('Erro ao obter IP:', error);
+          return this.generateBrowserFingerprint();
+        }
+      }
+
+      generateBrowserFingerprint() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillText('fingerprint', 2, 2);
+        
+        const raw = [
+          navigator.userAgent,
+          navigator.language,
+          screen.width + 'x' + screen.height,
+          new Date().getTimezoneOffset(),
+          canvas.toDataURL()
+        ].join('|');
+        
+        // Simple hash
+        let hash = 0;
+        for (let i = 0; i < raw.length; i++) {
+          const char = raw.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash |= 0;
+        }
+        return 'fp_' + Math.abs(hash).toString(36);
+      }
+
+      loadUserRegistry() {
+        try {
+          const data = localStorage.getItem('iptv-user-registry');
+          return data ? JSON.parse(data) : {};
+        } catch (error) {
+          console.error('Erro ao carregar registro:', error);
+          return {};
+        }
+      }
+
+      saveUserRegistry(registry) {
+        try {
+          const jsonData = JSON.stringify(registry, null, 2);
+          localStorage.setItem('iptv-user-registry', jsonData);
+          
+          // Também salvar como "raw JSON" acessível para download
+          this.rawRegistryJSON = jsonData;
+          console.log('📁 Raw JSON do registro de usuários:\n', jsonData);
+        } catch (error) {
+          console.error('Erro ao salvar registro:', error);
+        }
+      }
+
+      async updateUserRegistry(newPlaylistUrl) {
+        try {
+          if (!this.userIP) {
+            this.userIP = await this.fetchUserIP();
+          }
+          
+          const registry = this.loadUserRegistry();
+          
+          registry[this.userIP] = {
+            playlistUrl: newPlaylistUrl,
+            server: this.config.server,
+            username: this.config.username,
+            lastAccess: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            screenResolution: `${screen.width}x${screen.height}`,
+            updatedAt: new Date().toISOString()
+          };
+          
+          this.saveUserRegistry(registry);
+          console.log('📋 Playlist atualizada no registro do usuário:', this.userIP);
+        } catch (error) {
+          console.error('Erro ao atualizar registro:', error);
+        }
+      }
+
+      // Exportar registro como arquivo JSON (pode ser chamado externamente)
+      exportUserRegistry() {
+        const registry = this.loadUserRegistry();
+        const blob = new Blob([JSON.stringify(registry, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'iptv-user-registry.json';
+        a.click();
+        URL.revokeObjectURL(url);
       }
 
       extractPlaylistInfo(url) {
@@ -5336,102 +5452,6 @@ function loadPageBackground() {
           }).catch(() => {
             this.showError('Não foi possível copiar o link');
           });
-        }
-      }
-
-      // MELHORIA: Função de logout
-      logout() {
-        if (confirm('Tem certeza que deseja sair?')) {
-          // Limpar configurações
-          localStorage.removeItem('iptv-config');
-          this.cache.clear();
-          this.globalSearchCache = { channels: [], movies: [], series: [] };
-          this.allContent = [];
-          // Parar player
-          if (this.player) {
-            this.player.pause();
-            this.player.src('');
-          }
-          if (this.hls) {
-            this.hls.destroy();
-            this.hls = null;
-          }
-          this.hidePlayerEPG();
-          // Recarregar página
-          window.location.reload();
-        }
-      }
-
-      // MELHORIA: Atualizar EPG abaixo do player
-      updatePlayerEPG(channel) {
-        this.currentPlayingChannel = channel;
-        const section = document.getElementById('playerEpgSection');
-        const channelName = document.getElementById('playerEpgChannelName');
-        const currentDiv = document.getElementById('playerEpgCurrent');
-        const nextDiv = document.getElementById('playerEpgNext');
-
-        channelName.textContent = channel.name;
-        section.classList.add('visible');
-        currentDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Carregando programação...';
-        nextDiv.style.display = 'none';
-
-        // Fetch EPG
-        this.fetchChannelEPG(channel.id).then(epgData => {
-          if (epgData && epgData.current) {
-            const startTime = this.formatEPGTime(epgData.current.start);
-            const endTime = this.formatEPGTime(epgData.current.end);
-            currentDiv.innerHTML = `
-              <i class="fas fa-play-circle"></i>
-              <span>${epgData.current.title}</span>
-              <span class="player-epg-time">${startTime} - ${endTime}</span>
-            `;
-            if (epgData.next) {
-              const nextStart = this.formatEPGTime(epgData.next.start);
-              document.getElementById('playerEpgNextTitle').textContent = epgData.next.title;
-              document.getElementById('playerEpgNextTime').textContent = nextStart;
-              nextDiv.style.display = 'flex';
-            }
-          } else {
-            currentDiv.innerHTML = '<i class="fas fa-info-circle"></i> Programação não disponível';
-          }
-        });
-
-        // Refresh EPG every 5 minutes
-        if (this.playerEpgInterval) clearInterval(this.playerEpgInterval);
-        this.playerEpgInterval = setInterval(() => {
-          if (this.currentPlayingChannel) {
-            this.updatePlayerEPG(this.currentPlayingChannel);
-          }
-        }, 5 * 60 * 1000);
-      }
-
-      hidePlayerEPG() {
-        const section = document.getElementById('playerEpgSection');
-        if (section) section.classList.remove('visible');
-        if (this.playerEpgInterval) {
-          clearInterval(this.playerEpgInterval);
-          this.playerEpgInterval = null;
-        }
-        this.currentPlayingChannel = null;
-      }
-
-      // MELHORIA: Integração OttRun API para verificar mensagens/status
-      async checkOttRunStatus() {
-        if (!this.config.username) return;
-        try {
-          const url = `https://api01.ottrun.com/api2/ApiIPTV.php?tag=msg&aid=10&userid=${encodeURIComponent(this.config.username)}`;
-          const response = await fetch(url, {
-            headers: { 'Accept': 'application/json' }
-          });
-          if (response.ok) {
-            const data = await response.json();
-            if (data && data.message) {
-              this.showToast(data.message, 'info');
-            }
-            console.log('OttRun status:', data);
-          }
-        } catch (e) {
-          console.log('OttRun API não disponível:', e.message);
         }
       }
 
