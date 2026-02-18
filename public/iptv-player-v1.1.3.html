@@ -266,63 +266,13 @@
     padding-top: 56.25%;
     background: #000;
     overflow: hidden;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
   }
-  
-  /* Touch fullscreen indicator */
-  .video-container .touch-fullscreen-hint {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    background: rgba(0,0,0,0.7);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 30px;
-    font-size: 0.85rem;
-    z-index: 200;
-    pointer-events: none;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    opacity: 0;
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .video-container .touch-fullscreen-hint.show {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-  #videoPlayer,
-  #videoPlayer video,
-  #videoPlayer .vjs-tech {
+  #videoPlayer {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain !important;
-    background: #000;
-  }
-  
-  /* Player fullscreen mode - via CSS class (not inline styles) */
-  .video-container.player-fullscreen {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    padding-top: 0 !important;
-    z-index: 10000 !important;
-    background: #000 !important;
-  }
-  .video-container.player-fullscreen #videoPlayer,
-  .video-container.player-fullscreen #videoPlayer video,
-  .video-container.player-fullscreen #videoPlayer .vjs-tech {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain !important;
+    width: 100%;
+    height: 100%;
   }
   
   /* Logo inside player */
@@ -2203,6 +2153,34 @@
   .btn:active { transform: translateY(0); }
   *:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
   .video-placeholder h5 { opacity: .9; }
+
+  /* ===== MELHORIA: Proporção correta do vídeo ===== */
+  #videoPlayer video,
+  #videoPlayer .vjs-tech {
+    object-fit: contain !important;
+  }
+
+  /* ===== MELHORIA: Player Fullscreen dedicado (touch) ===== */
+  .video-container.player-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    padding-top: 0 !important;
+    z-index: 10000 !important;
+    background: #000 !important;
+  }
+  .video-container.player-fullscreen #videoPlayer,
+  .video-container.player-fullscreen #videoPlayer video,
+  .video-container.player-fullscreen #videoPlayer .vjs-tech {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+  }
 </style>
   <link rel="icon" href="/favicon.ico" />
   <link rel="canonical" href="/iptv-player-v7.html" />
@@ -2253,11 +2231,8 @@
       <!-- Video Section -->
       <div class="video-section">
         <!-- Video Player Container -->
-        <div class="video-container" id="videoContainer">
+        <div class="video-container">
           <video id="videoPlayer" class="video-js" controls preload="auto"></video>
-          <div class="touch-fullscreen-hint" id="touchFullscreenHint">
-            <i class="fas fa-expand"></i> Toque para tela cheia
-          </div>
 
           <!-- Logo padrão dentro do player no canto inferior esquerdo -->
           <img src="https://i.ibb.co/wYHRkPj/Text-Toos-Apk.png" alt="Logo Player" class="player-logo" id="playerLogo">
@@ -2898,9 +2873,7 @@ function loadPageBackground() {
           this.loadWatchProgress();
           this.initPlayer();
           this.setupEventListeners();
-          
-          // === USER IP + PLAYLIST JSON SYSTEM ===
-          await this.initUserRegistry();
+          this.setupPlayerTouchFullscreen(); // MELHORIA: Touch fullscreen do player
           
           await Promise.all([
             this.loadCategories(),
@@ -2914,6 +2887,50 @@ function loadPageBackground() {
           console.error('Erro ao inicializar app:', error);
           this.showErrorOverlay('Erro ao inicializar aplicativo', () => this.init());
         }
+      }
+
+      /* ===== MELHORIA: Touch Fullscreen dedicado do Player ===== */
+      setupPlayerTouchFullscreen() {
+        const videoContainer = document.getElementById('videoContainer');
+        if (!videoContainer) return;
+
+        let isPlayerFullscreen = false;
+
+        const enterPlayerFullscreen = () => {
+          videoContainer.classList.add('player-fullscreen');
+          isPlayerFullscreen = true;
+          // Tentar bloquear orientação paisagem em mobile
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(() => {});
+          }
+        };
+
+        const exitPlayerFullscreen = () => {
+          videoContainer.classList.remove('player-fullscreen');
+          isPlayerFullscreen = false;
+          if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
+          }
+        };
+
+        // 1 toque no player = toggle fullscreen do player
+        videoContainer.addEventListener('touchend', (e) => {
+          // Ignorar se tocou em controles do Video.js
+          if (e.target.closest('.vjs-control-bar') || e.target.closest('.vjs-big-play-button')) return;
+
+          if (isPlayerFullscreen) {
+            exitPlayerFullscreen();
+          } else {
+            enterPlayerFullscreen();
+          }
+        }, { passive: true });
+
+        // ESC para sair do fullscreen do player
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && isPlayerFullscreen) {
+            exitPlayerFullscreen();
+          }
+        });
       }
 
       initPlayer() {
@@ -2955,99 +2972,6 @@ function loadPageBackground() {
             else if (this.currentRadio) this.playRadio(this.currentRadio);
           });
         });
-
-
-        // === TOUCH FULLSCREEN SYSTEM ===
-        this.setupTouchFullscreen();
-      }
-
-      setupTouchFullscreen() {
-        const videoContainer = document.getElementById('videoContainer');
-        const hint = document.getElementById('touchFullscreenHint');
-        let touchTimeout = null;
-        let lastTap = 0;
-        let hintShown = false;
-
-        // Show hint once when first content plays
-        this.player.on('play', () => {
-          if (!hintShown && 'ontouchstart' in window) {
-            hintShown = true;
-            hint.classList.add('show');
-            setTimeout(() => hint.classList.remove('show'), 3000);
-          }
-        });
-
-        // Double tap to fullscreen (prevents conflict with play/pause)
-        videoContainer.addEventListener('touchend', (e) => {
-          // Don't intercept clicks on controls
-          if (e.target.closest('.vjs-control-bar') || 
-              e.target.closest('.custom-controls') ||
-              e.target.closest('.radio-info-overlay') ||
-              e.target.closest('.player-logo')) return;
-
-          const now = Date.now();
-          const timeDiff = now - lastTap;
-          lastTap = now;
-
-          if (timeDiff < 300 && timeDiff > 0) {
-            // Double tap detected
-            e.preventDefault();
-            e.stopPropagation();
-            this.togglePlayerFullscreen();
-          }
-        }, { passive: false });
-
-        // Also handle single tap on the hint itself
-        hint.addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.togglePlayerFullscreen();
-        });
-
-        // Listen for fullscreen changes
-        document.addEventListener('fullscreenchange', () => this.onFullscreenChange());
-        document.addEventListener('webkitfullscreenchange', () => this.onFullscreenChange());
-      }
-
-      togglePlayerFullscreen() {
-        const videoContainer = document.getElementById('videoContainer');
-
-        if (document.fullscreenElement || document.webkitFullscreenElement) {
-          // Exit fullscreen
-          if (document.exitFullscreen) document.exitFullscreen();
-          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-        } else {
-          // Enter fullscreen on the CONTAINER (preserves aspect ratio via object-fit: contain)
-          const target = videoContainer;
-          if (target.requestFullscreen) target.requestFullscreen();
-          else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
-          else if (target.webkitEnterFullscreen) target.webkitEnterFullscreen(); // iOS
-          
-          // iOS fallback: try native video fullscreen
-          if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-            const videoEl = this.player.el().querySelector('video');
-            if (videoEl && videoEl.webkitEnterFullscreen) {
-              videoEl.webkitEnterFullscreen();
-            }
-          }
-        }
-      }
-
-      onFullscreenChange() {
-        const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-        const videoContainer = document.getElementById('videoContainer');
-        
-        if (isFullscreen) {
-          videoContainer.classList.add('player-fullscreen');
-          // Force landscape on mobile
-          if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('landscape').catch(() => {});
-          }
-        } else {
-          videoContainer.classList.remove('player-fullscreen');
-          if (screen.orientation && screen.orientation.unlock) {
-            screen.orientation.unlock();
-          }
-        }
       }
 
       setupAdvancedPlayer(url, type) {
@@ -5269,9 +5193,6 @@ function loadPageBackground() {
           this.config = newConfig;
           this.saveConfig();
 
-          // === ATUALIZAR REGISTRO DO USUÁRIO COM NOVA PLAYLIST ===
-          await this.updateUserRegistry(url);
-
           const modal = bootstrap.Modal.getInstance(document.getElementById('playlistModal'));
           modal.hide();
           document.getElementById('playlistForm').reset();
@@ -5290,155 +5211,6 @@ function loadPageBackground() {
           console.error('Erro ao salvar playlist:', error);
           this.showError(error.message);
         }
-      }
-
-      // ========================================
-      // SISTEMA DE REGISTRO DE USUÁRIOS (IP + PLAYLIST JSON)
-      // ========================================
-      
-      async initUserRegistry() {
-        try {
-          // Buscar IP do usuário
-          this.userIP = await this.fetchUserIP();
-          
-          if (this.userIP) {
-            // Carregar registro existente
-            const registry = this.loadUserRegistry();
-            
-            // Atualizar com dados atuais
-            const playlistUrl = `${this.config.server}/get.php?username=${this.config.username}&password=${this.config.password}&type=m3u_plus&output=ts`;
-            
-            registry[this.userIP] = {
-              playlistUrl: playlistUrl,
-              server: this.config.server,
-              username: this.config.username,
-              lastAccess: new Date().toISOString(),
-              userAgent: navigator.userAgent,
-              screenResolution: `${screen.width}x${screen.height}`,
-              updatedAt: new Date().toISOString()
-            };
-            
-            // Salvar registro
-            this.saveUserRegistry(registry);
-            console.log('📋 Registro do usuário atualizado:', this.userIP);
-          }
-        } catch (error) {
-          console.error('Erro ao inicializar registro de usuário:', error);
-        }
-      }
-
-      async fetchUserIP() {
-        try {
-          // Tenta múltiplas APIs para obter o IP
-          const apis = [
-            'https://api.ipify.org?format=json',
-            'https://ipapi.co/json/',
-            'https://api.ip.sb/geoip'
-          ];
-          
-          for (const api of apis) {
-            try {
-              const response = await fetch(api, { timeout: 5000 });
-              if (response.ok) {
-                const data = await response.json();
-                return data.ip || data.query || null;
-              }
-            } catch (e) {
-              continue;
-            }
-          }
-          
-          // Fallback: gerar ID único baseado em fingerprint do navegador
-          return this.generateBrowserFingerprint();
-        } catch (error) {
-          console.error('Erro ao obter IP:', error);
-          return this.generateBrowserFingerprint();
-        }
-      }
-
-      generateBrowserFingerprint() {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.textBaseline = 'top';
-        ctx.font = '14px Arial';
-        ctx.fillText('fingerprint', 2, 2);
-        
-        const raw = [
-          navigator.userAgent,
-          navigator.language,
-          screen.width + 'x' + screen.height,
-          new Date().getTimezoneOffset(),
-          canvas.toDataURL()
-        ].join('|');
-        
-        // Simple hash
-        let hash = 0;
-        for (let i = 0; i < raw.length; i++) {
-          const char = raw.charCodeAt(i);
-          hash = ((hash << 5) - hash) + char;
-          hash |= 0;
-        }
-        return 'fp_' + Math.abs(hash).toString(36);
-      }
-
-      loadUserRegistry() {
-        try {
-          const data = localStorage.getItem('iptv-user-registry');
-          return data ? JSON.parse(data) : {};
-        } catch (error) {
-          console.error('Erro ao carregar registro:', error);
-          return {};
-        }
-      }
-
-      saveUserRegistry(registry) {
-        try {
-          const jsonData = JSON.stringify(registry, null, 2);
-          localStorage.setItem('iptv-user-registry', jsonData);
-          
-          // Também salvar como "raw JSON" acessível para download
-          this.rawRegistryJSON = jsonData;
-          console.log('📁 Raw JSON do registro de usuários:\n', jsonData);
-        } catch (error) {
-          console.error('Erro ao salvar registro:', error);
-        }
-      }
-
-      async updateUserRegistry(newPlaylistUrl) {
-        try {
-          if (!this.userIP) {
-            this.userIP = await this.fetchUserIP();
-          }
-          
-          const registry = this.loadUserRegistry();
-          
-          registry[this.userIP] = {
-            playlistUrl: newPlaylistUrl,
-            server: this.config.server,
-            username: this.config.username,
-            lastAccess: new Date().toISOString(),
-            userAgent: navigator.userAgent,
-            screenResolution: `${screen.width}x${screen.height}`,
-            updatedAt: new Date().toISOString()
-          };
-          
-          this.saveUserRegistry(registry);
-          console.log('📋 Playlist atualizada no registro do usuário:', this.userIP);
-        } catch (error) {
-          console.error('Erro ao atualizar registro:', error);
-        }
-      }
-
-      // Exportar registro como arquivo JSON (pode ser chamado externamente)
-      exportUserRegistry() {
-        const registry = this.loadUserRegistry();
-        const blob = new Blob([JSON.stringify(registry, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'iptv-user-registry.json';
-        a.click();
-        URL.revokeObjectURL(url);
       }
 
       extractPlaylistInfo(url) {
