@@ -300,8 +300,28 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    background: #000;
+  }
+  
+  /* Player fullscreen mode - via CSS class (not inline styles) */
+  .video-container.player-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    padding-top: 0 !important;
+    z-index: 10000 !important;
+    background: #000 !important;
+  }
+  .video-container.player-fullscreen #videoPlayer,
+  .video-container.player-fullscreen #videoPlayer video,
+  .video-container.player-fullscreen #videoPlayer .vjs-tech {
+    width: 100% !important;
+    height: 100% !important;
     object-fit: contain !important;
   }
   
@@ -2990,42 +3010,40 @@ function loadPageBackground() {
 
       togglePlayerFullscreen() {
         const videoContainer = document.getElementById('videoContainer');
-        const videoEl = this.player.el();
 
         if (document.fullscreenElement || document.webkitFullscreenElement) {
           // Exit fullscreen
           if (document.exitFullscreen) document.exitFullscreen();
           else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
         } else {
-          // Enter fullscreen - try video element first (better mobile support)
-          const target = videoEl || videoContainer;
+          // Enter fullscreen on the CONTAINER (preserves aspect ratio via object-fit: contain)
+          const target = videoContainer;
           if (target.requestFullscreen) target.requestFullscreen();
           else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
           else if (target.webkitEnterFullscreen) target.webkitEnterFullscreen(); // iOS
+          
+          // iOS fallback: try native video fullscreen
+          if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            const videoEl = this.player.el().querySelector('video');
+            if (videoEl && videoEl.webkitEnterFullscreen) {
+              videoEl.webkitEnterFullscreen();
+            }
+          }
         }
       }
 
       onFullscreenChange() {
         const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
         const videoContainer = document.getElementById('videoContainer');
+        
         if (isFullscreen) {
-          videoContainer.style.paddingTop = '0';
-          videoContainer.style.height = '100vh';
-          videoContainer.style.position = 'fixed';
-          videoContainer.style.top = '0';
-          videoContainer.style.left = '0';
-          videoContainer.style.zIndex = '10000';
+          videoContainer.classList.add('player-fullscreen');
           // Force landscape on mobile
           if (screen.orientation && screen.orientation.lock) {
             screen.orientation.lock('landscape').catch(() => {});
           }
         } else {
-          videoContainer.style.paddingTop = '';
-          videoContainer.style.height = '';
-          videoContainer.style.position = '';
-          videoContainer.style.top = '';
-          videoContainer.style.left = '';
-          videoContainer.style.zIndex = '';
+          videoContainer.classList.remove('player-fullscreen');
           if (screen.orientation && screen.orientation.unlock) {
             screen.orientation.unlock();
           }
