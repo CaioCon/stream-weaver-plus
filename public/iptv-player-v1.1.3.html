@@ -294,12 +294,15 @@
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
-  #videoPlayer {
+  #videoPlayer,
+  #videoPlayer video,
+  #videoPlayer .vjs-tech {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    object-fit: contain !important;
   }
   
   /* Logo inside player */
