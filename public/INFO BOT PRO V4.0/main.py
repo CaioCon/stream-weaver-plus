@@ -11,6 +11,7 @@
 #   grupo.py       → Funções de grupos e varredura
 #   pagina.py      → Paginação
 #   botoes.py      → Botões inline
+#   migrador.py    → Migrador IPTV (estado per-user)
 #   aplicativo.py  → API_ID, API_HASH, PHONE
 #   token.json     → Token do bot
 #
@@ -37,9 +38,17 @@ from grupo import (
 from botoes import (
     menu_principal_buttons, voltar_button, perfil_buttons,
     perfil_com_api_buttons, resultado_multiplo_buttons,
+    migrador_controle_buttons, migrador_resultados_buttons,
     set_owner, is_admin
 )
 from pagina import paginar_buttons, paginar_lista, ITEMS_PER_PAGE
+from migrador import (
+    EstadoMigracao, obter_migracao, registrar_migracao, remover_migracao,
+    executar_migracao, registrar_usuario_interacao,
+    extrair_cpf, extrair_credenciais, detectar_formato_resposta,
+    formatar_cabecalho_migracao, formatar_pagina_resultados,
+    carregar_hosts
+)
 
 # ── Configurações ──
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -132,6 +141,7 @@ async def cmd_start(event):
 👑 **Descubra** grupos como admin
 🚫 **Verifique** bans registrados
 🧵 **Threads** atualizando em tempo real
+🔄 **Migrador IPTV** integrado
 {user_info}
 
 ━━━━━━━━━━━━━━━━━━━━━
@@ -207,6 +217,58 @@ async def cmd_buscar_text(event):
     else:
         text = f"🔍 **{len(results)} resultados para** `{query}`:\n\n"
         await event.reply(text, parse_mode='md', buttons=resultado_multiplo_buttons(results))
+
+
+# ══════════════════════════════════════════════
+# 🔄  COMANDO /migrar DIRETO
+# ══════════════════════════════════════════════
+
+@bot.on(events.NewMessage(pattern=r'/migrar\s+(.+)'))
+async def cmd_migrar_direto(event):
+    """Inicia migração IPTV diretamente via comando."""
+    await registrar_interacao(event)
+    sender = await event.get_sender()
+    texto = event.pattern_match.group(1).strip()
+
+    if ":" not in texto:
+        await event.reply(
+            "❌ **Formato inválido.**\nUse: `/migrar user:pass`",
+            parse_mode='md'
+        )
+        return
+
+    user, pwd = texto.split(":", 1)
+    user = user.strip()
+    pwd = pwd.strip()
+
+    if not user or not pwd:
+        await event.reply("❌ **Credenciais vazias.**", parse_mode='md')
+        return
+
+    # Verifica se já tem migração ativa
+    estado_existente = obter_migracao(sender.id)
+    if estado_existente:
+        await event.reply(
+            "⚠️ **Você já tem uma migração em andamento!**\n\n"
+            "Use os botões para parar antes de iniciar outra.",
+            parse_mode='md'
+        )
+        return
+
+    nome = f"{sender.first_name or ''} {sender.last_name or ''}".strip() or "Sem nome"
+    username_tg = f"@{sender.username}" if sender.username else "Nenhum"
+
+    estado = EstadoMigracao(
+        user_id=sender.id,
+        username=user,
+        password=pwd,
+        user_name=nome,
+        user_username=username_tg
+    )
+    estado.chat_id = event.chat_id
+
+    registrar_usuario_interacao(sender.id, nome, username_tg, f"Migração iniciada: {user}:***")
+    asyncio.create_task(executar_migracao(bot, estado))
 
 
 # ══════════════════════════════════════════════
@@ -402,8 +464,7 @@ async def callback_handler(event):
                 f"🔄 Varredura: **{SCAN_INTERVAL // 60} min** | "
                 f"🧵 Threads: **{THREAD_SCAN_INTERVAL // 60} min** "
                 f"({'✅' if grupo.thread_scan_active else '❌'})\n"
-                f"📜 Máx hist: **{MAX_HISTORY}** | 📄 Pág: **{ITEMS_PER_PAGE}**\n"
-                f"💾 `{FILE_PATH}` | `{GROUPS_DB_PATH}`",
+                f"📜 Máx hist: **{MAX_HISTORY}** | 📄 Pág: **{ITEMS_PER_PAGE}**",
                 parse_mode='md', buttons=voltar_button()
             )
 
@@ -418,11 +479,123 @@ async def callback_handler(event):
                 f"• 👑 Detecção admins + 🚫 Registro bans\n"
                 f"• 📜 Histórico paginado + 📤 Exportação\n"
                 f"• 🆔 Auto-registro de usuários\n"
-                f"• 🔄 Detecção de entradas/saídas de grupos\n\n"
+                f"• 🔄 Detecção de entradas/saídas de grupos\n"
+                f"• 🔄 **Migrador IPTV** com estado por usuário\n\n"
                 f"⚡ Telethon asyncio | 💾 JSON persistente | 🛡️ Anti-flood\n\n"
                 f"👨‍💻 **Edivaldo Silva** @Edkd1 | v{BOT_VERSION}",
                 parse_mode='md', buttons=voltar_button()
             )
+
+        # ══════════════════════════════════════
+        # 🔄  MIGRADOR IPTV — CALLBACKS
+        # ══════════════════════════════════════
+
+        elif data == "cmd_migrador":
+            await event.answer()
+            hosts = carregar_hosts()
+            estado = obter_migracao(sender_id)
+            status_txt = "🟢 Disponível"
+            if estado:
+                status_txt = f"🔄 {estado.status.upper()} — {estado.progresso}%"
+
+            await message.edit(
+                f"╔══════════════════════════════╗\n"
+                f"║  🔄 **MIGRADOR IPTV PRO**       ║\n"
+                f"╚══════════════════════════════╝\n\n"
+                f"⚙️ **Status:** {status_txt}\n\n"
+                f"━━━━━━━━━━━━━━━━━━━━━\n"
+                f"📝 **Como usar:**\n\n"
+                f"1️⃣ Responda uma mensagem minha com `user:pass`\n"
+                f"2️⃣ Ou use: `/migrar user:pass`\n\n"
+                f"💡 _Cada usuário tem sua própria sessão isolada_\n"
+                f"━━━━━━━━━━━━━━━━━━━━━\n"
+                f"_👨‍💻 @Edkd1 | v{BOT_VERSION}_",
+                parse_mode='md',
+                buttons=voltar_button()
+            )
+
+        # ── Pausar migração ──
+        elif data.startswith("migra_pause_"):
+            uid_migra = int(data.replace("migra_pause_", ""))
+            if uid_migra != sender_id and not is_admin(sender_id):
+                await event.answer("🔒 Apenas o próprio usuário.", alert=True)
+                return
+            estado = obter_migracao(uid_migra)
+            if estado and estado.status == "executando":
+                estado.pausar()
+                await event.answer("⏸️ Migração pausada!", alert=True)
+                try:
+                    await message.edit(
+                        formatar_cabecalho_migracao(estado),
+                        parse_mode='md',
+                        buttons=migrador_controle_buttons(uid_migra)
+                    )
+                except Exception:
+                    pass
+            else:
+                await event.answer("⚠️ Nenhuma migração ativa.", alert=True)
+
+        # ── Continuar migração ──
+        elif data.startswith("migra_resume_"):
+            uid_migra = int(data.replace("migra_resume_", ""))
+            if uid_migra != sender_id and not is_admin(sender_id):
+                await event.answer("🔒 Apenas o próprio usuário.", alert=True)
+                return
+            estado = obter_migracao(uid_migra)
+            if estado and estado.status == "pausado":
+                estado.continuar()
+                await event.answer("▶️ Migração retomada!", alert=True)
+                try:
+                    await message.edit(
+                        formatar_cabecalho_migracao(estado),
+                        parse_mode='md',
+                        buttons=migrador_controle_buttons(uid_migra)
+                    )
+                except Exception:
+                    pass
+            else:
+                await event.answer("⚠️ Nada para retomar.", alert=True)
+
+        # ── Parar migração ──
+        elif data.startswith("migra_stop_"):
+            uid_migra = int(data.replace("migra_stop_", ""))
+            if uid_migra != sender_id and not is_admin(sender_id):
+                await event.answer("🔒 Apenas o próprio usuário.", alert=True)
+                return
+            estado = obter_migracao(uid_migra)
+            if estado:
+                estado.parar()
+                await event.answer("⏹️ Migração parada!", alert=True)
+                try:
+                    await message.edit(
+                        formatar_cabecalho_migracao(estado),
+                        parse_mode='md',
+                        buttons=migrador_controle_buttons(uid_migra)
+                    )
+                except Exception:
+                    pass
+            else:
+                await event.answer("⚠️ Nenhuma migração ativa.", alert=True)
+
+        # ── Resultados paginados da migração ──
+        elif data.startswith("migra_res_"):
+            parts = data.split("_")
+            # migra_res_{uid}_{page}
+            uid_migra = int(parts[2])
+            page = int(parts[3]) if len(parts) > 3 else 0
+            estado = obter_migracao(uid_migra)
+            if estado and estado.resultados:
+                text, page, total_pages = formatar_pagina_resultados(estado, page)
+                await message.edit(
+                    text, parse_mode='md',
+                    buttons=migrador_resultados_buttons(uid_migra, page, total_pages)
+                )
+            else:
+                await event.answer("📋 Sem resultados.", alert=True)
+
+        # ══════════════════════════════════════
+        # 👤  PERFIS — CALLBACKS (PRESERVADOS)
+        # ══════════════════════════════════════
 
         elif data.startswith("profile_"):
             uid = data.replace("profile_", "")
@@ -562,8 +735,102 @@ async def callback_handler(event):
             pass
 
 
-# ── Texto livre ──
-@bot.on(events.NewMessage(func=lambda e: e.is_private and not e.text.startswith('/')))
+# ══════════════════════════════════════════════
+# 💬  HANDLER: REPLY — DETECÇÃO DE CPF/CREDENCIAIS
+# ══════════════════════════════════════════════
+#
+# Quando um usuário responde uma mensagem MINHA (do bot),
+# reconheço apenas CPF ou credenciais (user:pass).
+# Isso inicia o processo de migração para aquele usuário.
+# ══════════════════════════════════════════════
+
+@bot.on(events.NewMessage(func=lambda e: e.is_reply and not e.text.startswith('/')))
+async def reply_handler(event):
+    """Detecta respostas a mensagens do bot com CPF ou credenciais."""
+    await registrar_interacao(event)
+
+    # Verificar se a mensagem respondida é do bot
+    try:
+        replied = await event.get_reply_message()
+        if not replied:
+            return
+
+        me = await bot.get_me()
+        if replied.sender_id != me.id:
+            return  # Não é resposta a mim
+    except Exception:
+        return
+
+    sender = await event.get_sender()
+    if not sender:
+        return
+
+    texto = event.text.strip()
+    formato = detectar_formato_resposta(texto)
+
+    nome = f"{sender.first_name or ''} {sender.last_name or ''}".strip() or "Sem nome"
+    username_tg = f"@{sender.username}" if sender.username else "Nenhum"
+
+    registrar_usuario_interacao(sender.id, nome, username_tg, f"Reply: {texto[:50]}...")
+
+    if formato == "cpf":
+        cpf = extrair_cpf(texto)
+        await event.reply(
+            f"📄 **CPF detectado:** `{cpf}`\n\n"
+            f"💡 _A consulta de CPF é processada externamente._\n"
+            f"_Envie via Pydroid para processar._",
+            parse_mode='md',
+            buttons=voltar_button()
+        )
+
+    elif formato == "credencial":
+        user, pwd = extrair_credenciais(texto)
+
+        # Verifica se já tem migração ativa
+        estado_existente = obter_migracao(sender.id)
+        if estado_existente:
+            await event.reply(
+                f"⚠️ **Você já tem uma migração em andamento!**\n\n"
+                f"⚙️ Status: **{estado_existente.status.upper()}**\n"
+                f"📊 Progresso: {estado_existente.progresso}%\n"
+                f"✅ Hits: **{estado_existente.hits}** | ❌ Fails: **{estado_existente.fails}**\n\n"
+                f"_Use os botões para controlar ou pare antes de iniciar outra._",
+                parse_mode='md',
+                buttons=migrador_controle_buttons(sender.id)
+            )
+            return
+
+        # Iniciar migração para este usuário
+        estado = EstadoMigracao(
+            user_id=sender.id,
+            username=user,
+            password=pwd,
+            user_name=nome,
+            user_username=username_tg
+        )
+        estado.chat_id = event.chat_id
+
+        log(f"🔄 Migração via reply por {nome} ({sender.id}): {user}:***")
+        asyncio.create_task(executar_migracao(bot, estado))
+
+    else:
+        # Formato não reconhecido
+        await event.reply(
+            "⚠️ **Formato não reconhecido.**\n\n"
+            "💡 Envie no formato esperado:\n"
+            "• **CPF:** `12345678900`\n"
+            "• **Credenciais:** `user:pass`\n\n"
+            "_Responda uma mensagem minha com um desses formatos._",
+            parse_mode='md',
+            buttons=voltar_button()
+        )
+
+
+# ══════════════════════════════════════════════
+# 💬  HANDLER: TEXTO LIVRE (PRIVADO)
+# ══════════════════════════════════════════════
+
+@bot.on(events.NewMessage(func=lambda e: e.is_private and not e.text.startswith('/') and not e.is_reply))
 async def text_handler(event):
     await registrar_interacao(event)
     chat_id = event.chat_id
@@ -650,7 +917,8 @@ async def text_handler(event):
     else:
         sender = await event.get_sender()
         await event.reply(
-            "💡 Use o menu ou `/buscar termo`.",
+            "💡 Use o menu ou `/buscar termo`.\n"
+            "🔄 Para migrar: responda minha mensagem com `user:pass`.",
             parse_mode='md',
             buttons=menu_principal_buttons(sender.id if sender else 0)
         )
@@ -667,13 +935,14 @@ async def main():
     log(f"🚀 User Info Bot Pro v{BOT_VERSION} ({BOT_CODENAME}) iniciado!")
     log("👨‍💻 Créditos: Edivaldo Silva @Edkd1")
     log(f"🔄 Varredura a cada {SCAN_INTERVAL // 60} min | 🧵 Threads a cada {THREAD_SCAN_INTERVAL // 60} min")
+    log("🔄 Migrador IPTV: Estado por usuário ativo")
     log("📡 Executando primeira varredura...")
 
     await executar_varredura(user_client, notify_chat=OWNER_ID)
     asyncio.create_task(auto_scanner(user_client))
     asyncio.create_task(executar_threads_atualizacao(user_client))
 
-    print("✅ Bot ativo! Use /start ou /buscar")
+    print("✅ Bot ativo! Use /start, /buscar, /migrar ou responda com credenciais")
     await bot.run_until_disconnected()
 
 

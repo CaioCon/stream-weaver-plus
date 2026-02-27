@@ -26,6 +26,7 @@ def menu_principal_buttons(user_id: int = 0):
          Button.inline("📊 Estatísticas", b"cmd_stats")],
         [Button.inline("🌐 Consultar Telegram", b"cmd_tg_search"),
          Button.inline("📋 Últimas Alterações", b"cmd_recent")],
+        [Button.inline("🔄 Migrador IPTV", b"cmd_migrador")],
     ]
     if is_admin(user_id):
         btns.append([
@@ -76,4 +77,36 @@ def resultado_multiplo_buttons(results: list):
         label = f"👤 {r['nome_atual']} | {r['username_atual']}"
         btns.append([Button.inline(label[:40], f"profile_{r['id']}".encode())])
     btns.append([Button.inline("🔙 Menu", b"cmd_menu")])
+    return btns
+
+
+# ══════════════════════════════════════════════
+# 🔄  BOTÕES DO MIGRADOR IPTV
+# ══════════════════════════════════════════════
+
+def migrador_controle_buttons(user_id: int):
+    """Botões de controle da migração: parar | pausar | continuar."""
+    uid = str(user_id)
+    return [
+        [
+            Button.inline("⏸️ Pausar", f"migra_pause_{uid}".encode()),
+            Button.inline("▶️ Continuar", f"migra_resume_{uid}".encode()),
+            Button.inline("⏹️ Parar", f"migra_stop_{uid}".encode()),
+        ],
+        [Button.inline("📋 Resultados", f"migra_res_{uid}_0".encode())],
+    ]
+
+
+def migrador_resultados_buttons(user_id: int, page: int, total_pages: int):
+    """Botões de paginação dos resultados da migração."""
+    uid = str(user_id)
+    btns = []
+    nav = []
+    if page > 0:
+        nav.append(Button.inline("◀️ Anterior", f"migra_res_{uid}_{page - 1}".encode()))
+    nav.append(Button.inline(f"📄 {page + 1}/{total_pages}", b"noop"))
+    if page < total_pages - 1:
+        nav.append(Button.inline("Próxima ▶️", f"migra_res_{uid}_{page + 1}".encode()))
+    btns.append(nav)
+    btns.append([Button.inline("🔙 Menu Principal", b"cmd_menu")])
     return btns
