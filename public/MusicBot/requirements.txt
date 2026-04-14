@@ -1,7 +1,4 @@
 python-telegram-bot>=20.7
-yt-dlp
-mutagen
-requests
-rich
-ytmusicapi
-beautifulsoup4
+python-dotenv
+deezer-python
+deemix
