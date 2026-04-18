@@ -100,6 +100,49 @@ def is_field_hidden(field: str) -> bool:
     return bool(carregar_settings()["hidden_global"].get(field, False))
 
 
+# ── Autorização para ver telefone ──
+def carregar_phone_auth() -> dict:
+    d = _read(PHONE_AUTH)
+    d.setdefault("authorized", [])
+    return d
+
+
+def salvar_phone_auth(d: dict):
+    _atomic_write(PHONE_AUTH, d)
+
+
+def is_phone_authorized(uid) -> bool:
+    return str(uid) in [str(x) for x in carregar_phone_auth().get("authorized", [])]
+
+
+def autorizar_phone(uid) -> bool:
+    """Adiciona uid à lista. Retorna True se foi adicionado, False se já existia."""
+    d = carregar_phone_auth()
+    lst = [str(x) for x in d.get("authorized", [])]
+    if str(uid) in lst:
+        return False
+    lst.append(str(uid))
+    d["authorized"] = lst
+    salvar_phone_auth(d)
+    return True
+
+
+def desautorizar_phone(uid) -> bool:
+    d = carregar_phone_auth()
+    lst = [str(x) for x in d.get("authorized", [])]
+    if str(uid) not in lst:
+        return False
+    lst.remove(str(uid))
+    d["authorized"] = lst
+    salvar_phone_auth(d)
+    return True
+
+
+def listar_phone_auth() -> list:
+    return [str(x) for x in carregar_phone_auth().get("authorized", [])]
+
+
+
 # ── Helpers ──
 def log(msg: str):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
