@@ -27,14 +27,24 @@ python main.py
 > O bot precisa ser **administrador do canal** com permissão de postar e editar.
 
 ## Comandos do owner (no canal)
-| Comando             | Função                                |
-|---------------------|---------------------------------------|
-| `/scan`             | Força uma varredura imediata          |
-| `/panel`            | Abre o painel de toggles globais      |
-| `/hide <campo>`     | Oculta o campo nos cards              |
-| `/show <campo>`     | Mostra o campo nos cards              |
+| Comando             | Função                                          |
+|---------------------|-------------------------------------------------|
+| `/scan`             | Força uma varredura imediata                    |
+| `/panel`            | Abre o painel de toggles globais                |
+| `/hide <campo>`     | Oculta o campo nos cards                        |
+| `/show <campo>`     | Mostra o campo nos cards                        |
+| `/auth <id\|@user>` | Autoriza usuário a ver telefone via inline      |
+| `/unauth <id\|@user>` | Remove autorização de telefone                |
+| `/auths`            | Lista todos os autorizados                      |
 
 Campos válidos: `nome id username phone bio grupos historico foto`.
+
+## Regras de visibilidade
+- 🔄 **Varredura**: roda manualmente via `/scan` e automaticamente a cada 60 minutos.
+- 📺 **Canal**: recebe os cards COMPLETOS (sujeitos ao painel `/panel`).
+- 🔎 **Inline (@bot @user / @bot 123)**: mostra todos os dados, mas o **telefone fica restrito** — apenas usuários autorizados via `/auth` (e o dono) o veem.
+- 🚫 **DM**: o bot **nunca** consulta dados em DM. Apenas `/start` e `/remover`.
+
 
 ## Estrutura
 ```

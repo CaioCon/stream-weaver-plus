@@ -5,7 +5,7 @@
 import json
 import os
 from datetime import datetime
-from config import (FILE_PATH, LOG_PATH, CARD_INDEX, SETTINGS,
+from config import (FILE_PATH, LOG_PATH, CARD_INDEX, SETTINGS, PHONE_AUTH,
                     DEFAULT_HIDDEN_GLOBAL, MAX_HISTORY)
 
 
@@ -16,6 +16,8 @@ def _ensure_files():
         _atomic_write(CARD_INDEX, {})
     if not os.path.exists(SETTINGS):
         _atomic_write(SETTINGS, {"hidden_global": dict(DEFAULT_HIDDEN_GLOBAL)})
+    if not os.path.exists(PHONE_AUTH):
+        _atomic_write(PHONE_AUTH, {"authorized": []})
     if not os.path.exists(LOG_PATH):
         with open(LOG_PATH, 'w', encoding='utf-8') as f:
             f.write(f"[{datetime.now()}] Log iniciado\n")
@@ -96,6 +98,49 @@ def toggle_field_hidden(field: str) -> bool:
 
 def is_field_hidden(field: str) -> bool:
     return bool(carregar_settings()["hidden_global"].get(field, False))
+
+
+# ── Autorização para ver telefone ──
+def carregar_phone_auth() -> dict:
+    d = _read(PHONE_AUTH)
+    d.setdefault("authorized", [])
+    return d
+
+
+def salvar_phone_auth(d: dict):
+    _atomic_write(PHONE_AUTH, d)
+
+
+def is_phone_authorized(uid) -> bool:
+    return str(uid) in [str(x) for x in carregar_phone_auth().get("authorized", [])]
+
+
+def autorizar_phone(uid) -> bool:
+    """Adiciona uid à lista. Retorna True se foi adicionado, False se já existia."""
+    d = carregar_phone_auth()
+    lst = [str(x) for x in d.get("authorized", [])]
+    if str(uid) in lst:
+        return False
+    lst.append(str(uid))
+    d["authorized"] = lst
+    salvar_phone_auth(d)
+    return True
+
+
+def desautorizar_phone(uid) -> bool:
+    d = carregar_phone_auth()
+    lst = [str(x) for x in d.get("authorized", [])]
+    if str(uid) not in lst:
+        return False
+    lst.remove(str(uid))
+    d["authorized"] = lst
+    salvar_phone_auth(d)
+    return True
+
+
+def listar_phone_auth() -> list:
+    return [str(x) for x in carregar_phone_auth().get("authorized", [])]
+
 
 
 # ── Helpers ──

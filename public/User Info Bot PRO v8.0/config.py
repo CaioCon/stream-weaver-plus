@@ -38,6 +38,7 @@ FILE_PATH   = os.path.join(FOLDER_PATH, "user_database.json")
 LOG_PATH    = os.path.join(FOLDER_PATH, "monitor.log")
 CARD_INDEX  = os.path.join(FOLDER_PATH, "card_index.json")  # uid -> message_id no canal
 SETTINGS    = os.path.join(FOLDER_PATH, "settings.json")    # painel: campos ocultos globais
+PHONE_AUTH  = os.path.join(FOLDER_PATH, "phone_auth.json")  # lista de uids autorizados a ver telefone
 SESSION_USER = os.path.join(BASE_DIR, "session_monitor")
 SESSION_BOT  = os.path.join(BASE_DIR, "session_bot")
 
