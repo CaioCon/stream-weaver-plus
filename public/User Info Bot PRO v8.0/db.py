@@ -5,7 +5,7 @@
 import json
 import os
 from datetime import datetime
-from config import (FILE_PATH, LOG_PATH, CARD_INDEX, SETTINGS,
+from config import (FILE_PATH, LOG_PATH, CARD_INDEX, SETTINGS, PHONE_AUTH,
                     DEFAULT_HIDDEN_GLOBAL, MAX_HISTORY)
 
 
@@ -16,6 +16,8 @@ def _ensure_files():
         _atomic_write(CARD_INDEX, {})
     if not os.path.exists(SETTINGS):
         _atomic_write(SETTINGS, {"hidden_global": dict(DEFAULT_HIDDEN_GLOBAL)})
+    if not os.path.exists(PHONE_AUTH):
+        _atomic_write(PHONE_AUTH, {"authorized": []})
     if not os.path.exists(LOG_PATH):
         with open(LOG_PATH, 'w', encoding='utf-8') as f:
             f.write(f"[{datetime.now()}] Log iniciado\n")
