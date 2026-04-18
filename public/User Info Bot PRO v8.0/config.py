@@ -25,11 +25,13 @@ BOT_TOKEN    = "8618840827:AAHohLnNTWh_lkP4l9du6KJTaRQcPsNrwV8"
 OWNER_ID     = 2061557102
 BOT_USERNAME = "InforUser_Bot"
 
-# ── Canal de notificação (o bot deve ser admin do canal) ──
-# Aceita o ID -100... do canal privado/público.
-NOTIFY_CHANNEL_ID = -1003406151494
-# Link "humano" do canal (usado para botão "Abrir no canal")
-NOTIFY_CHANNEL_LINK = "https://t.me/c/3406151494"
+# ── Grupo de notificação (o bot deve ser admin do grupo) ──
+# Aceita o ID -100... do supergrupo.
+NOTIFY_CHANNEL_ID   = -1003708574604
+NOTIFY_CHANNEL_LINK = "https://t.me/c/3708574604"
+
+# Itens por página na paginação de cards (DM do owner)
+ITEMS_PER_PAGE = 6
 
 # ── Caminhos ──
 BASE_DIR    = os.path.dirname(os.path.abspath(__file__))

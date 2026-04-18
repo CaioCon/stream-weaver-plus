@@ -1,4 +1,12 @@
-# User Info Bot PRO v8.0
+# User Info Bot PRO v8.1
+
+> Notificações no **GRUPO** `-1003708574604`. Owner gerencia mensagens (editar/apagar/republicar) via DM com paginação inline.
+
+## Novidades v8.1
+- 📺 Cards agora vão para o **grupo** `-1003708574604` (não mais canal).
+- 🗂 Comando `/cards` em DM com o dono → lista paginada (botões inline) de todos os cards publicados.
+- 🛠 Cada card tem painel de gerenciamento: **Editar legenda**, **Republicar**, **Apagar**.
+- ✏️ Editor de legenda interativo: dono envia novo texto em DM e o card é editado no grupo.
 
 Versão enxuta — sem premium, sem combos, sem importação de banco.
 Toda interação acontece em modo *inline* + canal de notificação.
