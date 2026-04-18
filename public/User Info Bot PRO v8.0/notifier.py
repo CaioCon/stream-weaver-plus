@@ -16,10 +16,11 @@ from format import to_html, HTML
 
 
 def _gerencia_buttons(uid: str):
-    """Botões de gerenciamento que aparecem abaixo de cada card."""
+    """Botões abaixo de cada card no grupo (apenas owner pode usar)."""
     return [
-        [Button.inline("👁 Ocultar/mostrar campos", f"mng_{uid}".encode())],
-        [Button.inline("🗑 Apagar card", f"del_{uid}".encode())],
+        [Button.inline("👁 Ocultar/mostrar campos", f"mng_{uid}".encode()),
+         Button.inline("🛠 Gerenciar",              f"card_view_{uid}".encode())],
+        [Button.inline("🗑 Apagar card",            f"del_{uid}".encode())],
     ]
 
 
