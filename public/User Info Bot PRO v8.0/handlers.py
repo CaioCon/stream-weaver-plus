@@ -1,5 +1,5 @@
 # ══════════════════════════════════════════════
-# 🎮  HANDLERS — User Info Bot PRO v8.0
+# 🎮  HANDLERS — User Info Bot PRO v8.1
 # 👨‍💻 Créditos: Edivaldo Silva @Edkd1
 # ══════════════════════════════════════════════
 """
@@ -9,31 +9,39 @@ Eventos cobertos:
   • InlineQuery: @InforUser_Bot @username  |  @InforUser_Bot 123456789
        → mostra DADOS COMPLETOS (Nome, ID, Username, Bio, Grupos, Histórico).
        → 📱 Telefone APENAS se o solicitante estiver autorizado pelo dono.
-  • Em DM o bot NÃO faz consulta de dados. Apenas o canal recebe perfis completos.
-  • Comandos do owner no canal de notificação:
+  • Em DM o bot NÃO faz consulta de dados (somente o owner administra).
+  • Comandos do owner no GRUPO de notificação ou em DM:
        /scan            força varredura imediata
        /panel           painel de toggles globais
        /show <campo>    /hide <campo>   atalhos
        /auth <id|@user> autoriza usuário a ver telefone via inline
        /unauth <id|@user>
        /auths           lista autorizados
-  • Callbacks dos cards:
-       mng_<uid>        abre painel de toggles do canal
-       togg_<campo>     alterna oculto/visível
-       del_<uid>        remove o card do canal e do índice
-       rmcard_<uid>_<req_id> / rmdeny_<req_id>  (no DM do owner)
+  • Comandos do owner em DM (gerenciamento das mensagens):
+       /cards           lista paginada com TODOS os cards do grupo
+                        cada card → editar caption / apagar / republicar
+  • Callbacks:
+       mng_<uid>             abre painel de toggles globais
+       togg_<campo>          alterna oculto/visível
+       del_<uid>             apaga o card no grupo + remove do índice
+       cards_page_<n>        paginação da lista de cards (DM owner)
+       card_view_<uid>       abre painel de gerenciamento de UM card (DM)
+       card_edit_<uid>       solicita nova caption (DM)
+       card_repub_<uid>      reposta o card (apaga e reenvia)
+       card_del_<uid>        apaga o card pelo painel de gerenciamento (DM)
+       rmcard_<uid>_<rid> / rmdeny_<rid>  pedidos de remoção do usuário
 """
 
 import asyncio
 from telethon import events, Button
 
 from config import (OWNER_ID, BOT_USERNAME, NOTIFY_CHANNEL_ID,
-                    NOTIFY_CHANNEL_LINK,
+                    NOTIFY_CHANNEL_LINK, ITEMS_PER_PAGE,
                     INLINE_USERNAME_RE, INLINE_ID_RE, TOGGLEABLE_FIELDS)
 from db import (carregar_dados, salvar_dados, log,
-                get_card_msg_id, set_card_msg_id, del_card_msg_id,
+                carregar_cards, get_card_msg_id, set_card_msg_id, del_card_msg_id,
                 carregar_settings, toggle_field_hidden, is_field_hidden,
-                upsert_user, salvar_settings,
+                upsert_user, salvar_settings, iter_usuarios,
                 is_phone_authorized, autorizar_phone, desautorizar_phone,
                 listar_phone_auth)
 from format import to_html, HTML
@@ -41,6 +49,11 @@ from profile import montar_card
 from search import buscar_com_lookup
 from notifier import enviar_ou_editar_card, avisar_owner_remocao
 import scan as scan_mod
+
+
+# Estado em memória — owner em DM aguardando entrada de texto p/ editar caption
+# {owner_id: {"action": "edit_caption", "uid": "<uid>"}}
+_pending_dm = {}
 
 
 # ────────────────────────────────────────────────────────────
@@ -58,7 +71,7 @@ def _painel_buttons():
             rows.append(row); row = []
     if row:
         rows.append(row)
-    rows.append([Button.url("📺 Abrir canal", NOTIFY_CHANNEL_LINK)])
+    rows.append([Button.url("📺 Abrir grupo", NOTIFY_CHANNEL_LINK)])
     return rows
 
 
@@ -66,7 +79,7 @@ def _painel_text() -> str:
     s = carregar_settings()["hidden_global"]
     linhas = ["⚙️ *PAINEL DE GERENCIAMENTO*",
               "━━━━━━━━━━━━━━━━━━━━",
-              "Marque qual campo deve ficar *oculto* nos cards do canal.",
+              "Marque qual campo deve ficar *oculto* nos cards do grupo.",
               ""]
     for f in TOGGLEABLE_FIELDS:
         st = "🚫 oculto" if s.get(f) else "✅ visível"
@@ -75,11 +88,7 @@ def _painel_text() -> str:
 
 
 def _montar_card_inline(uid: str, ent: dict, *, viewer_uid: int) -> str:
-    """
-    Monta caption COMPLETA para inline.
-    Inclui telefone APENAS se viewer estiver autorizado (ou for o owner).
-    Não respeita hidden_global do canal — o filtro do canal é separado.
-    """
+    """Caption COMPLETA para inline (telefone restrito a autorizados)."""
     nome     = ent.get("nome_atual") or "_Sem nome_"
     username = ent.get("username_atual") or ""
     phone    = ent.get("phone") or ""
@@ -119,7 +128,6 @@ def _montar_card_inline(uid: str, ent: dict, *, viewer_uid: int) -> str:
 
 
 async def _resolver_uid_alvo(user_client, alvo: str):
-    """Recebe '@user', 'user' ou '12345' e devolve int(uid)."""
     alvo = alvo.strip().lstrip("@")
     if alvo.isdigit():
         return int(alvo)
@@ -131,29 +139,113 @@ async def _resolver_uid_alvo(user_client, alvo: str):
         return None
 
 
+# ── Paginação dos cards do grupo (DM owner) ──
+def _listar_cards_publicados() -> list:
+    """Retorna lista de tuplas (uid, msg_id, label) ordenada por nome."""
+    idx  = carregar_cards()
+    db   = carregar_dados()
+    out  = []
+    for uid, msg_id in idx.items():
+        ent  = db.get(uid, {})
+        nome = ent.get("nome_atual") or "?"
+        user = ent.get("username_atual") or ""
+        label = f"{nome} | @{user}" if user else f"{nome} | {uid}"
+        out.append((uid, msg_id, label))
+    out.sort(key=lambda x: x[2].lower())
+    return out
+
+
+def _cards_page(page: int):
+    """Monta texto+botões da página `page` da lista de cards."""
+    cards       = _listar_cards_publicados()
+    total       = len(cards)
+    total_pages = max(1, (total + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE)
+    page        = max(0, min(page, total_pages - 1))
+    inicio      = page * ITEMS_PER_PAGE
+    chunk       = cards[inicio:inicio + ITEMS_PER_PAGE]
+
+    txt = (f"🗂 *CARDS PUBLICADOS NO GRUPO*\n"
+           f"━━━━━━━━━━━━━━━━━━━━\n"
+           f"Total: *{total}*  •  Página *{page+1}/{total_pages}*\n\n"
+           "Toque em um card para gerenciar (editar / apagar).")
+    btns = []
+    for uid, msg_id, label in chunk:
+        btns.append([Button.inline(f"👤 {label[:48]}",
+                                   f"card_view_{uid}".encode())])
+    nav = []
+    if page > 0:
+        nav.append(Button.inline("◀️", f"cards_page_{page-1}".encode()))
+    nav.append(Button.inline(f"📄 {page+1}/{total_pages}", b"noop"))
+    if page < total_pages - 1:
+        nav.append(Button.inline("▶️", f"cards_page_{page+1}".encode()))
+    if len(nav) > 1:
+        btns.append(nav)
+    btns.append([Button.url("📺 Abrir grupo", NOTIFY_CHANNEL_LINK)])
+    return txt, btns
+
+
+def _card_manage_buttons(uid: str):
+    return [
+        [Button.inline("✏️ Editar legenda", f"card_edit_{uid}".encode())],
+        [Button.inline("♻️ Republicar card", f"card_repub_{uid}".encode())],
+        [Button.inline("🗑 Apagar card",     f"card_del_{uid}".encode())],
+        [Button.inline("⬅️ Voltar à lista",  b"cards_page_0")],
+    ]
+
+
+def _card_manage_text(uid: str) -> str:
+    db   = carregar_dados()
+    ent  = db.get(uid, {})
+    nome = ent.get("nome_atual") or "?"
+    user = ent.get("username_atual") or ""
+    msg  = get_card_msg_id(uid)
+    return ("🛠 *GERENCIAR CARD*\n"
+            "━━━━━━━━━━━━━━━━━━━━\n"
+            f"📛 *Nome*: {nome}\n"
+            f"🆔 *ID*: `{uid}`\n"
+            f"🔗 *Username*: {('@'+user) if user else '_(nenhum)_'}\n"
+            f"💬 *msg_id no grupo*: `{msg}`\n\n"
+            "Escolha uma ação:")
+
+
 # ────────────────────────────────────────────────────────────
 def register_handlers(bot, user_client):
 
     # ─── /start em DM ───
     @bot.on(events.NewMessage(pattern=r'^/start(?:\s|$)', func=lambda e: e.is_private))
     async def cmd_start(event):
-        txt = (
-            "👋 *User Info Bot PRO v8.0*\n"
-            "━━━━━━━━━━━━━━━━━━━━\n\n"
-            "Eu monitoro perfis em grupos públicos e publico cards no canal "
-            "de notificação do dono.\n\n"
-            "🔎 *Como pesquisar (em qualquer chat):*\n"
-            f"  `@{BOT_USERNAME} @username`\n"
-            f"  `@{BOT_USERNAME} 1234567890`\n\n"
-            "🚫 *Não faço consultas por DM.*\n"
-            "🗑 *Quer remover seus dados?* Envie `/remover`."
-        )
+        is_own = _is_owner(event.sender_id)
+        if is_own:
+            txt = (
+                "👋 *User Info Bot PRO v8.1 — modo dono*\n"
+                "━━━━━━━━━━━━━━━━━━━━\n\n"
+                "Comandos disponíveis aqui no DM:\n"
+                "• `/cards` — lista paginada dos cards publicados\n"
+                "• `/scan` — varredura imediata\n"
+                "• `/panel` — painel de campos ocultos\n"
+                "• `/auth <id|@user>` — libera telefone\n"
+                "• `/unauth <id|@user>` — revoga\n"
+                "• `/auths` — lista autorizados\n\n"
+                f"📺 Grupo de notificação: {NOTIFY_CHANNEL_LINK}"
+            )
+        else:
+            txt = (
+                "👋 *User Info Bot PRO v8.1*\n"
+                "━━━━━━━━━━━━━━━━━━━━\n\n"
+                "🔎 *Como pesquisar (em qualquer chat):*\n"
+                f"  `@{BOT_USERNAME} @username`\n"
+                f"  `@{BOT_USERNAME} 1234567890`\n\n"
+                "🚫 *Não faço consultas por DM.*\n"
+                "🗑 *Quer remover seus dados?* Envie `/remover`."
+            )
         await event.respond(to_html(txt), parse_mode=HTML, link_preview=False)
 
     # ─── /remover em DM ───
     @bot.on(events.NewMessage(pattern=r'^/remover(?:\s+(\d+))?$',
                               func=lambda e: e.is_private))
     async def cmd_remover(event):
+        if _is_owner(event.sender_id):
+            return
         sender = await event.get_sender()
         uid_alvo = event.pattern_match.group(1) or str(sender.id)
         await avisar_owner_remocao(bot, sender, uid_alvo)
@@ -162,11 +254,30 @@ def register_handlers(bot, user_client):
             "Você será notificado se o card for removido."
         ), parse_mode=HTML)
 
-    # ─── Texto livre em DM (NÃO consulta dados) ───
+    # ─── Texto livre em DM ───
     @bot.on(events.NewMessage(func=lambda e: e.is_private and
                               not (e.text or '').startswith('/')))
     async def dm_text(event):
+        # Owner pode estar no fluxo de edição de caption
         if event.sender_id == OWNER_ID:
+            st = _pending_dm.get(OWNER_ID)
+            if st and st.get("action") == "edit_caption":
+                uid    = st["uid"]
+                msg_id = get_card_msg_id(uid)
+                if not msg_id:
+                    _pending_dm.pop(OWNER_ID, None)
+                    await event.respond("❌ Card não encontrado mais.")
+                    return
+                nova = event.text or ""
+                try:
+                    await bot.edit_message(NOTIFY_CHANNEL_ID, msg_id,
+                                            to_html(nova), parse_mode=HTML)
+                    await event.respond("✅ Legenda atualizada no grupo.")
+                except Exception as e:
+                    await event.respond(f"❌ Falha ao editar: `{e}`",
+                                        parse_mode=HTML)
+                _pending_dm.pop(OWNER_ID, None)
+                return
             return  # owner conversa livremente
         await event.respond(to_html(
             "🚫 *Eu não realizo consultas por DM.*\n\n"
@@ -175,7 +286,7 @@ def register_handlers(bot, user_client):
             "🗑 Para pedir remoção dos seus dados envie `/remover`."
         ), parse_mode=HTML)
 
-    # ─── Inline query (lookup público — DADOS COMPLETOS, telefone restrito) ───
+    # ─── Inline query ───
     @bot.on(events.InlineQuery)
     async def inline(event):
         q = (event.text or "").strip()
@@ -202,8 +313,6 @@ def register_handlers(bot, user_client):
                 description=f"@{user}" if user else f"ID {uid}",
                 text=to_html(txt), parse_mode=HTML,
             ))
-
-            # Em paralelo: garante card COMPLETO no canal (com telefone)
             asyncio.create_task(enviar_ou_editar_card(
                 bot, uid, ent, photo_bytes=ent.pop("_photo_bytes", None),
             ))
@@ -214,7 +323,7 @@ def register_handlers(bot, user_client):
             return
         await event.answer(articles, cache_time=0, private=True)
 
-    # ─── Owner: /scan no canal (varredura manual) ───
+    # ─── Owner: /scan ───
     @bot.on(events.NewMessage(pattern=r'^/scan(?:\s|$)'))
     async def cmd_scan(event):
         if not _is_owner(event.sender_id):
@@ -233,6 +342,14 @@ def register_handlers(bot, user_client):
         await event.respond(to_html(_painel_text()), parse_mode=HTML,
                             buttons=_painel_buttons())
 
+    # ─── Owner: /cards (paginado, em DM) ───
+    @bot.on(events.NewMessage(pattern=r'^/cards(?:\s|$)'))
+    async def cmd_cards(event):
+        if not _is_owner(event.sender_id):
+            return
+        txt, btns = _cards_page(0)
+        await event.respond(to_html(txt), parse_mode=HTML, buttons=btns)
+
     # ─── Owner: /hide /show <campo> ───
     @bot.on(events.NewMessage(pattern=r'^/(hide|show)\s+(\w+)$'))
     async def cmd_hideshow(event):
@@ -249,7 +366,7 @@ def register_handlers(bot, user_client):
                             f"{'🚫 oculto' if acao=='hide' else '✅ visível'}.",
                             parse_mode=HTML)
 
-    # ─── Owner: /auth <id|@user> — autoriza ver telefone via inline ───
+    # ─── Owner: /auth ───
     @bot.on(events.NewMessage(pattern=r'^/auth(?:\s+(\S+))?$'))
     async def cmd_auth(event):
         if not _is_owner(event.sender_id):
@@ -268,7 +385,6 @@ def register_handlers(bot, user_client):
             parse_mode=HTML,
         )
 
-    # ─── Owner: /unauth <id|@user> ───
     @bot.on(events.NewMessage(pattern=r'^/unauth(?:\s+(\S+))?$'))
     async def cmd_unauth(event):
         if not _is_owner(event.sender_id):
@@ -287,7 +403,6 @@ def register_handlers(bot, user_client):
             parse_mode=HTML,
         )
 
-    # ─── Owner: /auths — lista autorizados ───
     @bot.on(events.NewMessage(pattern=r'^/auths(?:\s|$)'))
     async def cmd_auths(event):
         if not _is_owner(event.sender_id):
@@ -300,6 +415,11 @@ def register_handlers(bot, user_client):
         await event.respond(to_html(
             f"📋 *Autorizados a ver telefone* ({len(lst)}):\n{body}"
         ), parse_mode=HTML)
+
+    # ─── Callback: noop (ignora) ───
+    @bot.on(events.CallbackQuery(pattern=rb"^noop$"))
+    async def cb_noop(event):
+        await event.answer()
 
     # ─── Callback: togg_<campo> ───
     @bot.on(events.CallbackQuery(pattern=rb"^togg_(\w+)$"))
@@ -326,7 +446,7 @@ def register_handlers(bot, user_client):
                             buttons=_painel_buttons())
         await event.answer()
 
-    # ─── Callback: del_<uid> ───
+    # ─── Callback: del_<uid> (botão abaixo do card no grupo) ───
     @bot.on(events.CallbackQuery(pattern=rb"^del_(\d+)$"))
     async def cb_del(event):
         if not _is_owner(event.sender_id):
@@ -341,7 +461,91 @@ def register_handlers(bot, user_client):
         del_card_msg_id(uid)
         await event.answer("Card removido.")
 
-    # ─── Callback: rmcard_<uid>_<req_id> ───
+    # ─── Callbacks de paginação/gerenciamento (DM owner) ───
+    @bot.on(events.CallbackQuery(pattern=rb"^cards_page_(\d+)$"))
+    async def cb_cards_page(event):
+        if not _is_owner(event.sender_id):
+            await event.answer("Apenas o dono.", alert=True); return
+        page = int(event.pattern_match.group(1).decode())
+        txt, btns = _cards_page(page)
+        try:
+            await event.edit(to_html(txt), parse_mode=HTML, buttons=btns)
+        except Exception:
+            await event.respond(to_html(txt), parse_mode=HTML, buttons=btns)
+        await event.answer()
+
+    @bot.on(events.CallbackQuery(pattern=rb"^card_view_(\d+)$"))
+    async def cb_card_view(event):
+        if not _is_owner(event.sender_id):
+            await event.answer("Apenas o dono.", alert=True); return
+        uid = event.pattern_match.group(1).decode()
+        try:
+            await event.edit(to_html(_card_manage_text(uid)), parse_mode=HTML,
+                             buttons=_card_manage_buttons(uid))
+        except Exception:
+            await event.respond(to_html(_card_manage_text(uid)), parse_mode=HTML,
+                                buttons=_card_manage_buttons(uid))
+        await event.answer()
+
+    @bot.on(events.CallbackQuery(pattern=rb"^card_edit_(\d+)$"))
+    async def cb_card_edit(event):
+        if not _is_owner(event.sender_id):
+            await event.answer("Apenas o dono.", alert=True); return
+        uid = event.pattern_match.group(1).decode()
+        _pending_dm[OWNER_ID] = {"action": "edit_caption", "uid": uid}
+        await event.answer()
+        await event.respond(to_html(
+            f"✏️ *Edição de legenda* — card `{uid}`\n\n"
+            "Envie agora a *nova legenda* (Markdown leve suportado).\n"
+            "Para cancelar, envie `/cancel`."
+        ), parse_mode=HTML)
+
+    @bot.on(events.NewMessage(pattern=r'^/cancel$', func=lambda e: e.is_private))
+    async def cmd_cancel(event):
+        if event.sender_id != OWNER_ID:
+            return
+        if _pending_dm.pop(OWNER_ID, None):
+            await event.respond("✋ Edição cancelada.")
+
+    @bot.on(events.CallbackQuery(pattern=rb"^card_repub_(\d+)$"))
+    async def cb_card_repub(event):
+        if not _is_owner(event.sender_id):
+            await event.answer("Apenas o dono.", alert=True); return
+        uid = event.pattern_match.group(1).decode()
+        msg_id = get_card_msg_id(uid)
+        if msg_id:
+            try:
+                await bot.delete_messages(NOTIFY_CHANNEL_ID, msg_id)
+            except Exception:
+                pass
+            del_card_msg_id(uid)
+        db = carregar_dados()
+        ent = db.get(uid)
+        if not ent:
+            await event.answer("Usuário não está no banco.", alert=True); return
+        await enviar_ou_editar_card(bot, uid, ent)
+        await event.answer("♻️ Card republicado.")
+
+    @bot.on(events.CallbackQuery(pattern=rb"^card_del_(\d+)$"))
+    async def cb_card_del(event):
+        if not _is_owner(event.sender_id):
+            await event.answer("Apenas o dono.", alert=True); return
+        uid = event.pattern_match.group(1).decode()
+        msg_id = get_card_msg_id(uid)
+        if msg_id:
+            try:
+                await bot.delete_messages(NOTIFY_CHANNEL_ID, msg_id)
+            except Exception as e:
+                log(f"card_del {uid}: {e}")
+        del_card_msg_id(uid)
+        await event.answer("🗑 Card apagado.")
+        txt, btns = _cards_page(0)
+        try:
+            await event.edit(to_html(txt), parse_mode=HTML, buttons=btns)
+        except Exception:
+            pass
+
+    # ─── Pedido de remoção (usuário) ───
     @bot.on(events.CallbackQuery(pattern=rb"^rmcard_(\d+)_(\d+)$"))
     async def cb_rmcard(event):
         if not _is_owner(event.sender_id):
@@ -360,7 +564,7 @@ def register_handlers(bot, user_client):
         salvar_dados(db)
         try:
             await bot.send_message(req, to_html(
-                "✅ Seus dados foram removidos do canal."), parse_mode=HTML)
+                "✅ Seus dados foram removidos do grupo."), parse_mode=HTML)
         except Exception:
             pass
         await event.edit("✅ Removido e usuário avisado.")
