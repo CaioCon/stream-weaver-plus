@@ -2075,59 +2075,15 @@ async def h_ow_steps(event):
     await event.respond(prompt, parse_mode="md",
         buttons=[[Button.inline("❌ Cancelar", b"mn")]])
 
-@bot.on(events.NewMessage(pattern=r"^/addgroup(?:\s+(-?\d+))?$"))
-async def h_cmd_addgroup(event):
-    if not _is_owner(event):
-        return
-    arg = event.pattern_match.group(1)
-    chat_id = int(arg) if arg else _event_chat_id(event)
-    title = ""
-    try:
-        ent = await event.get_chat()
-        title = getattr(ent, "title", "") or ""
-    except Exception:
-        pass
-    groups_cfg.add_group(chat_id, title)
-    await event.respond(f"✅ Grupo `{chat_id}` autorizado.", parse_mode="md")
-
-@bot.on(events.NewMessage(pattern=r"^/rmgroup\s+(-?\d+)$"))
-async def h_cmd_rmgroup(event):
-    if not _is_owner(event):
-        return
-    chat_id = int(event.pattern_match.group(1))
-    ok = groups_cfg.remove_group(chat_id)
-    await event.respond("✅ Removido." if ok else "ℹ️ Não estava na lista.")
-
-@bot.on(events.NewMessage(pattern=r"^/setopic(?:\s+(-?\d+)\s+(\d+))?$"))
-async def h_cmd_setopic(event):
-    """
-    /setopic                       → usa o tópico atual da mensagem
-    /setopic <chat_id> <topic_id>  → define manualmente
-    Encaminhar mensagem do tópico após clicar em 'Definir tópico' também funciona.
-    """
-    if not _is_owner(event):
-        return
-    g1 = event.pattern_match.group(1)
-    g2 = event.pattern_match.group(2)
-    if g1 and g2:
-        chat_id = int(g1); topic_id = int(g2)
-        groups_cfg.add_group(chat_id)
-        groups_cfg.set_topic(chat_id, topic_id)
-        return await event.respond(
-            f"✅ Tópico `{topic_id}` configurado em `{chat_id}`.",
-            parse_mode="md")
-    chat_id  = _event_chat_id(event)
-    topic_id = _event_topic_id(event)
-    if not topic_id:
-        return await event.respond(
-            "ℹ️ Envie /setopic **dentro do tópico** desejado, "
-            "ou use `/setopic <chat_id> <topic_id>`.",
-            parse_mode="md")
-    groups_cfg.add_group(chat_id)
-    groups_cfg.set_topic(chat_id, topic_id)
-    await event.respond(
-        f"✅ Tópico `{topic_id}` definido para este grupo.",
-        parse_mode="md")
+# ─────────────────────────────────────────────────────────────
+# Comandos com "/" foram removidos. O gerenciamento de grupos,
+# tópicos e permissões é 100% via botões inline:
+#   • Painel admin → 👥 Grupos/Tópicos
+#       ➕ Adicionar grupo (ID)
+#       ➖ Remover grupo
+#       📌 Definir tópico  (encaminhe msg do tópico OU envie "chat_id topic_id")
+#   • Painel admin → 🛡 Permissões  (Explorar / Busca por termo)
+# ─────────────────────────────────────────────────────────────
 
 @bot.on(events.NewMessage(func=lambda e: e.forward is not None))
 async def h_forwarded_topic(event):
