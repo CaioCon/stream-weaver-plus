@@ -1228,77 +1228,98 @@ def _event_chat_id(event) -> int:
         return int(event.sender_id)
 
 def _event_topic_id(event) -> int | None:
-    """Extrai topic id de mensagens de fórum (se houver)."""
+    """Extrai topic id de mensagens de fórum (Telethon).
+
+    Cobre os casos:
+      • reply_to.forum_topic = True  → reply_to_top_id (ou reply_to_msg_id quando é a 1ª msg do tópico)
+      • reply_to.reply_to_top_id presente (mesmo sem flag)
+      • mensagem é a própria criação do tópico (action ForumTopicCreated)
+    """
     try:
         msg = getattr(event, "message", None) or event
-        # Telethon: ForumTopic via reply_to.forum_topic
+        # Caso especial: a própria mensagem É o tópico
+        action = getattr(msg, "action", None)
+        if action is not None and type(action).__name__ == "MessageActionTopicCreate":
+            return int(getattr(msg, "id", 0)) or None
+
         rt = getattr(msg, "reply_to", None)
         if rt is None:
             return None
-        # forum_topic flag
         if getattr(rt, "forum_topic", False):
-            return getattr(rt, "reply_to_top_id", None) \
-                   or getattr(rt, "reply_to_msg_id", None)
+            top = getattr(rt, "reply_to_top_id", None) \
+                  or getattr(rt, "reply_to_msg_id", None)
+            return int(top) if top else None
         top = getattr(rt, "reply_to_top_id", None)
         if top:
-            return top
+            return int(top)
     except Exception:
         pass
     return None
 
-# Memoriza onde cada uid está atuando (chat,topic) para roteamento de envios
-_user_target: dict[int, tuple[int, int | None]] = {}
+
+# Roteamento por (uid, chat_id) — evita colisão quando o mesmo usuário
+# fala em múltiplos grupos/tópicos.
+_user_target: dict[tuple[int, int], tuple[int, int | None]] = {}
+# Último contexto por uid (para handlers que só conhecem o uid, ex.: botões em DM)
+_last_target: dict[int, tuple[int, int | None]] = {}
 
 def _set_target(uid: int, chat_id: int, topic_id: int | None):
-    _user_target[uid] = (chat_id, topic_id)
+    _user_target[(uid, chat_id)] = (chat_id, topic_id)
+    _last_target[uid] = (chat_id, topic_id)
 
-def _target_for(uid: int) -> tuple[int, int | None]:
-    """Retorna (chat,topic) onde o bot deve enviar para esse uid."""
-    return _user_target.get(uid, (uid, None))
+def _target_for(uid: int, chat_id: int | None = None) -> tuple[int, int | None]:
+    """Retorna (chat,topic) onde o bot deve enviar para esse uid.
 
-def _send_kwargs(uid: int) -> dict:
+    Se chat_id for fornecido, prioriza o roteamento daquele grupo.
+    Caso contrário, usa o último contexto conhecido (ou DM com o uid).
+    """
+    if chat_id is not None:
+        t = _user_target.get((uid, chat_id))
+        if t:
+            return t
+    return _last_target.get(uid, (uid, None))
+
+def _send_kwargs(uid: int, chat_id: int | None = None) -> dict:
     """kwargs comuns para send_message/send_file respeitando tópico."""
-    chat, topic = _target_for(uid)
+    chat, topic = _target_for(uid, chat_id)
     kw: dict = {}
     if topic:
         kw["reply_to"] = topic
     return kw
 
+def is_owner(uid: int) -> bool:
+    """Reconhece se o uid é o dono configurado em OWNER_ID."""
+    return OWNER_ID != 0 and uid == OWNER_ID
+
 async def _gate(event, is_cb: bool = True) -> bool:
     """
     Gate de origem:
-      - DMs: somente OWNER pode usar.
-      - Grupos: precisam estar registrados em groups_cfg; se houver
-        topic_id configurado, o bot só responde nesse tópico.
-      - Spam check em todos os casos.
+      • DMs: liberadas para qualquer usuário (busca por termo + links Deezer).
+        Recursos restritos (Explorar, painel admin, ARL premium) seguem
+        controlados pelos próprios handlers via PermissionsManager / OWNER_ID.
+      • Grupos: precisam estar registrados em groups_cfg; se houver
+        topic_id configurado, o bot só responde nesse(s) tópico(s)
+        e SEMPRE responde dentro do tópico de origem.
+      • Spam check em todos os casos.
     """
     sender_id = event.sender_id
     chat_id   = _event_chat_id(event)
     topic_id  = _event_topic_id(event)
     is_dm     = chat_id == sender_id
 
-    # Owner pode tudo
-    if sender_id != OWNER_ID:
-        if is_dm:
-            if is_cb:
-                await event.answer(
-                    "🔒 Este bot só funciona em grupos autorizados.",
-                    alert=True)
-            else:
-                try:
-                    await event.respond(
-                        "🔒 **Acesso restrito.**\n\n"
-                        "Este bot só responde em grupos/tópicos autorizados.",
-                        parse_mode="md")
-                except Exception:
-                    pass
-            return False
-        if not groups_cfg.is_allowed(chat_id, topic_id):
-            # Silencioso em chats/tópicos não autorizados
-            return False
-
-    # Memoriza destino para envios subsequentes
-    _set_target(sender_id, chat_id, groups_cfg.topic_for(chat_id) or topic_id)
+    if is_dm:
+        # DM: libera para todos. Em DM, "tópico" é sempre None.
+        _set_target(sender_id, sender_id, None)
+    else:
+        # Grupo: owner pode tudo; demais precisam estar em grupo/tópico autorizado.
+        if not is_owner(sender_id):
+            if not groups_cfg.is_allowed(chat_id, topic_id):
+                # Silencioso em chats/tópicos não autorizados
+                return False
+        # Roteia respostas SEMPRE para o tópico de origem (quando autorizado)
+        # caindo no tópico principal configurado se origem não bater.
+        target_topic = groups_cfg.topic_for(chat_id, topic_id) or topic_id
+        _set_target(sender_id, chat_id, target_topic)
 
     ok, msg = spam.hit(sender_id)
     if not ok:
