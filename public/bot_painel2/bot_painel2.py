@@ -2431,8 +2431,14 @@ async def h_text(event):
         asyncio.create_task(_handle_dz_link(msg, uid, tipo, iid))
         return
 
-    # Busca direta por termo — apenas autorizados
-    if not perms.can_search(uid):
+    # Busca direta por termo:
+    #  • DM: liberada para qualquer usuário
+    #  • Grupo: liberada (já validada pelo _gate — grupo+tópico autorizado)
+    #  • Restrição legada perms.can_search ainda vale fora de DM/grupo autorizado
+    _chat_id = _event_chat_id(event)
+    _is_dm   = _chat_id == uid
+    _in_group_ok = (not _is_dm) and groups_cfg.is_allowed(_chat_id, _event_topic_id(event))
+    if not (_is_dm or _in_group_ok or perms.can_search(uid) or is_owner(uid)):
         return await event.respond(
             "🔒 **Busca por nome desativada para você.**\n\n"
             "Envie diretamente um link do Deezer (álbum, faixa ou artista).",
