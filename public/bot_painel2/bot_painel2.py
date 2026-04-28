@@ -75,11 +75,12 @@ from mutagen.mp3 import MP3
 BASE_DIR        = Path(__file__).resolve().parent
 ENV_PATH        = BASE_DIR / ".env"
 DOWNLOAD_DIR    = BASE_DIR / "downloads"
+GRUPOS_DIR      = BASE_DIR / "grupos"
 ARL_FILE        = BASE_DIR / "arl_user.txt"
 USERS_INFO_FILE = BASE_DIR / "users_info.json"
 ADMIN_CFG_FILE  = BASE_DIR / "admin_config.json"
 
-for _d in (BASE_DIR, DOWNLOAD_DIR):
+for _d in (BASE_DIR, DOWNLOAD_DIR, GRUPOS_DIR):
     _d.mkdir(parents=True, exist_ok=True)
 
 # ═══════════════════════════════════════════════════════════════
