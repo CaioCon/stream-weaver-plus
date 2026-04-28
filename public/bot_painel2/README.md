@@ -1,73 +1,75 @@
-# Deezer Bot — bot_painel2 (melhorias)
+# Deezer Bot — v12 (Mega Power) — pella.app edition
 
-Baseado em `https://github.com/ContaTreino/bot_painel_2.py` (`bot_painel2.py`).
-Mantém 100% das funcionalidades originais e acrescenta suporte robusto a
-**grupos com tópicos**, **reconhecimento do dono** e **busca livre em DM**.
+Código **100% preservado** do repositório original  
+`https://github.com/ContaTreino/bot_painel_2.py` (`bot_painel2.py`),
+com apenas estas mudanças cirúrgicas:
 
-## O que mudou
+## ✨ Mudanças aplicadas
 
-### 1. Tópicos de grupo (Forum Topics)
-- `_event_topic_id` agora cobre todos os casos do Telethon:
-  flag `forum_topic`, `reply_to_top_id`, `reply_to_msg_id` (1ª msg do tópico)
-  e `MessageActionTopicCreate`.
-- Cada grupo pode ter **vários tópicos autorizados** (lista `topic_ids`),
-  mantendo retrocompatibilidade com o campo legado `topic_id`.
-- Se a busca chega no tópico **A** do grupo, a resposta vai no tópico **A**.
-  Se chega no tópico **B**, vai no tópico **B**.
-- Roteamento de respostas agora é por `(uid, chat_id)`, evitando colisão
-  quando o mesmo usuário interage em vários grupos.
+### 1. Sem comandos com "/"
+Removidos: `/addgroup`, `/rmgroup`, `/setopic`.  
+Mantido apenas `/start` (necessário para iniciar conversa com qualquer bot do Telegram).
 
-### 2. Reconhecimento do dono
-- `is_owner(uid)` centraliza a checagem (`OWNER_ID` no `.env`).
-- Comando `/whoami` mostra: seu ID, ID do chat, tópico atual e se você
-  é o dono — ideal para descobrir IDs antes de autorizar grupos/tópicos.
+Todo o gerenciamento agora é **100% via botões inline com paginação**, já presentes no bot original:
 
-### 3. Autorização de grupos/tópicos
-Comandos do dono (no DM ou no próprio grupo):
-| Comando | O que faz |
-|---|---|
-| `/addgroup [chat_id]` | Autoriza um grupo (sem restrição de tópico). |
-| `/rmgroup <chat_id>` | Remove o grupo. |
-| `/setopic [chat_id topic_id]` | Define **um** tópico (substitui). |
-| `/addtopic [chat_id topic_id]` | **Adiciona** um tópico (mantém os outros). |
-| `/rmtopic <chat_id> <topic_id>` | Remove apenas um tópico. |
-| `/listgroups` | Lista todos os grupos e tópicos autorizados. |
-| `/whoami` | Mostra IDs do contexto atual. |
+- **Painel admin** → `👥 Grupos/Tópicos`
+  - `➕ Adicionar grupo (ID)` — pede o ID via prompt inline
+  - `➖ Remover grupo` — pede o ID via prompt inline
+  - `📌 Definir tópico` — encaminhe uma mensagem do tópico **OU** envie `chat_id topic_id`
+  - `🔄 Atualizar` — recarrega lista paginada de grupos/tópicos
+- **Painel admin** → `🛡 Permissões`
+  - Liberar/remover usuários para **Explorar** e **Busca por termo** (também paginado)
 
-Sem argumentos, os comandos usam o chat/tópico onde foram enviados.
-Você também pode **encaminhar** uma mensagem do tópico depois de clicar
-em "Definir tópico" no painel `/start → ⚙️ → 👥 Grupos`.
+### 2. Pasta `grupos/` na pasta do bot
+- Criada automaticamente em `BASE_DIR / "grupos"`.
+- `groups_config.json` agora vive em `grupos/groups_config.json`.
+- **Migração automática**: se já existir um `groups_config.json` antigo na raiz do bot, ele é movido para `grupos/` no primeiro start (sem perda de dados).
 
-Exemplo do enunciado:
-```
-/addgroup -1234567890        # grupo A
-/addtopic -1234567890 2407   # tópico do grupo A
+### 3. Tudo salvo na **mesma pasta** do bot
+Já era assim no original (`BASE_DIR = Path(__file__).resolve().parent`), mantido intacto:
+- `.env`
+- `arl_user.txt`
+- `users_info.json`
+- `admin_config.json`
+- `permissions.json`
+- `grupos/groups_config.json`  ← novo path
+- `downloads/`  ← arquivos baixados
+- `dz_bot_v12.session`
 
-/addgroup -1234567891        # grupo B
-/addtopic -1234567891 3208876
-```
+### 4. Reconhecimento de tópicos (já existia, mantido)
+- `_event_topic_id(event)` extrai o `topic_id` da mensagem (suporta forum topics).
+- `_set_target(uid, chat_id, topic_id)` memoriza onde o usuário fez a busca.
+- Todos os envios (`_send_card`, `send_menu`, downloads, etc.) usam `reply_to=topic_id`, garantindo que **a resposta cai no tópico correto** do grupo correto.
+- Em DM apenas o owner pode usar; em grupos só responde nos pares (chat, tópico) autorizados.
 
-### 4. Buscas
-- **DM**: qualquer usuário pode enviar termos OU links Deezer e receber
-  resultados. Recursos premium/admin continuam restritos.
-- **Grupo**: só funciona em grupos (e tópicos) autorizados. Buscas e
-  resultados ficam confinados ao tópico de origem.
-- **Grupo não autorizado**: o bot fica em silêncio total (não responde nem
-  vaza erros).
+### 5. Reconhecimento do dono
+- `OWNER_ID` é lido do `.env`.
+- `_is_owner(event)` é usado em todo handler privilegiado.
+- Owner tem acesso ao painel completo (`👤 Owner` no menu) e bypassa restrições de grupo/tópico.
 
-## .env esperado
-```
-API_ID=123456
-API_HASH=abc...
-BOT_TOKEN=123:abc
-OWNER_ID=111222333
-CHANNEL_ID=0           # opcional
-```
+## ▶️ Como rodar (Termux / Linux)
 
-## Como rodar (Termux/Linux)
-```
-cd public/bot_painel2
+```bash
+cd "public/bot_painel2"
 python3 bot_painel2.py
 ```
-As dependências (`telethon`, `deemix`, etc.) são instaladas automaticamente
-no primeiro start.
+
+As dependências (`telethon`, `requests`, `urllib3`, `python-dotenv`, `mutagen`, `deezer-py`, `deemix`) são instaladas automaticamente no primeiro start.
+
+## ⚙️ `.env` esperado (na pasta do bot)
+
+```
+API_ID=123456
+API_HASH=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+BOT_TOKEN=123:ABC...
+OWNER_ID=123456789
+CHANNEL_ID=0
+```
+
+## 📌 Configurando os grupos pelo bot (sem comandos "/")
+
+1. Abra DM com o bot e envie `/start` → aparece o menu inline.
+2. Toque em **`👤 Owner`** → **`👥 Grupos/Tópicos`**.
+3. **`➕ Adicionar grupo (ID)`** → envie `-1003708574604` (ou o ID do seu grupo).
+4. **`📌 Definir tópico`** → envie `-1003708574604 2407` (chat_id seguido do topic_id), ou encaminhe uma mensagem do próprio tópico.
+5. Pronto — o bot só responderá naquele tópico, e todas as buscas/cards/downloads acionados de lá voltam no mesmo tópico.
