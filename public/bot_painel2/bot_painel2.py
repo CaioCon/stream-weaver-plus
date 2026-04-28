@@ -2107,7 +2107,7 @@ async def h_forwarded_topic(event):
     if src_chat is None or src_topic is None:
         return await event.respond(
             "❌ Não consegui extrair tópico desta mensagem.\n"
-            "Use `/setopic <chat_id> <topic_id>` manualmente.",
+            "Use o painel: 👥 Grupos/Tópicos → 📌 Definir tópico, e envie `chat_id topic_id`.",
             parse_mode="md")
     groups_cfg.add_group(src_chat)
     groups_cfg.set_topic(src_chat, src_topic)
