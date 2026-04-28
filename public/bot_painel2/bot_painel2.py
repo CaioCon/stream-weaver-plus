@@ -2231,6 +2231,74 @@ async def h_forwarded_topic(event):
         buttons=[[Button.inline("👥 Grupos", b"ow:groups"),
                   Button.inline("🏠 Menu",   b"mn")]])
 
+
+# ─── Reconhecimento do dono / múltiplos tópicos por grupo ─────
+@bot.on(events.NewMessage(pattern=r"^/whoami$"))
+async def h_cmd_whoami(event):
+    """Mostra ID do remetente, ID do chat e tópico atual."""
+    sender_id = event.sender_id
+    chat_id   = _event_chat_id(event)
+    topic_id  = _event_topic_id(event)
+    owner_tag = "👑 **DONO**" if is_owner(sender_id) else "👤 usuário"
+    await event.respond(
+        f"{owner_tag}\n"
+        f"• Seu ID: `{sender_id}`\n"
+        f"• Chat ID: `{chat_id}`\n"
+        f"• Tópico: `{topic_id if topic_id else '—'}`\n"
+        f"• OWNER_ID configurado: `{OWNER_ID}`",
+        parse_mode="md")
+
+@bot.on(events.NewMessage(pattern=r"^/addtopic(?:\s+(-?\d+)\s+(\d+))?$"))
+async def h_cmd_addtopic(event):
+    """Adiciona um tópico autorizado ao grupo (sem remover os existentes)."""
+    if not _is_owner(event):
+        return
+    g1 = event.pattern_match.group(1)
+    g2 = event.pattern_match.group(2)
+    if g1 and g2:
+        chat_id, topic_id = int(g1), int(g2)
+    else:
+        chat_id  = _event_chat_id(event)
+        topic_id = _event_topic_id(event)
+        if not topic_id:
+            return await event.respond(
+                "ℹ️ Envie `/addtopic` dentro do tópico ou use "
+                "`/addtopic <chat_id> <topic_id>`.", parse_mode="md")
+    groups_cfg.add_group(chat_id)
+    groups_cfg.add_topic(chat_id, topic_id)
+    await event.respond(
+        f"✅ Tópico `{topic_id}` autorizado em `{chat_id}`.",
+        parse_mode="md")
+
+@bot.on(events.NewMessage(pattern=r"^/rmtopic\s+(-?\d+)\s+(\d+)$"))
+async def h_cmd_rmtopic(event):
+    if not _is_owner(event):
+        return
+    chat_id  = int(event.pattern_match.group(1))
+    topic_id = int(event.pattern_match.group(2))
+    ok = groups_cfg.remove_topic(chat_id, topic_id)
+    await event.respond(
+        f"✅ Tópico `{topic_id}` removido de `{chat_id}`."
+        if ok else "ℹ️ Tópico não estava na lista.",
+        parse_mode="md")
+
+@bot.on(events.NewMessage(pattern=r"^/listgroups$"))
+async def h_cmd_listgroups(event):
+    if not _is_owner(event):
+        return
+    g = groups_cfg.list_groups()
+    if not g:
+        return await event.respond("ℹ️ Nenhum grupo autorizado.")
+    lines = ["👥 **Grupos autorizados:**"]
+    for cid, info in g.items():
+        title = info.get("title") or "(sem título)"
+        ids = list(info.get("topic_ids") or [])
+        if info.get("topic_id") is not None and info["topic_id"] not in ids:
+            ids.append(info["topic_id"])
+        topics = ", ".join(f"`{t}`" for t in ids) if ids else "todos"
+        lines.append(f"• `{cid}` — {title}\n   Tópicos: {topics}")
+    await event.respond("\n".join(lines), parse_mode="md")
+
 # ─── Mensagens de texto / links ───────────────────────────────
 @bot.on(events.NewMessage())
 async def h_text(event):
