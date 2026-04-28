@@ -257,8 +257,18 @@ admin_cfg = AdminConfig(ADMIN_CFG_FILE)
 # ═══════════════════════════════════════════════════════════════
 # GROUPS / TOPICS / PERMISSIONS  (NOVO)
 # ═══════════════════════════════════════════════════════════════
-GROUPS_CFG_FILE = BASE_DIR / "groups_config.json"
+GROUPS_CFG_FILE = GRUPOS_DIR / "groups_config.json"
 PERMS_FILE      = BASE_DIR / "permissions.json"
+
+# Migração automática: se existir groups_config.json antigo na BASE_DIR,
+# move para a nova pasta grupos/ (preserva config existente).
+_LEGACY_GROUPS = BASE_DIR / "groups_config.json"
+if _LEGACY_GROUPS.exists() and not GROUPS_CFG_FILE.exists():
+    try:
+        GROUPS_CFG_FILE.write_bytes(_LEGACY_GROUPS.read_bytes())
+        _LEGACY_GROUPS.unlink()
+    except Exception:
+        pass
 
 class GroupsConfig:
     """
