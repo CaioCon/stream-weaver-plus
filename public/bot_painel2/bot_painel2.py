@@ -75,11 +75,12 @@ from mutagen.mp3 import MP3
 BASE_DIR        = Path(__file__).resolve().parent
 ENV_PATH        = BASE_DIR / ".env"
 DOWNLOAD_DIR    = BASE_DIR / "downloads"
+GRUPOS_DIR      = BASE_DIR / "grupos"
 ARL_FILE        = BASE_DIR / "arl_user.txt"
 USERS_INFO_FILE = BASE_DIR / "users_info.json"
 ADMIN_CFG_FILE  = BASE_DIR / "admin_config.json"
 
-for _d in (BASE_DIR, DOWNLOAD_DIR):
+for _d in (BASE_DIR, DOWNLOAD_DIR, GRUPOS_DIR):
     _d.mkdir(parents=True, exist_ok=True)
 
 # ═══════════════════════════════════════════════════════════════
@@ -256,8 +257,18 @@ admin_cfg = AdminConfig(ADMIN_CFG_FILE)
 # ═══════════════════════════════════════════════════════════════
 # GROUPS / TOPICS / PERMISSIONS  (NOVO)
 # ═══════════════════════════════════════════════════════════════
-GROUPS_CFG_FILE = BASE_DIR / "groups_config.json"
+GROUPS_CFG_FILE = GRUPOS_DIR / "groups_config.json"
 PERMS_FILE      = BASE_DIR / "permissions.json"
+
+# Migração automática: se existir groups_config.json antigo na BASE_DIR,
+# move para a nova pasta grupos/ (preserva config existente).
+_LEGACY_GROUPS = BASE_DIR / "groups_config.json"
+if _LEGACY_GROUPS.exists() and not GROUPS_CFG_FILE.exists():
+    try:
+        GROUPS_CFG_FILE.write_bytes(_LEGACY_GROUPS.read_bytes())
+        _LEGACY_GROUPS.unlink()
+    except Exception:
+        pass
 
 class GroupsConfig:
     """
@@ -312,78 +323,19 @@ class GroupsConfig:
             self._data["groups"][key] = cur
             self._save()
 
-    def _topics_for(self, key: str) -> list[int]:
-        """Retorna lista de tópicos autorizados para o grupo (vazia = grupo inteiro)."""
-        g = self._data["groups"].get(key) or {}
-        # Suporta tanto 'topic_id' (legado) quanto 'topic_ids' (lista)
-        ids: list[int] = []
-        if isinstance(g.get("topic_ids"), list):
-            ids = [int(t) for t in g["topic_ids"] if t is not None]
-        single = g.get("topic_id")
-        if single is not None and int(single) not in ids:
-            ids.append(int(single))
-        return ids
-
     def is_allowed(self, chat_id: int, topic_id: int | None) -> bool:
         key = str(chat_id)
         g = self._data["groups"].get(key)
         if not g:
             return False
-        topics = self._topics_for(key)
-        if not topics:
-            # grupo inteiro liberado (sem restrição de tópico)
-            return True
-        # grupo tem tópico(s) configurado(s) → mensagem precisa vir de um deles
-        if topic_id is None:
-            return False
-        return int(topic_id) in topics
+        cfg_topic = g.get("topic_id")
+        if cfg_topic is None:
+            return True  # grupo inteiro liberado
+        return cfg_topic == (topic_id or 0) or cfg_topic == topic_id
 
-    def topic_for(self, chat_id: int, incoming_topic: int | None = None) -> int | None:
-        """
-        Retorna o tópico-alvo para responder.
-        Se a mensagem veio de um tópico autorizado, responde nele.
-        Caso contrário, cai no primeiro tópico configurado (legado).
-        """
-        key = str(chat_id)
-        topics = self._topics_for(key)
-        if not topics:
-            return None
-        if incoming_topic is not None and int(incoming_topic) in topics:
-            return int(incoming_topic)
-        return topics[0]
-
-    def add_topic(self, chat_id: int, topic_id: int):
-        """Adiciona um tópico autorizado ao grupo (mantém os existentes)."""
-        with self._lock:
-            key = str(chat_id)
-            cur = self._data["groups"].get(key, {"title": "", "topic_id": None})
-            ids = list(cur.get("topic_ids") or [])
-            if cur.get("topic_id") is not None and cur["topic_id"] not in ids:
-                ids.append(int(cur["topic_id"]))
-            if int(topic_id) not in ids:
-                ids.append(int(topic_id))
-            cur["topic_ids"] = ids
-            cur["topic_id"]  = ids[0]  # mantém compat
-            self._data["groups"][key] = cur
-            self._save()
-
-    def remove_topic(self, chat_id: int, topic_id: int) -> bool:
-        with self._lock:
-            key = str(chat_id)
-            cur = self._data["groups"].get(key)
-            if not cur:
-                return False
-            ids = list(cur.get("topic_ids") or [])
-            if cur.get("topic_id") is not None and cur["topic_id"] not in ids:
-                ids.append(int(cur["topic_id"]))
-            if int(topic_id) not in ids:
-                return False
-            ids = [t for t in ids if int(t) != int(topic_id)]
-            cur["topic_ids"] = ids
-            cur["topic_id"]  = ids[0] if ids else None
-            self._data["groups"][key] = cur
-            self._save()
-            return True
+    def topic_for(self, chat_id: int) -> int | None:
+        g = self._data["groups"].get(str(chat_id))
+        return (g or {}).get("topic_id")
 
     def list_groups(self) -> dict:
         return dict(self._data["groups"])
@@ -1228,98 +1180,77 @@ def _event_chat_id(event) -> int:
         return int(event.sender_id)
 
 def _event_topic_id(event) -> int | None:
-    """Extrai topic id de mensagens de fórum (Telethon).
-
-    Cobre os casos:
-      • reply_to.forum_topic = True  → reply_to_top_id (ou reply_to_msg_id quando é a 1ª msg do tópico)
-      • reply_to.reply_to_top_id presente (mesmo sem flag)
-      • mensagem é a própria criação do tópico (action ForumTopicCreated)
-    """
+    """Extrai topic id de mensagens de fórum (se houver)."""
     try:
         msg = getattr(event, "message", None) or event
-        # Caso especial: a própria mensagem É o tópico
-        action = getattr(msg, "action", None)
-        if action is not None and type(action).__name__ == "MessageActionTopicCreate":
-            return int(getattr(msg, "id", 0)) or None
-
+        # Telethon: ForumTopic via reply_to.forum_topic
         rt = getattr(msg, "reply_to", None)
         if rt is None:
             return None
+        # forum_topic flag
         if getattr(rt, "forum_topic", False):
-            top = getattr(rt, "reply_to_top_id", None) \
-                  or getattr(rt, "reply_to_msg_id", None)
-            return int(top) if top else None
+            return getattr(rt, "reply_to_top_id", None) \
+                   or getattr(rt, "reply_to_msg_id", None)
         top = getattr(rt, "reply_to_top_id", None)
         if top:
-            return int(top)
+            return top
     except Exception:
         pass
     return None
 
-
-# Roteamento por (uid, chat_id) — evita colisão quando o mesmo usuário
-# fala em múltiplos grupos/tópicos.
-_user_target: dict[tuple[int, int], tuple[int, int | None]] = {}
-# Último contexto por uid (para handlers que só conhecem o uid, ex.: botões em DM)
-_last_target: dict[int, tuple[int, int | None]] = {}
+# Memoriza onde cada uid está atuando (chat,topic) para roteamento de envios
+_user_target: dict[int, tuple[int, int | None]] = {}
 
 def _set_target(uid: int, chat_id: int, topic_id: int | None):
-    _user_target[(uid, chat_id)] = (chat_id, topic_id)
-    _last_target[uid] = (chat_id, topic_id)
+    _user_target[uid] = (chat_id, topic_id)
 
-def _target_for(uid: int, chat_id: int | None = None) -> tuple[int, int | None]:
-    """Retorna (chat,topic) onde o bot deve enviar para esse uid.
+def _target_for(uid: int) -> tuple[int, int | None]:
+    """Retorna (chat,topic) onde o bot deve enviar para esse uid."""
+    return _user_target.get(uid, (uid, None))
 
-    Se chat_id for fornecido, prioriza o roteamento daquele grupo.
-    Caso contrário, usa o último contexto conhecido (ou DM com o uid).
-    """
-    if chat_id is not None:
-        t = _user_target.get((uid, chat_id))
-        if t:
-            return t
-    return _last_target.get(uid, (uid, None))
-
-def _send_kwargs(uid: int, chat_id: int | None = None) -> dict:
+def _send_kwargs(uid: int) -> dict:
     """kwargs comuns para send_message/send_file respeitando tópico."""
-    chat, topic = _target_for(uid, chat_id)
+    chat, topic = _target_for(uid)
     kw: dict = {}
     if topic:
         kw["reply_to"] = topic
     return kw
 
-def is_owner(uid: int) -> bool:
-    """Reconhece se o uid é o dono configurado em OWNER_ID."""
-    return OWNER_ID != 0 and uid == OWNER_ID
-
 async def _gate(event, is_cb: bool = True) -> bool:
     """
     Gate de origem:
-      • DMs: liberadas para qualquer usuário (busca por termo + links Deezer).
-        Recursos restritos (Explorar, painel admin, ARL premium) seguem
-        controlados pelos próprios handlers via PermissionsManager / OWNER_ID.
-      • Grupos: precisam estar registrados em groups_cfg; se houver
-        topic_id configurado, o bot só responde nesse(s) tópico(s)
-        e SEMPRE responde dentro do tópico de origem.
-      • Spam check em todos os casos.
+      - DMs: somente OWNER pode usar.
+      - Grupos: precisam estar registrados em groups_cfg; se houver
+        topic_id configurado, o bot só responde nesse tópico.
+      - Spam check em todos os casos.
     """
     sender_id = event.sender_id
     chat_id   = _event_chat_id(event)
     topic_id  = _event_topic_id(event)
     is_dm     = chat_id == sender_id
 
-    if is_dm:
-        # DM: libera para todos. Em DM, "tópico" é sempre None.
-        _set_target(sender_id, sender_id, None)
-    else:
-        # Grupo: owner pode tudo; demais precisam estar em grupo/tópico autorizado.
-        if not is_owner(sender_id):
-            if not groups_cfg.is_allowed(chat_id, topic_id):
-                # Silencioso em chats/tópicos não autorizados
-                return False
-        # Roteia respostas SEMPRE para o tópico de origem (quando autorizado)
-        # caindo no tópico principal configurado se origem não bater.
-        target_topic = groups_cfg.topic_for(chat_id, topic_id) or topic_id
-        _set_target(sender_id, chat_id, target_topic)
+    # Owner pode tudo
+    if sender_id != OWNER_ID:
+        if is_dm:
+            if is_cb:
+                await event.answer(
+                    "🔒 Este bot só funciona em grupos autorizados.",
+                    alert=True)
+            else:
+                try:
+                    await event.respond(
+                        "🔒 **Acesso restrito.**\n\n"
+                        "Este bot só responde em grupos/tópicos autorizados.",
+                        parse_mode="md")
+                except Exception:
+                    pass
+            return False
+        if not groups_cfg.is_allowed(chat_id, topic_id):
+            # Silencioso em chats/tópicos não autorizados
+            return False
+
+    # Memoriza destino para envios subsequentes
+    _set_target(sender_id, chat_id, groups_cfg.topic_for(chat_id) or topic_id)
 
     ok, msg = spam.hit(sender_id)
     if not ok:
@@ -2144,59 +2075,15 @@ async def h_ow_steps(event):
     await event.respond(prompt, parse_mode="md",
         buttons=[[Button.inline("❌ Cancelar", b"mn")]])
 
-@bot.on(events.NewMessage(pattern=r"^/addgroup(?:\s+(-?\d+))?$"))
-async def h_cmd_addgroup(event):
-    if not _is_owner(event):
-        return
-    arg = event.pattern_match.group(1)
-    chat_id = int(arg) if arg else _event_chat_id(event)
-    title = ""
-    try:
-        ent = await event.get_chat()
-        title = getattr(ent, "title", "") or ""
-    except Exception:
-        pass
-    groups_cfg.add_group(chat_id, title)
-    await event.respond(f"✅ Grupo `{chat_id}` autorizado.", parse_mode="md")
-
-@bot.on(events.NewMessage(pattern=r"^/rmgroup\s+(-?\d+)$"))
-async def h_cmd_rmgroup(event):
-    if not _is_owner(event):
-        return
-    chat_id = int(event.pattern_match.group(1))
-    ok = groups_cfg.remove_group(chat_id)
-    await event.respond("✅ Removido." if ok else "ℹ️ Não estava na lista.")
-
-@bot.on(events.NewMessage(pattern=r"^/setopic(?:\s+(-?\d+)\s+(\d+))?$"))
-async def h_cmd_setopic(event):
-    """
-    /setopic                       → usa o tópico atual da mensagem
-    /setopic <chat_id> <topic_id>  → define manualmente
-    Encaminhar mensagem do tópico após clicar em 'Definir tópico' também funciona.
-    """
-    if not _is_owner(event):
-        return
-    g1 = event.pattern_match.group(1)
-    g2 = event.pattern_match.group(2)
-    if g1 and g2:
-        chat_id = int(g1); topic_id = int(g2)
-        groups_cfg.add_group(chat_id)
-        groups_cfg.set_topic(chat_id, topic_id)
-        return await event.respond(
-            f"✅ Tópico `{topic_id}` configurado em `{chat_id}`.",
-            parse_mode="md")
-    chat_id  = _event_chat_id(event)
-    topic_id = _event_topic_id(event)
-    if not topic_id:
-        return await event.respond(
-            "ℹ️ Envie /setopic **dentro do tópico** desejado, "
-            "ou use `/setopic <chat_id> <topic_id>`.",
-            parse_mode="md")
-    groups_cfg.add_group(chat_id)
-    groups_cfg.set_topic(chat_id, topic_id)
-    await event.respond(
-        f"✅ Tópico `{topic_id}` definido para este grupo.",
-        parse_mode="md")
+# ─────────────────────────────────────────────────────────────
+# Comandos com "/" foram removidos. O gerenciamento de grupos,
+# tópicos e permissões é 100% via botões inline:
+#   • Painel admin → 👥 Grupos/Tópicos
+#       ➕ Adicionar grupo (ID)
+#       ➖ Remover grupo
+#       📌 Definir tópico  (encaminhe msg do tópico OU envie "chat_id topic_id")
+#   • Painel admin → 🛡 Permissões  (Explorar / Busca por termo)
+# ─────────────────────────────────────────────────────────────
 
 @bot.on(events.NewMessage(func=lambda e: e.forward is not None))
 async def h_forwarded_topic(event):
@@ -2220,7 +2107,7 @@ async def h_forwarded_topic(event):
     if src_chat is None or src_topic is None:
         return await event.respond(
             "❌ Não consegui extrair tópico desta mensagem.\n"
-            "Use `/setopic <chat_id> <topic_id>` manualmente.",
+            "Use o painel: 👥 Grupos/Tópicos → 📌 Definir tópico, e envie `chat_id topic_id`.",
             parse_mode="md")
     groups_cfg.add_group(src_chat)
     groups_cfg.set_topic(src_chat, src_topic)
@@ -2230,74 +2117,6 @@ async def h_forwarded_topic(event):
         parse_mode="md",
         buttons=[[Button.inline("👥 Grupos", b"ow:groups"),
                   Button.inline("🏠 Menu",   b"mn")]])
-
-
-# ─── Reconhecimento do dono / múltiplos tópicos por grupo ─────
-@bot.on(events.NewMessage(pattern=r"^/whoami$"))
-async def h_cmd_whoami(event):
-    """Mostra ID do remetente, ID do chat e tópico atual."""
-    sender_id = event.sender_id
-    chat_id   = _event_chat_id(event)
-    topic_id  = _event_topic_id(event)
-    owner_tag = "👑 **DONO**" if is_owner(sender_id) else "👤 usuário"
-    await event.respond(
-        f"{owner_tag}\n"
-        f"• Seu ID: `{sender_id}`\n"
-        f"• Chat ID: `{chat_id}`\n"
-        f"• Tópico: `{topic_id if topic_id else '—'}`\n"
-        f"• OWNER_ID configurado: `{OWNER_ID}`",
-        parse_mode="md")
-
-@bot.on(events.NewMessage(pattern=r"^/addtopic(?:\s+(-?\d+)\s+(\d+))?$"))
-async def h_cmd_addtopic(event):
-    """Adiciona um tópico autorizado ao grupo (sem remover os existentes)."""
-    if not _is_owner(event):
-        return
-    g1 = event.pattern_match.group(1)
-    g2 = event.pattern_match.group(2)
-    if g1 and g2:
-        chat_id, topic_id = int(g1), int(g2)
-    else:
-        chat_id  = _event_chat_id(event)
-        topic_id = _event_topic_id(event)
-        if not topic_id:
-            return await event.respond(
-                "ℹ️ Envie `/addtopic` dentro do tópico ou use "
-                "`/addtopic <chat_id> <topic_id>`.", parse_mode="md")
-    groups_cfg.add_group(chat_id)
-    groups_cfg.add_topic(chat_id, topic_id)
-    await event.respond(
-        f"✅ Tópico `{topic_id}` autorizado em `{chat_id}`.",
-        parse_mode="md")
-
-@bot.on(events.NewMessage(pattern=r"^/rmtopic\s+(-?\d+)\s+(\d+)$"))
-async def h_cmd_rmtopic(event):
-    if not _is_owner(event):
-        return
-    chat_id  = int(event.pattern_match.group(1))
-    topic_id = int(event.pattern_match.group(2))
-    ok = groups_cfg.remove_topic(chat_id, topic_id)
-    await event.respond(
-        f"✅ Tópico `{topic_id}` removido de `{chat_id}`."
-        if ok else "ℹ️ Tópico não estava na lista.",
-        parse_mode="md")
-
-@bot.on(events.NewMessage(pattern=r"^/listgroups$"))
-async def h_cmd_listgroups(event):
-    if not _is_owner(event):
-        return
-    g = groups_cfg.list_groups()
-    if not g:
-        return await event.respond("ℹ️ Nenhum grupo autorizado.")
-    lines = ["👥 **Grupos autorizados:**"]
-    for cid, info in g.items():
-        title = info.get("title") or "(sem título)"
-        ids = list(info.get("topic_ids") or [])
-        if info.get("topic_id") is not None and info["topic_id"] not in ids:
-            ids.append(info["topic_id"])
-        topics = ", ".join(f"`{t}`" for t in ids) if ids else "todos"
-        lines.append(f"• `{cid}` — {title}\n   Tópicos: {topics}")
-    await event.respond("\n".join(lines), parse_mode="md")
 
 # ─── Mensagens de texto / links ───────────────────────────────
 @bot.on(events.NewMessage())
@@ -2499,14 +2318,8 @@ async def h_text(event):
         asyncio.create_task(_handle_dz_link(msg, uid, tipo, iid))
         return
 
-    # Busca direta por termo:
-    #  • DM: liberada para qualquer usuário
-    #  • Grupo: liberada (já validada pelo _gate — grupo+tópico autorizado)
-    #  • Restrição legada perms.can_search ainda vale fora de DM/grupo autorizado
-    _chat_id = _event_chat_id(event)
-    _is_dm   = _chat_id == uid
-    _in_group_ok = (not _is_dm) and groups_cfg.is_allowed(_chat_id, _event_topic_id(event))
-    if not (_is_dm or _in_group_ok or perms.can_search(uid) or is_owner(uid)):
+    # Busca direta por termo — apenas autorizados
+    if not perms.can_search(uid):
         return await event.respond(
             "🔒 **Busca por nome desativada para você.**\n\n"
             "Envie diretamente um link do Deezer (álbum, faixa ou artista).",
