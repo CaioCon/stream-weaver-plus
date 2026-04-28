@@ -312,19 +312,78 @@ class GroupsConfig:
             self._data["groups"][key] = cur
             self._save()
 
+    def _topics_for(self, key: str) -> list[int]:
+        """Retorna lista de tópicos autorizados para o grupo (vazia = grupo inteiro)."""
+        g = self._data["groups"].get(key) or {}
+        # Suporta tanto 'topic_id' (legado) quanto 'topic_ids' (lista)
+        ids: list[int] = []
+        if isinstance(g.get("topic_ids"), list):
+            ids = [int(t) for t in g["topic_ids"] if t is not None]
+        single = g.get("topic_id")
+        if single is not None and int(single) not in ids:
+            ids.append(int(single))
+        return ids
+
     def is_allowed(self, chat_id: int, topic_id: int | None) -> bool:
         key = str(chat_id)
         g = self._data["groups"].get(key)
         if not g:
             return False
-        cfg_topic = g.get("topic_id")
-        if cfg_topic is None:
-            return True  # grupo inteiro liberado
-        return cfg_topic == (topic_id or 0) or cfg_topic == topic_id
+        topics = self._topics_for(key)
+        if not topics:
+            # grupo inteiro liberado (sem restrição de tópico)
+            return True
+        # grupo tem tópico(s) configurado(s) → mensagem precisa vir de um deles
+        if topic_id is None:
+            return False
+        return int(topic_id) in topics
 
-    def topic_for(self, chat_id: int) -> int | None:
-        g = self._data["groups"].get(str(chat_id))
-        return (g or {}).get("topic_id")
+    def topic_for(self, chat_id: int, incoming_topic: int | None = None) -> int | None:
+        """
+        Retorna o tópico-alvo para responder.
+        Se a mensagem veio de um tópico autorizado, responde nele.
+        Caso contrário, cai no primeiro tópico configurado (legado).
+        """
+        key = str(chat_id)
+        topics = self._topics_for(key)
+        if not topics:
+            return None
+        if incoming_topic is not None and int(incoming_topic) in topics:
+            return int(incoming_topic)
+        return topics[0]
+
+    def add_topic(self, chat_id: int, topic_id: int):
+        """Adiciona um tópico autorizado ao grupo (mantém os existentes)."""
+        with self._lock:
+            key = str(chat_id)
+            cur = self._data["groups"].get(key, {"title": "", "topic_id": None})
+            ids = list(cur.get("topic_ids") or [])
+            if cur.get("topic_id") is not None and cur["topic_id"] not in ids:
+                ids.append(int(cur["topic_id"]))
+            if int(topic_id) not in ids:
+                ids.append(int(topic_id))
+            cur["topic_ids"] = ids
+            cur["topic_id"]  = ids[0]  # mantém compat
+            self._data["groups"][key] = cur
+            self._save()
+
+    def remove_topic(self, chat_id: int, topic_id: int) -> bool:
+        with self._lock:
+            key = str(chat_id)
+            cur = self._data["groups"].get(key)
+            if not cur:
+                return False
+            ids = list(cur.get("topic_ids") or [])
+            if cur.get("topic_id") is not None and cur["topic_id"] not in ids:
+                ids.append(int(cur["topic_id"]))
+            if int(topic_id) not in ids:
+                return False
+            ids = [t for t in ids if int(t) != int(topic_id)]
+            cur["topic_ids"] = ids
+            cur["topic_id"]  = ids[0] if ids else None
+            self._data["groups"][key] = cur
+            self._save()
+            return True
 
     def list_groups(self) -> dict:
         return dict(self._data["groups"])
