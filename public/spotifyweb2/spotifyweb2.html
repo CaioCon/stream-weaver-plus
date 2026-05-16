@@ -1006,6 +1006,27 @@ function fmt(s){if(!s||isNaN(s))return'0:00';s=Math.floor(s);return`${Math.floor
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function fmtFans(n){if(!n)return'';if(n>=1e6)return`${(n/1e6).toFixed(1)}M fãs`;if(n>=1e3)return`${Math.round(n/1e3)}K fãs`;return`${n} fãs`}
 function imgErr(el){el.src=BLANK}
+/* Detecta tipo de lançamento estilo Spotify (Álbum/Single/EP/Compilação).
+   Usa record_type da Deezer quando disponível; caso contrário, heurística
+   baseada em nb_tracks (Single ≤2, EP 3–6, Álbum 7+). */
+function albumKind(a){
+  const nt=Number(a.nb_tracks||a.tracks_n||a.tracks||0)||0;
+  const rt=String(a.record_type||a.type_release||'').toLowerCase();
+  if(rt==='single')   return {label:'Single',     cls:'cb-single',  tracks:nt};
+  if(rt==='ep')       return {label:'EP',         cls:'cb-ep',      tracks:nt};
+  if(rt==='compile')  return {label:'Compilação', cls:'cb-compile', tracks:nt};
+  if(rt==='album')    return {label:'Álbum',      cls:'cb-album',   tracks:nt};
+  if(nt>0&&nt<=2)     return {label:'Single',     cls:'cb-single',  tracks:nt};
+  if(nt>=3&&nt<=6)    return {label:'EP',         cls:'cb-ep',      tracks:nt};
+  return {label:'Álbum', cls:'cb-album', tracks:nt};
+}
+function albumSubMeta(a){
+  const k=albumKind(a);
+  const parts=[];
+  if(a.year) parts.push(a.year);
+  if(k.tracks>0) parts.push(k.tracks+(k.tracks===1?' faixa':' faixas'));
+  return parts.join(' · ');
+}
 
 async function checkHealth(){
   try{
