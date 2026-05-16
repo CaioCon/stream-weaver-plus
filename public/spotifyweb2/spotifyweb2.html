@@ -1460,6 +1460,29 @@ async function openArtist(artistId){
     (d.albums||[]).forEach(a=>{const k=albumKind(a);const meta=albumSubMeta(a)||(a.year||'');ahtml+=`<div class="card" data-album-id="${a.id}"><img class="card-img" src="${esc(a.cover_xl||a.cover)}" onerror="imgErr(this)" loading="lazy"/><button class="card-play">▶</button><div class="card-badge ${k.cls}">${k.label}</div><div class="card-title">${esc(a.title)}</div><div class="card-sub">${meta||'—'}</div></div>`});
     document.getElementById('ap-alb-grid').innerHTML=ahtml||'<div style="padding:1rem;color:var(--sub);grid-column:1/-1">Sem álbuns</div>';
     document.querySelectorAll('#ap-alb-grid .card[data-album-id]').forEach(el=>{el.addEventListener('click',()=>openAlbum(el.dataset.albumId))});
+    /* Enriquecimento Spotify-like: busca nb_tracks + record_type quando faltar,
+       atualizando badge (Álbum/Single/EP) e legenda "N faixas" em segundo plano. */
+    (async()=>{
+      const cards=[...document.querySelectorAll('#ap-alb-grid .card[data-album-id]')];
+      const need=(d.albums||[]).filter(a=>!a.record_type||!(a.nb_tracks||a.tracks_n||a.tracks));
+      if(!need.length)return;
+      const CONC=4;let i=0;
+      async function worker(){
+        while(i<need.length){
+          const a=need[i++];
+          try{
+            const r=await fetch(`/album/${a.id}`);if(!r.ok)continue;
+            const det=await r.json();
+            const merged={...a,nb_tracks:det.nb_tracks||det.tracks_n||(det.tracks?det.tracks.length:0)||0,record_type:det.record_type||a.record_type,year:a.year||(det.release_date||'').slice(0,4)};
+            const k=albumKind(merged);const meta=albumSubMeta(merged)||(merged.year||'');
+            const card=cards.find(c=>c.dataset.albumId==String(a.id));if(!card)continue;
+            const badge=card.querySelector('.card-badge');if(badge){badge.className='card-badge '+k.cls;badge.textContent=k.label}
+            const sub=card.querySelector('.card-sub');if(sub)sub.textContent=meta||'—';
+          }catch(_){/* silencioso */}
+        }
+      }
+      await Promise.all(Array.from({length:CONC},worker));
+    })();
     updateActiveUI();
   }catch(e){
     document.getElementById('ap-name').textContent='Erro';document.getElementById('ap-meta').textContent=e.message;
