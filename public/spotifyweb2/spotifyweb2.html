@@ -1457,7 +1457,7 @@ async function openArtist(artistId){
     document.getElementById('ap-top-list').innerHTML=thtml||'<div style="padding:1rem;color:var(--sub)">Nenhuma faixa</div>';
     document.querySelectorAll('#ap-top-list .chi[data-idx]').forEach(el=>{el.addEventListener('click',()=>playIdx(parseInt(el.dataset.idx)))});
     let ahtml='';
-    (d.albums||[]).forEach(a=>{ahtml+=`<div class="card" data-album-id="${a.id}"><img class="card-img" src="${esc(a.cover_xl||a.cover)}" onerror="imgErr(this)" loading="lazy"/><button class="card-play">▶</button><div class="card-badge cb-album">Álbum</div><div class="card-title">${esc(a.title)}</div><div class="card-sub">${a.year||''} · ${a.tracks_n||0} faixas</div></div>`});
+    (d.albums||[]).forEach(a=>{const k=albumKind(a);const meta=albumSubMeta(a)||(a.year||'');ahtml+=`<div class="card" data-album-id="${a.id}"><img class="card-img" src="${esc(a.cover_xl||a.cover)}" onerror="imgErr(this)" loading="lazy"/><button class="card-play">▶</button><div class="card-badge ${k.cls}">${k.label}</div><div class="card-title">${esc(a.title)}</div><div class="card-sub">${meta||'—'}</div></div>`});
     document.getElementById('ap-alb-grid').innerHTML=ahtml||'<div style="padding:1rem;color:var(--sub);grid-column:1/-1">Sem álbuns</div>';
     document.querySelectorAll('#ap-alb-grid .card[data-album-id]').forEach(el=>{el.addEventListener('click',()=>openAlbum(el.dataset.albumId))});
     updateActiveUI();
