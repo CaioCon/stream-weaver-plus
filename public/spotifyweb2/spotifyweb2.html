@@ -790,38 +790,54 @@ img{-webkit-user-drag:none;user-drag:none;pointer-events:auto}
   white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
   width:100%!important;
 }
-/* Play button do artista — centralizado sobre o avatar */
+/* Card é o âncora do botão de play */
+.artists-grid .card{position:relative!important;overflow:hidden!important}
+
+/* Play button do artista — sobreposto no canto inferior-direito do avatar (estilo Spotify) */
 .artists-grid .card-play{
   position:absolute!important;
-  top:auto!important;bottom:auto!important;
-  left:50%!important;right:auto!important;
-  transform:translate(-50%,calc(-100% - 1rem)) scale(.92)!important;
+  left:auto!important;right:auto!important;bottom:auto!important;
+  /* posiciona no canto inferior-direito da imagem (avatar) */
+  top:calc(1rem + min(150px, 100% - 1.5rem) - 24px)!important;
+  /* desloca para o lado direito do avatar */
+  margin-left:calc(min(150px, 100% - 1.5rem) / 2 - 28px)!important;
+  left:50%!important;
   width:44px!important;height:44px!important;border-radius:50%!important;
   background:#1db954!important;color:#000!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
   box-shadow:0 8px 22px rgba(0,0,0,.55)!important;
-  opacity:0;transition:opacity .18s,transform .18s,background .15s!important;
+  opacity:0;transform:translateY(8px) scale(.92)!important;
+  transition:opacity .18s,transform .18s,background .15s!important;
 }
-.artists-grid .card{position:relative!important}
 .artists-grid .card:hover .card-play{
   opacity:1!important;
-  transform:translate(-50%,calc(-100% - 1rem)) scale(1)!important;
+  transform:translateY(0) scale(1)!important;
 }
 .artists-grid .card-play:hover{background:#1ed760!important}
 
 /* Mobile: 2 colunas com avatares menores (não estourar a tela) */
 @media(max-width:800px){
-  .artists-grid{grid-template-columns:repeat(2,1fr)!important;gap:.6rem!important}
-  .artists-grid .card{padding:.85rem .55rem!important}
+  .artists-grid{grid-template-columns:repeat(2,1fr)!important;gap:.7rem!important}
+  .artists-grid .card{padding:.9rem .6rem!important}
   .artists-grid .card-img{max-width:130px!important}
-  .artists-grid .card-play{opacity:1!important;transform:translate(-50%,calc(-100% - .75rem)) scale(1)!important;width:40px!important;height:40px!important}
+  .artists-grid .card-play{
+    opacity:1!important;transform:translateY(0) scale(1)!important;
+    width:40px!important;height:40px!important;
+    top:calc(.9rem + min(130px, 100% - 1.2rem) - 22px)!important;
+    margin-left:calc(min(130px, 100% - 1.2rem) / 2 - 26px)!important;
+  }
   .artists-grid .card-title{font-size:.85rem!important}
   .artists-grid .card-sub{font-size:.7rem!important}
 }
 @media(max-width:380px){
   .artists-grid{grid-template-columns:repeat(2,1fr)!important;gap:.5rem!important}
-  .artists-grid .card{padding:.7rem .4rem!important}
+  .artists-grid .card{padding:.7rem .45rem!important}
   .artists-grid .card-img{max-width:110px!important}
-  .artists-grid .card-play{width:36px!important;height:36px!important}
+  .artists-grid .card-play{
+    width:36px!important;height:36px!important;
+    top:calc(.7rem + min(110px, 100% - .9rem) - 20px)!important;
+    margin-left:calc(min(110px, 100% - .9rem) / 2 - 24px)!important;
+  }
 }
 
 /* Discografia: badges por tipo (Álbum / Single / EP / Compilação) */
