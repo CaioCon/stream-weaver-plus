@@ -973,6 +973,54 @@ main{background:#000}
   .modal{max-height:95vh !important}
 }
 
+/* PATCH v6 — correção definitiva: botão preso na CAPA, nunca sobre texto/card */
+.cards-grid .card,
+#ap-alb-grid .card,
+.aptab-panel .cards-grid .card{
+  position:relative !important;
+  container-type:inline-size !important;
+  overflow:hidden !important;
+}
+.cards-grid .card-play,
+#ap-alb-grid .card-play,
+.aptab-panel .cards-grid .card-play{
+  top:calc(.7rem + 100cqw - 1.4rem - 20px) !important;
+  bottom:auto !important;
+  right:.7rem !important;
+  left:auto !important;
+  width:40px !important;
+  height:40px !important;
+  opacity:1 !important;
+  transform:none !important;
+  z-index:4 !important;
+}
+.cards-grid .card:hover .card-play,
+#ap-alb-grid .card:hover .card-play,
+.aptab-panel .cards-grid .card:hover .card-play{
+  transform:scale(1.04) !important;
+}
+@media(max-width:800px){
+  .cards-grid .card-play,
+  #ap-alb-grid .card-play,
+  .aptab-panel .cards-grid .card-play{
+    top:calc(.55rem + 100cqw - 1.1rem - 18px) !important;
+    right:.55rem !important;
+    width:36px !important;
+    height:36px !important;
+    font-size:.78rem !important;
+  }
+}
+@media(max-width:380px){
+  .cards-grid .card-play,
+  #ap-alb-grid .card-play,
+  .aptab-panel .cards-grid .card-play{
+    top:calc(.45rem + 100cqw - .9rem - 17px) !important;
+    right:.5rem !important;
+    width:34px !important;
+    height:34px !important;
+  }
+}
+
 </style>
 </head>
 <body>
