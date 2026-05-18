@@ -871,6 +871,108 @@ main{background:#000}
   }
 }
 
+/* ══════════════════════════════════════════
+   PATCH v5 — Ajustes solicitados:
+   1) Botão play SEMPRE dentro da capa (nunca sobre o nome)
+   2) Botões do player drawer um pouco menores e mais bonitos
+   3) Lista de músicas (modal) mostrando mais faixas
+═══════════════════════════════════════════ */
+
+/* 1 — Botão play ancorado ao final da CAPA do álbum/track usando container queries.
+       Como .card-img tem width:100% e aspect-ratio:1, sua altura = largura interna do card.
+       cqw permite calcular a partir do container (.card). */
+.cards-grid .card{container-type:inline-size}
+.cards-grid .card-play{
+  top:calc(.7rem + 100cqw - 1.4rem - 22px) !important;
+  bottom:auto !important;
+  right:.7rem !important;
+  left:auto !important;
+  width:44px !important;
+  height:44px !important;
+  font-size:.95rem !important;
+  background:#1ed760 !important;color:#000 !important;
+  box-shadow:0 8px 20px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.15) !important;
+}
+.cards-grid .card:hover .card-play{transform:translateY(0) scale(1) !important}
+@media(max-width:800px){
+  .cards-grid .card-play{
+    top:calc(.55rem + 100cqw - 1.1rem - 20px) !important;
+    right:.55rem !important;
+    width:40px !important;height:40px !important;
+  }
+}
+@media(max-width:380px){
+  .cards-grid .card-play{
+    top:calc(.45rem + 100cqw - .9rem - 18px) !important;
+    width:36px !important;height:36px !important;
+  }
+}
+
+/* 2 — Player drawer: botões menores e mais elegantes */
+.pd-ctrl{gap:.9rem !important;padding:.5rem 1.25rem .35rem !important}
+.pd-btn{
+  width:42px !important;height:42px !important;
+  font-size:1.05rem !important;
+  background:rgba(255,255,255,.08) !important;
+  border:1px solid rgba(255,255,255,.1) !important;
+  color:rgba(255,255,255,.85) !important;
+  backdrop-filter:blur(8px);
+}
+.pd-btn:hover{
+  background:rgba(255,255,255,.16) !important;
+  color:#fff !important;border-color:rgba(255,255,255,.22) !important;
+  transform:scale(1.08) !important;
+}
+.pd-play{
+  width:56px !important;height:56px !important;font-size:1.25rem !important;
+  background:#1ed760 !important;color:#000 !important;
+  box-shadow:0 10px 26px rgba(30,215,96,.35),0 4px 12px rgba(0,0,0,.4) !important;
+}
+.pd-play:hover{
+  background:#22e065 !important;
+  transform:scale(1.06) !important;
+  box-shadow:0 12px 30px rgba(30,215,96,.5) !important;
+}
+
+/* Player bar (desktop) – também reduz e refina os controles */
+.pb-btn{font-size:.92rem !important;padding:.32rem !important}
+.pb-play{
+  width:34px !important;height:34px !important;font-size:.85rem !important;
+  background:#fff !important;color:#000 !important;
+  box-shadow:0 4px 12px rgba(0,0,0,.45) !important;
+}
+.pb-play:hover{background:#1ed760 !important;transform:scale(1.07) !important}
+
+/* Mini-player mobile */
+.mini-play{width:32px !important;height:32px !important;font-size:.8rem !important}
+
+/* 3 — Lista de músicas maior (modal + drawer queue) */
+.modal{max-height:94vh !important}
+.modal-hdr{padding:1rem 1.25rem !important}
+.modal-cover-row{margin-bottom:.75rem !important}
+.modal-cover{width:84px !important;height:84px !important}
+.track-list{padding:.25rem 0 1rem !important}
+.tl-item{padding:.32rem 1rem !important;margin:0 .25rem !important}
+.tl-title{font-size:.84rem !important}
+.tl-num{font-size:.7rem !important}
+.tl-dur{font-size:.66rem !important}
+
+/* Drawer queue mais compacta = mais músicas visíveis */
+.pd-cover-wrap{padding:.2rem 5.5rem 0 !important}
+.pd-info{padding:.85rem 1.5rem .25rem !important}
+.pd-queue-hdr{padding:.35rem 1.5rem .15rem !important}
+.pq-item{padding:.3rem 1.25rem !important;margin:0 .3rem !important}
+.pq-cover{width:34px !important;height:34px !important}
+.pq-title{font-size:.78rem !important}
+.pq-artist{font-size:.66rem !important}
+
+@media(max-width:600px){
+  .pd-cover-wrap{padding:.2rem 3.5rem 0 !important}
+  .pd-btn{width:40px !important;height:40px !important;font-size:1rem !important}
+  .pd-play{width:54px !important;height:54px !important;font-size:1.2rem !important}
+  .modal{max-height:95vh !important}
+}
+
 </style>
 </head>
 <body>
