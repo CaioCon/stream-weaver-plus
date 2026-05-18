@@ -976,14 +976,16 @@ main{background:#000}
 /* PATCH v6 — correção definitiva: botão preso na CAPA, nunca sobre texto/card */
 .cards-grid .card,
 #ap-alb-grid .card,
-.aptab-panel .cards-grid .card{
+.aptab-panel .cards-grid .card,
+.artists-grid .card{
   position:relative !important;
   container-type:inline-size !important;
   overflow:hidden !important;
 }
 .cards-grid .card-play,
 #ap-alb-grid .card-play,
-.aptab-panel .cards-grid .card-play{
+.aptab-panel .cards-grid .card-play,
+.artists-grid .card-play{
   top:calc(.7rem + 100cqw - 1.4rem - 20px) !important;
   bottom:auto !important;
   right:.7rem !important;
@@ -996,7 +998,8 @@ main{background:#000}
 }
 .cards-grid .card:hover .card-play,
 #ap-alb-grid .card:hover .card-play,
-.aptab-panel .cards-grid .card:hover .card-play{
+.aptab-panel .cards-grid .card:hover .card-play,
+.artists-grid .card:hover .card-play{
   transform:scale(1.04) !important;
 }
 @media(max-width:800px){
