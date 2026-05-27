@@ -525,15 +525,20 @@ def _build_track(path: Path, enrich: bool = True) -> dict:
     }
 
 
-def _scan_library(music_dir: Path, enrich: bool = True):
+def _scan_library(music_dirs, enrich: bool = True):
+    """Escaneia um diretório (Path) ou uma lista deles."""
     global _scan_status
+    if isinstance(music_dirs, (str, Path)):
+        roots = [Path(music_dirs)]
+    else:
+        roots = [Path(d) for d in music_dirs]
     with _library_lock:
         _library.clear()
-    _scan_status.update({"running": True, "done": 0, "error": None, "current": ""})
+    _scan_status.update({"running": True, "done": 0, "error": None,
+                         "current": "", "roots": [str(r) for r in roots]})
 
     try:
-        files = [p for p in music_dir.rglob("*")
-                 if p.is_file() and p.suffix.lower() in AUDIO_EXTS]
+        files = list(_iter_audio_files(roots))
         _scan_status["total"] = len(files)
 
         for f in files:
@@ -564,19 +569,35 @@ def index():
 
 @app.route("/api/scan", methods=["POST"])
 def api_scan():
-    """Inicia scan assíncrono. Body JSON opcional: {"dir": "/path", "enrich": true}"""
+    """Inicia scan assíncrono.
+    Body JSON opcional:
+      {"dir": "/path"}            → escaneia um diretório
+      {"dirs": ["/a","/b"]}       → escaneia vários
+      {} (vazio)                   → escaneia TODOS os diretórios descobertos no dispositivo
+      "enrich": bool               → habilita enriquecimento via Deezer (padrão true)
+    """
     body    = request.get_json(silent=True) or {}
-    dir_arg = body.get("dir", "").strip()
+    dir_arg = (body.get("dir") or "").strip()
+    dirs_arg = body.get("dirs") or []
     enrich  = bool(body.get("enrich", True))
-    target  = Path(dir_arg) if dir_arg else MUSIC_DIR
 
-    if not target.exists() or not target.is_dir():
-        return jsonify({"error": f"Diretório não encontrado: {target}"}), 400
+    if dirs_arg:
+        targets = [Path(d).expanduser() for d in dirs_arg if str(d).strip()]
+    elif dir_arg:
+        targets = [Path(dir_arg).expanduser()]
+    else:
+        targets = MUSIC_ROOTS
+
+    targets = [t for t in targets if t.exists() and t.is_dir()]
+    if not targets:
+        return jsonify({"error": "Nenhum diretório válido para escanear"}), 400
     if _scan_status["running"]:
         return jsonify({"error": "Scan já em andamento"}), 409
 
-    threading.Thread(target=_scan_library, args=(target, enrich), daemon=True).start()
-    return jsonify({"message": "Scan iniciado", "dir": str(target), "enrich": enrich})
+    threading.Thread(target=_scan_library, args=(targets, enrich), daemon=True).start()
+    return jsonify({"message": "Scan iniciado",
+                    "dirs": [str(t) for t in targets],
+                    "enrich": enrich})
 
 
 @app.route("/api/scan/status")
