@@ -1301,6 +1301,8 @@ function loadIdx(i){
   // fav state
   const fb=document.getElementById('btn-fav');
   fb.classList.toggle('on', favSet.has(t.id));
+  const mpxf=document.getElementById('mpx-fav');
+  if(mpxf) mpxf.classList.toggle('on', favSet.has(t.id));
 
   renderQueue();
   renderTracks();
