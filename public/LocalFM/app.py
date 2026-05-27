@@ -938,7 +938,9 @@ if __name__ == "__main__":
             print(f"⚠️   Porta {_preferred} em uso — usando porta {port} automaticamente.")
 
     print(f"🎵  Local Music Player → http://0.0.0.0:{port}")
-    print(f"📁  Diretório de músicas: {MUSIC_DIR}")
+    print(f"📁  Diretórios de músicas ({len(MUSIC_ROOTS)}):")
+    for _r in MUSIC_ROOTS:
+        print(f"     • {_r}")
     print(f"🎧  Formatos suportados: {', '.join(sorted(AUDIO_EXTS))}")
     print(f"🔍  Metadados: mutagen + Deezer API + ffmpeg")
     print(f"ℹ️   POST /api/scan para iniciar scan da biblioteca")
