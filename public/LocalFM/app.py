@@ -850,6 +850,7 @@ def api_enrich(tid: str):
 def api_status():
     return jsonify({
         "music_dir":     str(MUSIC_DIR),
+        "music_dirs":    [str(p) for p in MUSIC_ROOTS],
         "library_size":  len(_library),
         "scan":          _scan_status,
         "audio_formats": sorted(AUDIO_EXTS),
