@@ -52,7 +52,72 @@ CORS(app)
 
 # ─── Configuração ─────────────────────────────────────────────────────────────
 
-MUSIC_DIR  = Path(os.environ.get("MUSIC_DIR", "/sdcard/Music")).expanduser()
+# Lista de diretórios "candidatos" comuns em Android / Termux / Linux / Windows / macOS.
+# São testados em runtime; somente os que existem são usados.
+_CANDIDATE_DIRS = [
+    # Android — raízes que normalmente contém Music/, Download/, WhatsApp/Media/Audio/, etc.
+    "/sdcard", "/storage/emulated/0", "/storage/self/primary",
+    "/storage/sdcard0", "/storage/sdcard1", "/storage/extSdCard",
+    "/mnt/sdcard", "/mnt/extSdCard", "/mnt/media_rw",
+    # Termux
+    "/data/data/com.termux/files/home/storage/shared",
+    "/data/data/com.termux/files/home/storage/music",
+    "/data/data/com.termux/files/home/storage/downloads",
+    # Linux/macOS padrão
+    str(Path.home() / "Music"),
+    str(Path.home() / "Downloads"),
+    str(Path.home() / "Documents"),
+    "/media", "/mnt",
+    # Windows
+    "C:/Users/Public/Music",
+]
+
+def _discover_music_roots() -> list[Path]:
+    """Descobre diretórios reais no dispositivo. Honra MUSIC_DIR/MUSIC_DIRS env."""
+    env_dirs = os.environ.get("MUSIC_DIRS", "") or os.environ.get("MUSIC_DIR", "")
+    roots: list[Path] = []
+    if env_dirs.strip():
+        for raw in re.split(r"[;:,]+", env_dirs):
+            raw = raw.strip()
+            if not raw:
+                continue
+            p = Path(raw).expanduser()
+            if p.exists() and p.is_dir():
+                roots.append(p)
+    if not roots:
+        for c in _CANDIDATE_DIRS:
+            try:
+                p = Path(c).expanduser()
+                if p.exists() and p.is_dir():
+                    roots.append(p)
+            except Exception:
+                continue
+    # Fallback final
+    if not roots:
+        roots.append(Path.home())
+    # Dedup preservando ordem
+    seen, uniq = set(), []
+    for p in roots:
+        try:
+            rp = p.resolve()
+        except Exception:
+            rp = p
+        if rp in seen:
+            continue
+        seen.add(rp)
+        uniq.append(p)
+    return uniq
+
+MUSIC_ROOTS: list[Path] = _discover_music_roots()
+MUSIC_DIR: Path = MUSIC_ROOTS[0]  # mantém compatibilidade com referências antigas
+
+# Diretórios ignorados durante a varredura recursiva (ruído / cache / sistema)
+_SKIP_DIR_NAMES = {
+    ".thumbnails", ".trash", ".Trash", ".Trashes", "$RECYCLE.BIN",
+    "Android", "cache", "Cache", ".cache", "node_modules",
+    ".git", ".svn", "tmp", "temp", "__pycache__",
+}
+
 CACHE_DIR  = Path(tempfile.gettempdir()) / "lmp_cache"
 COVER_DIR  = CACHE_DIR / "covers"
 CACHE_DIR.mkdir(exist_ok=True)
@@ -66,6 +131,25 @@ DZ_API = "https://api.deezer.com"
 import requests as _req
 _session = _req.Session()
 _session.headers.update({"User-Agent": "Mozilla/5.0", "Accept": "application/json"})
+
+
+def _iter_audio_files(roots: list[Path]):
+    """Walk recursivo pulando diretórios irrelevantes; lida com PermissionError."""
+    for root in roots:
+        try:
+            for dirpath, dirnames, filenames in os.walk(root, followlinks=False):
+                # filtra in-place para não descer em pastas ignoradas / ocultas
+                dirnames[:] = [d for d in dirnames
+                               if d not in _SKIP_DIR_NAMES and not d.startswith(".")]
+                for fn in filenames:
+                    ext = os.path.splitext(fn)[1].lower()
+                    if ext in AUDIO_EXTS:
+                        yield Path(dirpath) / fn
+        except PermissionError:
+            continue
+        except Exception as ex:
+            app.logger.warning(f"walk falhou em {root}: {ex}")
+            continue
 
 # Cache em memória das faixas escaneadas  {track_id: dict}
 _library: dict = {}
