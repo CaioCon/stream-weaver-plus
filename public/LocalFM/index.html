@@ -1325,7 +1325,7 @@ function nextTrack(){
 }
 function toggleShuffle(){
   shuffle=!shuffle;
-  ['sh-shuffle','dc-shuffle'].forEach(id=>{
+  ['sh-shuffle','dc-shuffle','mpx-shuffle'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.classList.toggle('active',shuffle);
   });
@@ -1333,7 +1333,7 @@ function toggleShuffle(){
 }
 function toggleRepeat(){
   repeat=repeat==='none'?'all':repeat==='all'?'one':'none';
-  ['sh-repeat','dc-repeat'].forEach(id=>{
+  ['sh-repeat','dc-repeat','mpx-repeat'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.classList.toggle('active',repeat!=='none');
   });
@@ -1350,8 +1350,10 @@ function toggleFav(){
   const t=queue[queueIdx]; if(!t) return;
   if(favSet.has(t.id)) favSet.delete(t.id); else favSet.add(t.id);
   localStorage.setItem('lfm_favs',JSON.stringify([...favSet]));
-  document.getElementById('btn-fav').classList.toggle('on',favSet.has(t.id));
-  toast(favSet.has(t.id)?'❤️ Adicionado aos favoritos':'Removido dos favoritos');
+  const on=favSet.has(t.id);
+  document.getElementById('btn-fav').classList.toggle('on',on);
+  const mpxf=document.getElementById('mpx-fav'); if(mpxf) mpxf.classList.toggle('on',on);
+  toast(on?'❤️ Adicionado aos favoritos':'Removido dos favoritos');
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1361,21 +1363,34 @@ audio.addEventListener('timeupdate',()=>{
   if(seeking) return;
   const cur=audio.currentTime, dur=audio.duration||0;
   const pct=dur?cur/dur*100:0;
-  ['sheet-progress','dc-progress'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=pct; });
+  ['sheet-progress','dc-progress','mpx-progress'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=pct; });
   const c=fmt(cur), d=fmt(dur);
   document.getElementById('sh-cur').textContent=c;
   document.getElementById('sh-tot').textContent=d;
   const dc=document.getElementById('dc-cur'); if(dc) dc.textContent=c;
   const dt=document.getElementById('dc-tot'); if(dt) dt.textContent=d;
+  const mc=document.getElementById('mpx-cur'); if(mc) mc.textContent=c;
+  const mt=document.getElementById('mpx-tot'); if(mt) mt.textContent=d;
   document.getElementById('mp-prog-fill').style.width=pct+'%';
 });
 audio.addEventListener('ended',()=>{ if(repeat==='one') audio.play(); else nextTrack(); });
 audio.addEventListener('play', ()=>setPlayIcons(true));
 audio.addEventListener('pause',()=>setPlayIcons(false));
 
-function onSeek(v){ seeking=true; const dur=audio.duration||0; const cur=dur*v/100; document.getElementById('sh-cur').textContent=fmt(cur); const dc=document.getElementById('dc-cur'); if(dc) dc.textContent=fmt(cur); }
+function onSeek(v){
+  seeking=true;
+  const dur=audio.duration||0;
+  const cur=dur*v/100;
+  const c=fmt(cur);
+  document.getElementById('sh-cur').textContent=c;
+  const dc=document.getElementById('dc-cur'); if(dc) dc.textContent=c;
+  const mc=document.getElementById('mpx-cur'); if(mc) mc.textContent=c;
+}
 function onSeekEnd(v){ if(audio.duration) audio.currentTime=audio.duration*v/100; seeking=false; }
-function setVol(v){ audio.volume=v; ['sheet-volume','dc-volume'].forEach(id=>{const el=document.getElementById(id); if(el) el.value=v;}); }
+function setVol(v){
+  audio.volume=v;
+  ['sheet-volume','dc-volume','mpx-volume'].forEach(id=>{const el=document.getElementById(id); if(el) el.value=v;});
+}
 
 /* ══════════════════════════════════════════════════════
    FULL SHEET
