@@ -899,6 +899,37 @@ input{font-family:inherit;}
       </div>
     </div>
   </div>
+
+  <!-- Mobile: full controls inline (seek + shuffle/repeat/fav/queue/vol) -->
+  <div id="mp-mobile-extra" onclick="event.stopPropagation()">
+    <div class="mpx-seek">
+      <span class="mpx-time" id="mpx-cur">0:00</span>
+      <input id="mpx-progress" type="range" min="0" max="100" value="0" step=".1"
+        oninput="onSeek(this.value)" onchange="onSeekEnd(this.value)"/>
+      <span class="mpx-time" id="mpx-tot">0:00</span>
+    </div>
+    <div class="mpx-row">
+      <button class="mpx-btn" id="mpx-shuffle" onclick="toggleShuffle()" aria-label="Aleatório">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+      </button>
+      <button class="mpx-btn" id="mpx-repeat" onclick="toggleRepeat()" aria-label="Repetir">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      </button>
+      <button class="mpx-btn" id="mpx-fav" onclick="toggleFav()" aria-label="Favorito">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+      <button class="mpx-btn" onclick="switchView('queue', document.querySelector('.lib-tab[data-view=queue]'))" aria-label="Fila">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </button>
+      <button class="mpx-btn" onclick="enrichCurrent()" aria-label="Buscar metadados">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <div class="mpx-vol">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        <input id="mpx-volume" type="range" min="0" max="1" step=".02" value="1" oninput="setVol(this.value)"/>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ── Full player sheet ──────────────────────────────── -->
