@@ -1509,7 +1509,28 @@ audio.addEventListener('timeupdate',()=>{
 });
 audio.addEventListener('loadedmetadata',()=>{ $('ps-dur').textContent=fmt(audio.duration); });
 audio.addEventListener('play',()=>setPlayIcons(true));
-audio.addEventListener('pause',()=>setPlayIcons(false));
+audio.addEventListener('play',()=>{ _userPaused=false; setPlayIcons(true); });
+audio.addEventListener('pause',()=>{
+  setPlayIcons(false);
+  // Auto-resume: se a pausa não foi pedida pelo usuário e a faixa ainda não acabou,
+  // tenta retomar a reprodução (corrige pausas espúrias por buffering/foco/sistema)
+  if(_userPaused || _transitioning) return;
+  if(!audio.src || audio.ended) return;
+  if(audio.duration && audio.currentTime >= audio.duration - 0.25) return;
+  setTimeout(()=>{
+    if(_userPaused || _transitioning || !audio.paused) return;
+    const p = audio.play();
+    if(p && p.catch) p.catch(()=>{});
+  }, 350);
+});
+audio.addEventListener('stalled', ()=>{
+  if(_userPaused || _transitioning) return;
+  setTimeout(()=>{ if(!_userPaused && audio.paused){ const p=audio.play(); if(p&&p.catch) p.catch(()=>{}); } }, 500);
+});
+audio.addEventListener('waiting', ()=>{
+  if(_userPaused || _transitioning) return;
+  setTimeout(()=>{ if(!_userPaused && audio.paused){ const p=audio.play(); if(p&&p.catch) p.catch(()=>{}); } }, 700);
+});
 let _endedLock = false;
 audio.addEventListener('ended',()=>{
   if(_endedLock || _transitioning) return;
