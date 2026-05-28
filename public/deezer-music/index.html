@@ -1508,7 +1508,7 @@ audio.addEventListener('timeupdate',()=>{
   $('ps-cur').textContent=fmt(audio.currentTime);
 });
 audio.addEventListener('loadedmetadata',()=>{ $('ps-dur').textContent=fmt(audio.duration); });
-audio.addEventListener('play',()=>setPlayIcons(true));
+
 audio.addEventListener('play',()=>{ _userPaused=false; setPlayIcons(true); });
 audio.addEventListener('pause',()=>{
   setPlayIcons(false);
