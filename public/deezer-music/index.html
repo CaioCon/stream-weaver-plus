@@ -1388,12 +1388,14 @@ async function playIdx(i){
   }
 }
 
+let _userPaused = false;
 function togglePlay(){
   if(!audio.src||audio.src===location.href)return;
   if(audio.paused){
+    _userPaused = false;
     const p = audio.play();
     if(p && p.catch) p.catch(()=>{}).then(()=>setPlayIcons(!audio.paused));
-  } else { audio.pause(); setPlayIcons(false); }
+  } else { _userPaused = true; audio.pause(); setPlayIcons(false); }
 }
 function prevTrack(){
   if(audio.currentTime>3){audio.currentTime=0;return;}
