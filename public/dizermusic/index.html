@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#0a0118" />
+<title>DizerMusic — Your music. Anywhere.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07020f;
+  --bg-2:#0e0322;
+  --surface:rgba(20,8,40,.65);
+  --surface-2:rgba(30,12,55,.75);
+  --line:rgba(160,110,255,.18);
+  --text:#f3eaff;
+  --muted:#a79bc7;
+  --acc:#a855f7;
+  --acc-2:#7c3aed;
+  --pink:#ec4899;
+  --cyan:#22d3ee;
+  --green:#34d399;
+  --orange:#fb923c;
+  --glow:0 0 24px rgba(168,85,247,.55), 0 0 48px rgba(124,58,237,.35);
+  --radius:18px;
+  --radius-lg:24px;
+  --sb: env(safe-area-inset-bottom,0px);
+  --st: env(safe-area-inset-top,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:#000;color:var(--text);font-family:'Inter',system-ui,sans-serif;overscroll-behavior-y:contain}
+body{
+  min-height:100dvh;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, #2a0a5e 0%, transparent 60%),
+    radial-gradient(900px 500px at 100% 110%, #5b1773 0%, transparent 55%),
+    radial-gradient(700px 400px at 0% 80%, #0a2a5e 0%, transparent 60%),
+    linear-gradient(180deg,#07020f 0%,#0a021c 100%);
+  background-attachment: fixed;
+}
+button,input{font:inherit;color:inherit}
+img{display:block;max-width:100%}
+
+/* App shell */
+.app{
+  position:relative;
+  min-height:100dvh;
+  padding-top: calc(14px + var(--st));
+  padding-bottom: calc(160px + var(--sb));
+}
+.screen{display:none; padding:0 18px;}
+.screen.active{display:block; animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none}}
+
+/* Top bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.greet{display:flex;flex-direction:column;gap:2px}
+.greet h1{font-family:'Space Grotesk',sans-serif;font-size:24px;margin:0;letter-spacing:.2px}
+.greet small{color:var(--muted);font-size:13px}
+.icon-btn{
+  width:42px;height:42px;border-radius:14px;border:1px solid var(--line);
+  background:var(--surface);display:grid;place-items:center;backdrop-filter:blur(12px);
+  color:var(--text)
+}
+.icon-btn:active{transform:scale(.95)}
+
+/* Search */
+.search{
+  display:flex;align-items:center;gap:10px;
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:16px; padding:12px 14px; margin-bottom:22px;
+  backdrop-filter:blur(12px);
+}
+.search input{flex:1;background:transparent;border:0;outline:0;color:var(--text);font-size:15px}
+.search input::placeholder{color:var(--muted)}
+
+/* Section header */
+.section-head{display:flex;align-items:center;justify-content:space-between;margin:6px 0 12px}
+.section-head h2{font-family:'Space Grotesk',sans-serif;font-size:18px;margin:0;font-weight:600}
+.section-head a{color:var(--acc);font-size:13px;text-decoration:none;font-weight:500}
+
+/* For You hero */
+.hero-card{
+  position:relative; height:140px; border-radius:var(--radius-lg);
+  background:
+    radial-gradient(120% 100% at 0% 0%, rgba(236,72,153,.55), transparent 60%),
+    linear-gradient(135deg,#4c1d95,#7c3aed 50%,#ec4899);
+  overflow:hidden; box-shadow:var(--glow);
+  display:flex;align-items:center;padding:20px;
+}
+.hero-card::after{
+  content:""; position:absolute; inset:0;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 2px, transparent 2px 8px),
+    radial-gradient(60% 80% at 80% 50%, rgba(255,255,255,.08), transparent 70%);
+  mix-blend-mode:overlay;
+}
+.hero-card h3{margin:0 0 4px;font-family:'Space Grotesk',sans-serif;font-size:22px;position:relative;z-index:1}
+.hero-card p{margin:0;color:rgba(255,255,255,.85);font-size:13px;position:relative;z-index:1}
+.hero-play{
+  margin-left:auto;width:48px;height:48px;border-radius:50%;
+  background:rgba(255,255,255,.9);color:#0a021c;display:grid;place-items:center;
+  position:relative;z-index:1;border:0;box-shadow:0 8px 24px rgba(0,0,0,.4)
+}
+
+/* Quick access grid */
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0 8px}
+.qa-card{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px; border-radius:16px; border:1px solid var(--line);
+  background:var(--surface); backdrop-filter:blur(10px);
+  font-weight:600; font-size:14px;
+}
+.qa-card svg{opacity:.9}
+.qa-card.purple{background:linear-gradient(135deg,rgba(124,58,237,.35),rgba(124,58,237,.1));border-color:rgba(168,85,247,.4)}
+.qa-card.pink{background:linear-gradient(135deg,rgba(236,72,153,.35),rgba(236,72,153,.1));border-color:rgba(236,72,153,.4)}
+.qa-card.cyan{background:linear-gradient(135deg,rgba(34,211,238,.3),rgba(34,211,238,.08));border-color:rgba(34,211,238,.4)}
+.qa-card.green{background:linear-gradient(135deg,rgba(52,211,153,.3),rgba(52,211,153,.08));border-color:rgba(52,211,153,.4)}
+
+/* Track row */
+.track{
+  display:flex;align-items:center;gap:12px;padding:10px;border-radius:14px;
+  margin-bottom:6px;
+}
+.track:active{background:rgba(168,85,247,.12)}
+.track .cover{
+  width:48px;height:48px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,#7c3aed,#ec4899);
+  display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px;
+  overflow:hidden;
+}
+.track .cover img{width:100%;height:100%;object-fit:cover}
+.track .meta{flex:1;min-width:0}
+.track .title{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track .sub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.track .play{
+  width:36px;height:36px;border-radius:50%;border:0;
+  background:rgba(168,85,247,.2);color:var(--text);display:grid;place-items:center;
+}
+
+/* Category chips (Explore) */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.cat{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;border-radius:14px;border:1px solid var(--line);
+  font-weight:600;font-size:14px;
+  background:var(--surface);
+}
+.cat.c1{background:linear-gradient(135deg,#6d28d9,#a855f7)}
+.cat.c2{background:linear-gradient(135deg,#be185d,#ec4899)}
+.cat.c3{background:linear-gradient(135deg,#0e7490,#22d3ee)}
+.cat.c4{background:linear-gradient(135deg,#9a3412,#fb923c)}
+.cat.c5{background:linear-gradient(135deg,#065f46,#34d399)}
+.cat.c6{background:var(--surface-2)}
+
+/* Release cards (Explore) */
+.h-scroll{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;margin:0 -18px 16px;padding-left:18px;padding-right:18px;scrollbar-width:none}
+.h-scroll::-webkit-scrollbar{display:none}
+.release{flex:0 0 130px}
+.release .art{
+  width:130px;height:130px;border-radius:16px;overflow:hidden;
+  background:radial-gradient(circle at 50% 50%,#a855f7 0%,#1e1b4b 70%);
+  display:grid;place-items:center;box-shadow:0 8px 28px rgba(168,85,247,.35);
+  position:relative;
+}
+.release .art::after{
+  content:"";position:absolute;inset:18px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.6);
+  box-shadow:0 0 18px rgba(168,85,247,.8), inset 0 0 12px rgba(236,72,153,.5);
+}
+.release h4{margin:10px 0 2px;font-size:14px;font-family:'Space Grotesk',sans-serif}
+.release small{color:var(--muted);font-size:12px}
+
+/* Playlist row card */
+.pl-card{
+  display:flex;align-items:center;gap:14px;padding:12px;border-radius:16px;
+  border:1px solid var(--line);background:var(--surface);margin-bottom:10px;
+}
+.pl-art{width:54px;height:54px;border-radius:12px;display:grid;place-items:center;color:#fff;flex-shrink:0}
+.pl-card .meta{flex:1;min-width:0}
+.pl-card .title{font-weight:600;font-size:15px}
+.pl-card .sub{font-size:12px;color:var(--muted);margin-top:2px}
+.dots{background:transparent;border:0;color:var(--muted);padding:6px}
+
+/* Tabs (Library / Downloads) */
+.tabs{display:flex;gap:18px;padding:0 4px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.tab{
+  background:transparent;border:0;padding:10px 2px;color:var(--muted);font-weight:600;font-size:14px;
+  position:relative;
+}
+.tab.active{color:var(--text)}
+.tab.active::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;
+  background:linear-gradient(90deg,#a855f7,#ec4899);border-radius:2px;
+}
+
+/* New playlist button */
+.new-pl{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:14px;border-radius:14px;border:1.5px dashed rgba(168,85,247,.4);
+  background:rgba(168,85,247,.05);color:var(--text);font-weight:600;margin-bottom:14px;
+}
+
+/* Mini player */
+.mini{
+  position:fixed; left:12px; right:12px; bottom:calc(72px + var(--sb));
+  background:rgba(20,8,40,.85); backdrop-filter:blur(20px);
+  border:1px solid var(--line); border-radius:16px;
+  display:flex;align-items:center;gap:12px;padding:8px 12px;
+  box-shadow:0 12px 40px rgba(0,0,0,.5); z-index:50;
+}
+.mini .cover{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#ec4899);flex-shrink:0;overflow:hidden}
+.mini .cover img{width:100%;height:100%;object-fit:cover}
+.mini .meta{flex:1;min-width:0}
+.mini .title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .sub{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .btn{background:transparent;border:0;color:var(--text);padding:8px}
+.mini .progress{position:absolute;left:14px;right:14px;bottom:5px;height:2px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.mini .progress > span{display:block;height:100%;width:32%;background:linear-gradient(90deg,#a855f7,#ec4899);border-radius:2px}
+
+/* Bottom nav */
+.nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;
+  display:grid;grid-template-columns:repeat(5,1fr);
+  padding:8px 4px calc(8px + var(--sb));
+  background:rgba(10,2,28,.92);backdrop-filter:blur(20px);
+  border-top:1px solid var(--line);
+}
+.nav button{
+  background:transparent;border:0;color:var(--muted);
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:6px 4px;font-size:11px;font-weight:500;
+}
+.nav button.active{color:var(--acc);text-shadow:0 0 12px rgba(168,85,247,.7)}
+.nav button.active svg{filter:drop-shadow(0 0 6px rgba(168,85,247,.8))}
+
+/* Player full screen */
+.player-sheet{
+  position:fixed;inset:0;z-index:100;
+  background:
+    radial-gradient(700px 400px at 50% 20%, #5b21b6 0%, transparent 60%),
+    linear-gradient(180deg,#0a021c,#1a0533);
+  transform:translateY(100%); transition:transform .4s cubic-bezier(.2,.8,.2,1);
+  display:flex;flex-direction:column; padding: calc(18px + var(--st)) 22px calc(22px + var(--sb));
+  overflow-y:auto;
+}
+.player-sheet.open{transform:none}
+.ps-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.ps-top .ctx{text-align:center;flex:1}
+.ps-top .ctx small{color:var(--muted);font-size:11px;letter-spacing:1px;text-transform:uppercase}
+.ps-top .ctx div{font-size:14px;font-weight:600;margin-top:2px}
+.ps-art{
+  width:min(86vw, 360px); aspect-ratio:1; margin:8px auto 28px;
+  border-radius:24px; overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 60%, #a855f7 0%, #1e1b4b 70%),
+    linear-gradient(180deg,#7c3aed,#0a021c);
+  display:grid;place-items:center;
+  box-shadow:0 30px 80px rgba(168,85,247,.5), 0 0 60px rgba(236,72,153,.3);
+  position:relative;
+}
+.ps-art::after{
+  content:"";position:absolute;width:55%;aspect-ratio:1;border-radius:50%;
+  border:3px solid rgba(255,255,255,.7);
+  box-shadow:0 0 40px rgba(168,85,247,.9), inset 0 0 30px rgba(236,72,153,.6);
+}
+.ps-art img{width:100%;height:100%;object-fit:cover}
+.ps-info{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px}
+.ps-info h2{margin:0;font-family:'Space Grotesk',sans-serif;font-size:24px}
+.ps-info p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.heart{background:transparent;border:0;color:var(--pink);padding:4px}
+.heart svg{filter:drop-shadow(0 0 8px rgba(236,72,153,.6))}
+.seek{margin-bottom:6px}
+.seek-bar{height:4px;background:rgba(255,255,255,.12);border-radius:4px;overflow:hidden}
+.seek-bar > span{display:block;height:100%;width:38%;background:linear-gradient(90deg,#a855f7,#ec4899);border-radius:4px;box-shadow:0 0 10px rgba(168,85,247,.6)}
+.seek-times{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px}
+.ps-controls{display:flex;align-items:center;justify-content:space-around;margin:22px 0}
+.ps-controls button{background:transparent;border:0;color:var(--text);padding:8px}
+.ps-controls .play-big{
+  width:68px;height:68px;border-radius:50%;background:#fff;color:#0a021c;
+  display:grid;place-items:center;box-shadow:0 12px 40px rgba(168,85,247,.6);
+}
+.ps-extras{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.ps-extras button{
+  display:flex;align-items:center;gap:6px;background:transparent;border:0;
+  color:var(--muted);font-size:13px;font-weight:500;
+}
+.ps-extras .wave{
+  flex:1;height:32px;margin:0 14px;
+  background:
+    repeating-linear-gradient(90deg, #a855f7 0 2px, transparent 2px 5px),
+    repeating-linear-gradient(90deg, transparent 0 1px, #ec4899 1px 2px);
+  -webkit-mask:linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
+  mask:linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
+  opacity:.7;
+}
+
+/* Downloads */
+.dl-row{
+  display:flex;align-items:center;gap:12px;padding:10px;border-radius:14px;margin-bottom:6px;
+}
+.dl-row .check{color:var(--green);filter:drop-shadow(0 0 6px rgba(52,211,153,.6))}
+.dl-row .ring{
+  width:24px;height:24px;border-radius:50%;border:2px solid rgba(168,85,247,.7);
+  border-top-color:transparent;animation:spin 1.2s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Logo splash overlay (welcome) */
+.splash{
+  position:fixed;inset:0;z-index:200;background:radial-gradient(circle at 50% 40%, #2a0a5e, #07020f 70%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  animation:fadeOut .8s ease 1.8s forwards;
+}
+.splash .logo{
+  width:120px;height:120px;border-radius:32px;
+  background:linear-gradient(135deg,#a855f7,#ec4899,#22d3ee);
+  display:grid;place-items:center;
+  box-shadow:0 0 60px rgba(168,85,247,.8);
+  animation:pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes fadeOut{to{opacity:0;visibility:hidden}}
+.splash h1{font-family:'Space Grotesk',sans-serif;background:linear-gradient(90deg,#a855f7,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:30px;margin:0}
+.splash small{color:var(--muted);letter-spacing:3px;font-size:11px}
+
+/* Utility */
+.scroll-area{padding-bottom:20px}
+</style>
+</head>
+<body>
+
+<!-- Splash -->
+<div class="splash" id="splash">
+  <div class="logo">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+    </svg>
+  </div>
+  <h1>DizerMusic</h1>
+  <small>MUSIC FOR DOWNLOAD</small>
+</div>
+
+<div class="app">
+
+  <!-- HOME -->
+  <section class="screen active" data-screen="home">
+    <div class="topbar">
+      <div class="greet">
+        <h1>Good morning 👋</h1>
+        <small>Let's play something great</small>
+      </div>
+      <button class="icon-btn" aria-label="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+      </button>
+    </div>
+    <div class="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input placeholder="Search for songs, albums or artists..." />
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+    </div>
+
+    <div class="section-head"><h2>For You</h2><a>See all</a></div>
+    <div class="hero-card" onclick="openPlayer()">
+      <div>
+        <h3>Daily Mix</h3>
+        <p>Your personal mix of favorites</p>
+      </div>
+      <button class="hero-play" aria-label="Play"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg></button>
+    </div>
+
+    <div class="section-head" style="margin-top:24px"><h2>Quick Access</h2></div>
+    <div class="qa-grid">
+      <button class="qa-card purple">Top Songs <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg></button>
+      <button class="qa-card pink">New Releases <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 14.6,8.6 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9.4,8.6"/></svg></button>
+      <button class="qa-card cyan" onclick="go('explore')">Genres <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+      <button class="qa-card green">Mood <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg></button>
+    </div>
+
+    <div class="section-head"><h2>Recently Played</h2><a>See all</a></div>
+    <div id="recent-list"></div>
+  </section>
+
+  <!-- EXPLORE -->
+  <section class="screen" data-screen="explore">
+    <div class="topbar">
+      <div class="greet"><h1>Explore</h1></div>
+      <button class="icon-btn" aria-label="Search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </button>
+    </div>
+
+    <div class="section-head"><h2>Browse by Category</h2><a>See all</a></div>
+    <div class="cat-grid">
+      <button class="cat c1">Pop <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="10" width="2" height="6"/><rect x="7" y="6" width="2" height="14"/><rect x="11" y="2" width="2" height="20"/><rect x="15" y="6" width="2" height="14"/><rect x="19" y="10" width="2" height="6"/></svg></button>
+      <button class="cat c2">Hip-Hop <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg></button>
+      <button class="cat c3">Electronic <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h3l2-7 4 14 3-10 2 5h6"/></svg></button>
+      <button class="cat c4">Rock <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 18V5l12-2v13a3 3 0 1 1-2-2.83V6.5l-8 1.34V18a3 3 0 1 1-2-2.83z"/></svg></button>
+      <button class="cat c5">Lo-Fi <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-7h3zM3 19a2 2 0 0 0 2 2h1v-7H3z"/></svg></button>
+      <button class="cat c6">More <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+    </div>
+
+    <div class="section-head"><h2>New Releases</h2><a>See all</a></div>
+    <div class="h-scroll" id="releases"></div>
+
+    <div class="section-head"><h2>Popular Playlists</h2><a>See all</a></div>
+    <div id="playlists-popular"></div>
+  </section>
+
+  <!-- LIBRARY -->
+  <section class="screen" data-screen="library">
+    <div class="topbar">
+      <div class="greet"><h1>Library</h1></div>
+      <div style="display:flex;gap:8px">
+        <button class="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
+        <button class="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active">Playlists</button>
+      <button class="tab">Albums</button>
+      <button class="tab">Songs</button>
+      <button class="tab">Artists</button>
+    </div>
+    <button class="new-pl"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg> New Playlist</button>
+    <div id="lib-playlists"></div>
+  </section>
+
+  <!-- DOWNLOADS -->
+  <section class="screen" data-screen="downloads">
+    <div class="topbar">
+      <div class="greet"><h1>Downloads</h1></div>
+      <div style="display:flex;gap:8px">
+        <button class="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
+        <button class="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active">All</button>
+      <button class="tab">Downloading</button>
+      <button class="tab">Downloaded</button>
+    </div>
+    <div id="dl-list"></div>
+  </section>
+
+  <!-- PROFILE -->
+  <section class="screen" data-screen="profile">
+    <div class="topbar"><div class="greet"><h1>Profile</h1></div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:24px 0">
+      <div style="width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#a855f7,#ec4899);display:grid;place-items:center;box-shadow:var(--glow);font-size:36px;font-weight:700">D</div>
+      <div style="font-size:20px;font-family:'Space Grotesk',sans-serif">DizerMusic User</div>
+      <div style="color:var(--muted);font-size:13px">Music for download</div>
+    </div>
+    <div id="profile-list"></div>
+  </section>
+
+</div>
+
+<!-- Mini player -->
+<div class="mini" id="mini" onclick="openPlayer()">
+  <div class="cover" id="mini-cover"></div>
+  <div class="meta">
+    <div class="title" id="mini-title">Midnight Drive</div>
+    <div class="sub" id="mini-sub">Synthwave</div>
+  </div>
+  <button class="btn" onclick="event.stopPropagation();togglePlay()" id="mini-play">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>
+  </button>
+  <button class="btn" onclick="event.stopPropagation();next()">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,4 15,12 5,20"/><rect x="17" y="4" width="2" height="16"/></svg>
+  </button>
+  <div class="progress"><span id="mini-bar"></span></div>
+</div>
+
+<!-- Bottom nav -->
+<nav class="nav">
+  <button data-go="home" class="active">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Home
+  </button>
+  <button data-go="explore">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    Explore
+  </button>
+  <button data-go="library">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    Library
+  </button>
+  <button data-go="downloads">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+    Downloads
+  </button>
+  <button data-go="profile">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Profile
+  </button>
+</nav>
+
+<!-- Player sheet -->
+<div class="player-sheet" id="player">
+  <div class="ps-top">
+    <button class="icon-btn" onclick="closePlayer()" aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="ctx">
+      <small>PLAYING FROM</small>
+      <div id="ps-ctx">Chill Vibes</div>
+    </div>
+    <button class="icon-btn" aria-label="More">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+    </button>
+  </div>
+
+  <div class="ps-art" id="ps-art"></div>
+
+  <div class="ps-info">
+    <div>
+      <h2 id="ps-title">Midnight Drive</h2>
+      <p id="ps-artist">Synthwave</p>
+    </div>
+    <button class="heart" id="heart">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
+  </div>
+
+  <div class="seek">
+    <div class="seek-bar"><span id="ps-bar"></span></div>
+    <div class="seek-times"><span id="ps-cur">1:28</span><span id="ps-dur">3:45</span></div>
+  </div>
+
+  <div class="ps-controls">
+    <button aria-label="Shuffle"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" x2="21" y1="20" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" x2="21" y1="15" y2="21"/><line x1="4" x2="9" y1="4" y2="9"/></svg></button>
+    <button aria-label="Prev" onclick="prev()"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="19,20 9,12 19,4"/><rect x="5" y="4" width="2" height="16"/></svg></button>
+    <button class="play-big" id="ps-play" onclick="togglePlay()">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" id="ps-play-icon"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>
+    </button>
+    <button aria-label="Next" onclick="next()"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,4 15,12 5,20"/><rect x="17" y="4" width="2" height="16"/></svg></button>
+    <button aria-label="Repeat"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
+  </div>
+
+  <div class="ps-extras">
+    <button><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Download</button>
+    <div class="wave"></div>
+    <button><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg> Add to Playlist</button>
+  </div>
+</div>
+
+<script>
+/* ---------------- Data ---------------- */
+const tracks = [
+  {title:"Midnight Drive", artist:"Synthwave", duration:"3:45", grad:"linear-gradient(135deg,#7c3aed,#ec4899)"},
+  {title:"Ocean Breeze", artist:"Lo-Fi", duration:"2:58", grad:"linear-gradient(135deg,#0ea5e9,#22d3ee)"},
+  {title:"Lost in Space", artist:"Ambient", duration:"4:12", grad:"linear-gradient(135deg,#1e3a8a,#a855f7)"},
+  {title:"Dreamscape", artist:"Lo-Fi", duration:"2:59", grad:"linear-gradient(135deg,#be185d,#f472b6)"},
+  {title:"Aurora", artist:"Chillstep", duration:"3:33", grad:"linear-gradient(135deg,#065f46,#34d399)"},
+];
+
+const playlists = [
+  {name:"My Favorites", count:128, color:"linear-gradient(135deg,#be185d,#ec4899)", icon:"♥"},
+  {name:"Chill Vibes", count:42, color:"linear-gradient(135deg,#0e7490,#22d3ee)", icon:"🌴"},
+  {name:"Night Drive", count:19, color:"linear-gradient(135deg,#4c1d95,#a855f7)", icon:"🌙"},
+  {name:"Focus Mode", count:27, color:"linear-gradient(135deg,#1e293b,#64748b)", icon:"🎧"},
+  {name:"Workout Hits", count:45, color:"linear-gradient(135deg,#9a3412,#fb923c)", icon:"💪"},
+];
+
+const popular = [
+  {name:"Top 50 Global", sub:"50 songs", color:"linear-gradient(135deg,#7c3aed,#a855f7)", icon:"📊"},
+  {name:"Chill Vibes", sub:"32 songs", color:"linear-gradient(135deg,#0e7490,#22d3ee)", icon:"🌴"},
+  {name:"Workout Hits", sub:"45 songs", color:"linear-gradient(135deg,#9a3412,#fb923c)", icon:"🏃"},
+];
+
+const releases = [
+  {title:"Eclipse", sub:"The North"},
+  {title:"Horizons", sub:"Skyline"},
+  {title:"Afterglow", sub:"Luna Wave"},
+  {title:"Dreamline", sub:"Ember"},
+  {title:"Nebula", sub:"Orion"},
+];
+
+const downloads = [
+  {title:"Midnight Drive", sub:"Synthwave • 3.45 MB", state:"done"},
+  {title:"Ocean Breeze", sub:"Lo-Fi • 2.85 MB", state:"done"},
+  {title:"Lost in Space", sub:"Ambient • 4.12 MB", state:"done"},
+  {title:"Dreamscape", sub:"Lo-Fi • 2.59 MB", state:"loading"},
+  {title:"Aurora", sub:"Chillstep • 3.33 MB", state:"paused"},
+];
+
+/* ---------------- Render ---------------- */
+function trackRow(t, i){
+  return `<div class="track" onclick="playTrack(${i})">
+    <div class="cover" style="background:${t.grad}"></div>
+    <div class="meta"><div class="title">${t.title}</div><div class="sub">${t.artist} • ${t.duration}</div></div>
+    <button class="play" aria-label="Play"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg></button>
+  </div>`;
+}
+document.getElementById('recent-list').innerHTML = tracks.slice(0,3).map(trackRow).join('');
+
+document.getElementById('releases').innerHTML = releases.map(r => `
+  <div class="release"><div class="art"></div><h4>${r.title}</h4><small>${r.sub}</small></div>
+`).join('');
+
+document.getElementById('playlists-popular').innerHTML = popular.map(p => `
+  <div class="pl-card">
+    <div class="pl-art" style="background:${p.color}">${p.icon}</div>
+    <div class="meta"><div class="title">${p.name}</div><div class="sub">${p.sub}</div></div>
+    <button class="dots"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+  </div>
+`).join('');
+
+document.getElementById('lib-playlists').innerHTML = playlists.map(p => `
+  <div class="pl-card">
+    <div class="pl-art" style="background:${p.color}">${p.icon}</div>
+    <div class="meta"><div class="title">${p.name}</div><div class="sub">${p.count} songs</div></div>
+    <button class="dots"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+  </div>
+`).join('');
+
+document.getElementById('dl-list').innerHTML = downloads.map((d,i) => {
+  const t = tracks[i % tracks.length];
+  let right = '';
+  if(d.state==='done') right = '<svg class="check" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+  else if(d.state==='loading') right = '<div class="ring"></div>';
+  else right = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>';
+  return `<div class="dl-row track">
+    <div class="cover" style="background:${t.grad}"></div>
+    <div class="meta"><div class="title">${d.title}</div><div class="sub">${d.sub}</div></div>
+    ${right}
+  </div>`;
+}).join('');
+
+document.getElementById('profile-list').innerHTML = [
+  ['Account','user'], ['Audio Quality','sliders'], ['Storage','hard-drive'],
+  ['Notifications','bell'], ['About','info'], ['Log out','log-out']
+].map(([label]) => `
+  <div class="pl-card">
+    <div class="pl-art" style="background:linear-gradient(135deg,#4c1d95,#a855f7)">⚙</div>
+    <div class="meta"><div class="title">${label}</div></div>
+    <button class="dots"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+  </div>
+`).join('');
+
+/* ---------------- Nav ---------------- */
+function go(name){
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.dataset.screen===name));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.go===name));
+  window.scrollTo({top:0,behavior:'instant'});
+}
+document.querySelectorAll('.nav button').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+
+/* ---------------- Player ---------------- */
+let current = 0, playing = false, pct = 38;
+function setCurrent(i){
+  current = (i + tracks.length) % tracks.length;
+  const t = tracks[current];
+  document.getElementById('mini-title').textContent = t.title;
+  document.getElementById('mini-sub').textContent = t.artist;
+  document.getElementById('mini-cover').style.background = t.grad;
+  document.getElementById('ps-title').textContent = t.title;
+  document.getElementById('ps-artist').textContent = t.artist;
+  document.getElementById('ps-dur').textContent = t.duration;
+  document.getElementById('ps-art').style.background = t.grad;
+  // anti-delay fade
+  const art = document.getElementById('ps-art');
+  art.style.transition='none'; art.style.opacity='0'; art.style.transform='scale(.97)';
+  requestAnimationFrame(()=>{art.style.transition='opacity .35s ease, transform .45s cubic-bezier(.2,.8,.2,1)';art.style.opacity='1';art.style.transform='none';});
+}
+function playTrack(i){ setCurrent(i); playing=true; updatePlayIcon(); openPlayer(); }
+function togglePlay(){ playing=!playing; updatePlayIcon(); }
+function next(){ setCurrent(current+1); playing=true; updatePlayIcon(); }
+function prev(){ setCurrent(current-1); playing=true; updatePlayIcon(); }
+function updatePlayIcon(){
+  const icon = playing
+    ? '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>'
+    : '<polygon points="6,4 20,12 6,20"/>';
+  document.getElementById('ps-play-icon').innerHTML = icon;
+  document.getElementById('mini-play').innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">${icon}</svg>`;
+}
+function openPlayer(){ document.getElementById('player').classList.add('open'); }
+function closePlayer(){ document.getElementById('player').classList.remove('open'); }
+
+document.getElementById('heart').addEventListener('click', e => {
+  e.currentTarget.style.transform='scale(1.3)';
+  setTimeout(()=>e.currentTarget.style.transform='',180);
+});
+
+/* fake progress */
+setInterval(()=>{
+  if(!playing) return;
+  pct = (pct + 0.3) % 100;
+  document.getElementById('ps-bar').style.width = pct+'%';
+  document.getElementById('mini-bar').style.width = pct+'%';
+}, 200);
+
+/* Tabs */
+document.querySelectorAll('.tabs').forEach(group => {
+  group.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      group.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+    });
+  });
+});
+
+setCurrent(0);
+setTimeout(()=>document.getElementById('splash').remove(), 2700);
+</script>
+</body>
+</html>
