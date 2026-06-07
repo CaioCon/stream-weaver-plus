@@ -58,7 +58,8 @@ input{font-family:var(--font)}
 .bottomnav a.active svg{fill:var(--acc)}
 
 /* ── MAIN ── */
-.main{flex:1;overflow-y:auto;padding-bottom:calc(var(--player) + var(--nav) + 8px)}
+.main{flex:1;overflow-y:auto;padding-bottom:calc(var(--nav) + 8px)}
+.main.has-player{padding-bottom:calc(var(--player) + var(--nav) + 8px)}
 
 /* ── VIEWS ── */
 .view{display:none}.view.active{display:block}
@@ -163,6 +164,7 @@ input{font-family:var(--font)}
 .npbar .np-info{flex:1;min-width:0}
 .npbar .np-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .npbar .np-art{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ps-artist:hover{color:var(--text);text-decoration:underline}
 .npbar .np-btns{display:flex;align-items:center;gap:2px}
 .npbar .np-btns button{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:color var(--ease)}
 .npbar .np-btns .play-btn{width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;transition:transform var(--ease),box-shadow var(--ease);box-shadow:0 4px 14px rgba(0,0,0,.5)}
@@ -172,15 +174,17 @@ input{font-family:var(--font)}
 .np-progress-fill{height:100%;background:var(--acc);width:0%;transition:width .15s linear}
 
 /* ── FULL PLAYER SHEET ── */
-.player-sheet{position:fixed;inset:0;z-index:300;background:var(--bg);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow-y:auto;overflow-x:hidden}
+.player-sheet{position:fixed;inset:0;z-index:300;background:var(--bg);display:flex;flex-direction:column;justify-content:space-between;transform:translateY(110%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow-y:auto;overflow-x:hidden;--ps-content-opacity:1}
 .player-sheet.open{transform:translateY(0)}
+/* Fade content during drag-collapse */
+.player-sheet .ps-handle,.player-sheet .ps-header,.player-sheet .ps-stage,.player-sheet .ps-meta,.player-sheet .ps-seek,.player-sheet .ps-controls,.player-sheet .ps-extras,.player-sheet .ps-preview-badge{opacity:var(--ps-content-opacity,1);transition:opacity .05s linear}
 .ps-handle{width:36px;height:4px;border-radius:2px;background:var(--s4);margin:12px auto 0;flex-shrink:0}
 .ps-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0}
 .ps-header span{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 .ps-header button{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:color var(--ease),background var(--ease)}
 .ps-header button:active{background:var(--s2);color:var(--text)}
-.ps-art{width:min(82vw,360px);aspect-ratio:1;border-radius:14px;object-fit:cover;background:var(--s2);margin:20px auto 20px;box-shadow:0 24px 64px rgba(0,0,0,.6);flex-shrink:0}
-.ps-meta{padding:0 24px;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.ps-art{width:min(78vw,320px);aspect-ratio:1;border-radius:14px;object-fit:cover;background:var(--s2);margin:16px auto 24px;box-shadow:0 24px 64px rgba(0,0,0,.6);flex-shrink:0}
+.ps-meta{padding:0 24px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
 .ps-meta .ps-texts{flex:1;min-width:0}
 .ps-title{font-size:21px;font-weight:800;letter-spacing:-.3px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ps-artist{font-size:15px;color:var(--muted);margin-top:4px}
@@ -202,7 +206,7 @@ input{font-family:var(--font)}
 .ps-controls .big-play{width:72px;height:72px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #c97bff, var(--acc) 55%, var(--acc2));display:flex;align-items:center;justify-content:center;transition:transform var(--ease),box-shadow var(--ease);box-shadow:0 10px 28px rgba(var(--acc-rgb),.55),0 0 0 1px rgba(255,255,255,.08) inset}
 .ps-controls .big-play:active{transform:scale(.92);box-shadow:0 4px 14px rgba(var(--acc-rgb),.45)}
 .ps-controls .big-play svg{fill:#fff;width:32px;height:32px;margin-left:3px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
-.ps-extras{display:flex;align-items:center;justify-content:space-around;padding:16px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border);margin-top:auto}
+.ps-extras{display:flex;align-items:center;justify-content:space-around;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border)}
 .ps-extras button{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:var(--muted);transition:color var(--ease)}
 .ps-extras button:active,.ps-extras button.on{color:var(--text)}
 .ps-extras button svg{width:22px;height:22px}
@@ -264,6 +268,20 @@ input{font-family:var(--font)}
 /* ── DL btn in track row ── */
 .ritem .dl-btn{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--dim);flex-shrink:0;transition:color var(--ease),background var(--ease)}
 .ritem .dl-btn:active,.ritem .dl-btn.downloading{color:var(--acc);background:var(--s3)}
+
+/* ── HERO BANNER ── */
+.hero-banner-wrap{position:relative;width:100%;overflow:hidden;margin-bottom:4px}
+.hero-slides{display:flex;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+.hero-slide{flex-shrink:0;width:100%;position:relative;cursor:pointer}
+.hero-slide img{width:100%;height:200px;object-fit:cover;display:block}
+.hero-slide-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 35%,rgba(0,0,0,.82) 100%)}
+.hero-slide-info{position:absolute;bottom:14px;left:16px;right:48px}
+.hero-slide-badge{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--acc);background:rgba(162,56,255,.18);border:1px solid rgba(162,56,255,.4);padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:5px}
+.hero-slide-title{font-size:15px;font-weight:800;line-height:1.25;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero-slide-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero-dots{position:absolute;bottom:8px;right:12px;display:flex;gap:5px}
+.hero-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35);transition:all .2s}
+.hero-dot.active{background:#fff;width:16px;border-radius:3px}
 
 /* ── RELATED ARTISTS ── */
 .related-artists{display:flex;gap:16px;padding:0 16px 4px;overflow-x:auto;scrollbar-width:none}
@@ -350,6 +368,13 @@ input{font-family:var(--font)}
   #ps-play,.ps-play{width:62px!important;height:62px!important}
 }
 </style>
+
+<!-- Service Worker: mantém áudio em segundo plano e intercepta navegação -->
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js', {scope:'/'}).catch(()=>{});
+}
+</script>
 </head>
 <body>
 <div id="app">
@@ -386,11 +411,26 @@ input{font-family:var(--font)}
       <div class="chip" data-q="lofi chill" data-type="track">Lo-fi</div>
     </div>
 
+    <!-- ── HERO BANNER ── -->
+    <div class="hero-banner-wrap" id="hero-banner-wrap">
+      <div class="hero-skeleton skeleton" style="width:100%;height:200px;border-radius:0"></div>
+    </div>
+
     <!-- Em Alta (chart global) -->
     <div class="sec">
       <div class="sec-head"><span class="sec-title">🔥 Em alta</span></div>
       <div class="shelf" id="shelf-trending">
         <div class="shelf-card"><div class="skeleton sk-thumb"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line-sm"></div></div>
+        <div class="shelf-card"><div class="skeleton sk-thumb"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line-sm"></div></div>
+        <div class="shelf-card"><div class="skeleton sk-thumb"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line-sm"></div></div>
+        <div class="shelf-card"><div class="skeleton sk-thumb"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line-sm"></div></div>
+      </div>
+    </div>
+
+    <!-- Em Alta Brasil -->
+    <div class="sec" id="sec-brasil" style="display:none">
+      <div class="sec-head"><span class="sec-title">🇧🇷 Em alta no Brasil</span></div>
+      <div class="shelf" id="shelf-brasil">
         <div class="shelf-card"><div class="skeleton sk-thumb"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line-sm"></div></div>
         <div class="shelf-card"><div class="skeleton sk-thumb"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line-sm"></div></div>
         <div class="shelf-card"><div class="skeleton sk-thumb"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line-sm"></div></div>
@@ -411,6 +451,16 @@ input{font-family:var(--font)}
     <div class="sec">
       <div class="sec-head"><span class="sec-title">🎧 Playlists</span></div>
       <div class="shelf" id="shelf-playlists">
+        <div class="shelf-card"><div class="skeleton sk-thumb"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line-sm"></div></div>
+        <div class="shelf-card"><div class="skeleton sk-thumb"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line-sm"></div></div>
+        <div class="shelf-card"><div class="skeleton sk-thumb"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line-sm"></div></div>
+      </div>
+    </div>
+
+    <!-- Novidades (álbuns recentes via editorial) -->
+    <div class="sec" id="sec-new-releases" style="display:none">
+      <div class="sec-head"><span class="sec-title">✨ Novidades</span></div>
+      <div class="shelf" id="shelf-new-releases">
         <div class="shelf-card"><div class="skeleton sk-thumb"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line-sm"></div></div>
         <div class="shelf-card"><div class="skeleton sk-thumb"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line-sm"></div></div>
         <div class="shelf-card"><div class="skeleton sk-thumb"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line-sm"></div></div>
@@ -574,7 +624,7 @@ input{font-family:var(--font)}
   <div class="ps-meta">
     <div class="ps-texts">
       <div class="ps-title" id="ps-title">—</div>
-      <div class="ps-artist" id="ps-artist">—</div>
+      <div class="ps-artist" id="ps-artist" onclick="goToCurrentArtist()" style="cursor:pointer">—</div>
     </div>
     <button class="ps-like" id="ps-like" onclick="toggleLike()">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -621,10 +671,7 @@ input{font-family:var(--font)}
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
       Baixar
     </button>
-    <button onclick="openSongLink()" title="Ouvir em outras plataformas via song.link">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
-      song.link
-    </button>
+
   </div>
 </div>
 
@@ -655,8 +702,7 @@ input{font-family:var(--font)}
     <div class="ctx-item" onclick="ctxAction('like')"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>Curtir</div>
     <div class="ctx-item" onclick="ctxAction('save')"><svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>Salvar na biblioteca</div>
     <div class="ctx-item" onclick="ctxAction('download')"><svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>Baixar áudio</div>
-    <div class="ctx-item" onclick="ctxAction('share')"><svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Partilhar via song.link</div>
-    <div class="ctx-item" onclick="ctxAction('songlink')"><svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>Abrir no song.link</div>
+    <div class="ctx-item" onclick="ctxAction('share')"><svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Partilhar</div>
   </div>
 </div>
 
@@ -677,7 +723,9 @@ input{font-family:var(--font)}
 </nav>
 
 <div class="toast" id="toastEl"></div>
-<audio id="audioEl" preload="none"></audio>
+<audio id="audioEl" preload="none" playsinline webkit-playsinline x-webkit-airplay="allow"></audio>
+<!-- Elemento auxiliar para pré-carregar a próxima faixa em background -->
+<audio id="audioPreload" preload="auto" style="display:none"></audio>
 </div>
 
 <script>
@@ -707,9 +755,47 @@ function _newAbort(slot){
 function _cancelAllContent(){ ['detail','artist','search'].forEach(s=>{ if(_aborts[s]){ _aborts[s].abort(); delete _aborts[s]; } }); }
 
 const audio = document.getElementById('audioEl');
+const audioPreload = document.getElementById('audioPreload');
 const npbar  = document.getElementById('npbar');
 const sheet  = document.getElementById('playerSheet');
 function $(id){return document.getElementById(id)}
+
+// ── PRÉ-CARREGAMENTO DA PRÓXIMA FAIXA ─────────────────────────────────────
+// Começa a buscar o áudio da próxima faixa quando restar ~30s na atual,
+// eliminando o delay perceptível ao trocar de música.
+let _preloadId = null;
+function _schedulePreload(){
+  const next = _getNextIdx();
+  if(next < 0) return;
+  const it = S.queue[next];
+  if(!it || _preloadId === it.id) return;
+  _preloadId = it.id;
+  const src = '/api/stream?id=' + encodeURIComponent(it.id);
+  if(audioPreload.src !== src){
+    audioPreload.src = src;
+    audioPreload.load();
+  }
+}
+function _getNextIdx(){
+  if(!S.queue.length) return -1;
+  if(S.shuffle) return -1; // shuffle é imprevisível, skip
+  const n = S.idx + 1;
+  if(n >= S.queue.length) return S.repeat === 'all' ? 0 : -1;
+  return n;
+}
+// Dispara preload quando sobrar ~30s na faixa atual
+audio.addEventListener('timeupdate', ()=>{
+  if(!audio.duration) return;
+  if(audio.duration - audio.currentTime < 30) _schedulePreload();
+});
+
+// ── SENTINEL: impede sair do app ao apertar voltar ───────────────────────────
+// O history sempre tem [sentinel, ...entradas]. Quando popstate chega no sentinel,
+// reempurramos ele imediatamente para que o próximo "voltar" também seja capturado.
+const _SENTINEL_STATE = { _sentinel: true };
+function _pushSentinel(){
+  try{ history.pushState(_SENTINEL_STATE, ''); }catch(_){}
+}
 
 // ── TOAST ──
 let _tt;
@@ -755,101 +841,342 @@ function isExpandable(it){
 }
 
 // ══════════════════════════════════════════
-//  NAVIGATION — pilha de views
+//  NAVIGATION — pilha com snapshot completo de estado
 // ══════════════════════════════════════════
-// Cada entrada: { view, scrollTop }
-const _navStack = [];
+// Cada entrada da pilha guarda:
+//   entry.view        — nome da view ('home','search','detail','artist','explore','library')
+//   entry.payload     — dados necessários para re-renderizar (item, {id,name}, {q,type}, etc.)
+//   entry.scrollTop   — posição de scroll salva
+//   entry._snap       — objeto com innerHTML de cada container + valores de src/textContent
+//   entry._state      — snapshot completo do estado JS (detailItems, artistTopTracks, etc.)
 
+const _navStack = [];
+let   _navBusy  = false;
+let   _popBusy  = false;
 const _ROOT_VIEWS = new Set(['home','explore','library']);
 
-function navTo(view, opts={}){
-  const prev = S.currentView;
+// ─── Containers de DOM por view ───────────────────────────────────────────
+const _VIEW_CONTAINERS = {
+  home:    ['shelf-trending','shelf-albums','shelf-playlists','shelf-artists',
+            'shelf-brasil','shelf-new-releases','hero-banner-wrap'],
+  search:  ['resultsList','searchLabel'],
+  detail:  ['detail-header-title','detail-cover','detail-type','detail-title',
+            'detail-sub','detail-count','detail-date','detail-tracks'],
+  artist:  ['artist-name','artist-fans','artist-tracks',
+            'artist-banner-img','artist-banner-placeholder','artist-avatar'],
+  explore: ['exploreGrid'],
+  library: ['lib-liked','lib-history'],
+};
 
-  // Salva posição de scroll da view atual na pilha
-  if(_navStack.length > 0){
-    _navStack[_navStack.length-1].scrollTop = $('mainEl').scrollTop;
-  }
-
-  // Se voltar para uma view que já está na pilha, desempilha até ela
-  const existingIdx = _navStack.findIndex(e => e.view === view);
-  if(!opts.push && existingIdx >= 0){
-    _navStack.splice(existingIdx + 1);
-  } else {
-    _navStack.push({ view, scrollTop: 0 });
-  }
-
-  S.prevView = prev;
-  S.currentView = view;
-
+// ─── Ativa a view e atualiza bottomnav ────────────────────────────────────
+function _activateView(view){
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  // Limpa todos os highlights do bottomnav
   document.querySelectorAll('.bottomnav a').forEach(a => a.classList.remove('active'));
-
   const el = $('view-' + view);
   if(el) el.classList.add('active');
-
-  // Destaca no bottomnav: a view raiz mais próxima na pilha
   const rootInStack = [..._navStack].reverse().find(e => _ROOT_VIEWS.has(e.view));
-  const navTarget = _ROOT_VIEWS.has(view) ? view : (rootInStack?.view || 'home');
+  const navTarget   = _ROOT_VIEWS.has(view) ? view : (rootInStack?.view || 'home');
   $('nav-' + navTarget)?.classList.add('active');
-
-  const entry = _navStack[_navStack.length - 1];
-  if(opts.restoreScroll && entry){
-    requestAnimationFrame(() => { $('mainEl').scrollTop = entry.scrollTop || 0; });
-  } else {
-    $('mainEl').scrollTop = 0;
-  }
-
-  if(view === 'library') renderLibrary();
-  if(view === 'explore') renderExplore();
-  if(['home','explore','library'].includes(view)) _cancelAllContent();
+  S.currentView = view;
+  try{ if(audio && audio.src && audio.src !== location.href) npbar.classList.add('visible'); }catch(_){}
 }
 
-function navBack(){
-  // Fecha sheets abertas primeiro
-  if(sheet.classList.contains('open')){ closePlayer(); return; }
-  if($('queueSheet').classList.contains('open')){ closeQueue(); return; }
-  if($('ctxOverlay').classList.contains('open')){ closeCtx(); return; }
+// ─── Captura snapshot COMPLETO da entrada no topo ─────────────────────────
+function _snapshotView(entry){
+  const snap = {};
+  const containers = _VIEW_CONTAINERS[entry.view] || [];
 
-  if(_navStack.length <= 1){
-    if(S.currentView !== 'home') navTo('home');
+  // innerHTML de todos os containers
+  containers.forEach(id => {
+    const el = $(id);
+    if(el) snap[id] = el.innerHTML;
+  });
+
+  // Atributos especiais (src, textContent) que ficam fora do innerHTML do pai
+  if(entry.view === 'detail'){
+    snap['__cover_src']        = $('detail-cover')?.src || '';
+    snap['__type_txt']         = $('detail-type')?.textContent || '';
+    snap['__title_txt']        = $('detail-title')?.textContent || '';
+    snap['__sub_txt']          = $('detail-sub')?.textContent || '';
+    snap['__count_txt']        = $('detail-count')?.textContent || '';
+    snap['__date_txt']         = $('detail-date')?.textContent || '';
+    snap['__header_title_txt'] = $('detail-header-title')?.textContent || '';
+  }
+  if(entry.view === 'artist'){
+    snap['__avatar_src']       = $('artist-avatar')?.src || '';
+    snap['__banner_src']       = $('artist-banner-img')?.src || '';
+    snap['__banner_display']   = $('artist-banner-img')?.style?.display || '';
+    snap['__ph_display']       = $('artist-banner-placeholder')?.style?.display || '';
+    snap['__name_txt']         = $('artist-name')?.textContent || '';
+    snap['__fans_txt']         = $('artist-fans')?.textContent || '';
+  }
+  if(entry.view === 'search'){
+    snap['__search_input']     = $('searchInput')?.value || '';
+    snap['__search_label_txt'] = $('searchLabel')?.textContent || '';
+  }
+
+  entry._snap = snap;
+
+  // Snapshot do estado JS completo desta view
+  entry._state = {
+    detailItems:       [...(S.detailItems||[])],
+    artistTopTracks:   [...(S.artistTopTracks||[])],
+    lastResultItems:   [...(S._lastResultItems||[])],
+    lastSearchQ:       S.lastSearchQ||'',
+    lastSearchType:    S.lastSearchType||'all',
+    currentArtistId:   S._currentArtistId||null,
+    artistAlbums:      window._artistAlbums ? [...window._artistAlbums] : null,
+    artistSingles:     window._artistSingles ? [...window._artistSingles] : null,
+  };
+}
+
+// ─── Restaura snapshot SEM chamar a API ──────────────────────────────────
+function _restoreSnapshot(entry){
+  const snap = entry._snap || {};
+  const st   = entry._state || {};
+  const containers = _VIEW_CONTAINERS[entry.view] || [];
+
+  // Restaura innerHTML
+  containers.forEach(id => {
+    const el = $(id);
+    if(el && snap[id] !== undefined) el.innerHTML = snap[id];
+  });
+
+  // Restaura atributos especiais
+  if(entry.view === 'detail'){
+    if($('detail-cover'))        $('detail-cover').src              = snap['__cover_src']        || '';
+    if($('detail-type'))         $('detail-type').textContent       = snap['__type_txt']         || '';
+    if($('detail-title'))        $('detail-title').textContent      = snap['__title_txt']        || '';
+    if($('detail-sub'))          $('detail-sub').textContent        = snap['__sub_txt']          || '';
+    if($('detail-count'))        $('detail-count').textContent      = snap['__count_txt']        || '';
+    if($('detail-date'))         $('detail-date').textContent       = snap['__date_txt']         || '';
+    if($('detail-header-title')) $('detail-header-title').textContent = snap['__header_title_txt'] || '';
+  }
+  if(entry.view === 'artist'){
+    if($('artist-avatar'))       $('artist-avatar').src             = snap['__avatar_src']       || '';
+    if($('artist-banner-img')){
+      $('artist-banner-img').src                                    = snap['__banner_src']       || '';
+      $('artist-banner-img').style.display                          = snap['__banner_display']   || '';
+    }
+    if($('artist-banner-placeholder'))
+      $('artist-banner-placeholder').style.display                  = snap['__ph_display']       || '';
+    if($('artist-name'))         $('artist-name').textContent       = snap['__name_txt']         || '';
+    if($('artist-fans'))         $('artist-fans').textContent       = snap['__fans_txt']         || '';
+  }
+  if(entry.view === 'search'){
+    if($('searchInput') && snap['__search_input'] !== undefined)
+      $('searchInput').value = snap['__search_input'];
+  }
+
+  // Restaura estado JS
+  if(st.detailItems)     S.detailItems       = [...st.detailItems];
+  if(st.artistTopTracks) S.artistTopTracks   = [...st.artistTopTracks];
+  if(st.lastResultItems){
+    S._lastResultItems  = [...st.lastResultItems];
+    // Reconecta event delegation na lista de resultados restaurada
+    const inner = $('resultsInner');
+    if(inner && !inner._delegated){
+      inner._delegated = true;
+      inner.addEventListener('click', e=>{
+        const ritem = e.target.closest('.ritem');
+        if(!ritem || e.target.closest('.rmenu')) return;
+        const i = parseInt(ritem.dataset.ri);
+        resultClickDirect(i, S._lastResultItems);
+      });
+    }
+  }
+  if(st.lastSearchQ)     S.lastSearchQ       = st.lastSearchQ;
+  if(st.lastSearchType)  S.lastSearchType    = st.lastSearchType;
+  if(st.currentArtistId) S._currentArtistId  = st.currentArtistId;
+  if(st.artistAlbums)    window._artistAlbums  = [...st.artistAlbums];
+  if(st.artistSingles)   window._artistSingles = [...st.artistSingles];
+}
+
+// ─── Salva scroll + snapshot da entrada no topo ANTES de sair ─────────────
+function _saveCurrentEntry(){
+  const top = _navStack[_navStack.length - 1];
+  if(!top) return;
+  const m = $('mainEl');
+  if(m) top.scrollTop = m.scrollTop;
+  _snapshotView(top);
+}
+
+// ─── Renderiza uma entrada (restaura snap ou busca dados) ─────────────────
+async function _renderEntry(entry, fromSnap){
+  _activateView(entry.view);
+
+  if(fromSnap && entry._snap){
+    // Restaura DOM + estado instantaneamente, sem rede
+    _restoreSnapshot(entry);
+  } else {
+    // Primeira vez — busca dados normalmente
+    if(entry.view === 'detail'  && entry.payload) await _rawOpenDetail(entry.payload);
+    else if(entry.view === 'artist' && entry.payload)
+      await _rawOpenArtistById(entry.payload.id, entry.payload.name, entry.payload.avatar);
+    else if(entry.view === 'search' && entry.payload)
+      await _rawDoSearch(entry.payload.q, entry.payload.type || 'all');
+    else if(entry.view === 'library') renderLibrary();
+    else if(entry.view === 'explore') renderExplore();
+    // Para home sem snap — loadHomeFeed já foi chamado na init; não re-chama
+  }
+
+  const mainEl = $('mainEl');
+  requestAnimationFrame(()=>{
+    if(mainEl) mainEl.scrollTop = fromSnap ? (entry.scrollTop || 0) : 0;
+  });
+}
+
+// ─── Sincroniza history.state com o índice atual ─────────────────────────
+function _patchState(){
+  try{ history.replaceState({ _navIdx: _navStack.length - 1 }, ''); }catch(_){}
+}
+
+// ─── navTo — empilha nova view ou volta a uma raiz já existente ───────────
+async function navTo(view, opts={}){
+  // Não bloqueamos por _navBusy aqui — apenas enfileiramos se necessário.
+  // Se já estamos ocupados, aguarda brevemente e tenta de novo (max 3x).
+  let tries = 0;
+  while((_navBusy || _popBusy) && tries < 6){
+    await new Promise(r => setTimeout(r, 80));
+    tries++;
+  }
+  if(_navBusy || _popBusy) return; // desiste após ~480ms
+
+  _navBusy = true;
+  try{
+    _saveCurrentEntry();
+
+    // Navegar para aba raiz já existente na pilha → volta até ela
+    if(_ROOT_VIEWS.has(view) && !opts.payload){
+      const idx = _navStack.findIndex(e => e.view === view && !e.payload);
+      if(idx >= 0){
+        const toRemove = _navStack.length - 1 - idx;
+        _navStack.splice(idx + 1);
+        if(toRemove > 0){
+          _popBusy = true;
+          await new Promise(res => {
+            const onPop = () => { window.removeEventListener('popstate', onPop); _popBusy = false; res(); };
+            window.addEventListener('popstate', onPop);
+            history.go(-toRemove);
+          });
+        }
+        await _renderEntry(_navStack[_navStack.length - 1], true);
+        _patchState();
+        _cancelAllContent();
+        return;
+      }
+    }
+
+    // Nova entrada na pilha
+    const entry = { view, payload: opts.payload || null, scrollTop: 0 };
+    _navStack.push(entry);
+    try{ history.pushState({ _navIdx: _navStack.length - 1 }, ''); }catch(_){}
+
+    await _renderEntry(entry, false);
+    if(view === 'library') renderLibrary();
+    if(view === 'explore') renderExplore();
+    if(_ROOT_VIEWS.has(view)) _cancelAllContent();
+  } finally { _navBusy = false; }
+}
+
+// ─── navBack — botão voltar da UI ─────────────────────────────────────────
+function navBack(){
+  if(sheet.classList.contains('open'))            { closePlayer(); return; }
+  if($('queueSheet')?.classList.contains('open')) { closeQueue();  return; }
+  if($('ctxOverlay')?.classList.contains('open')) { closeCtx();    return; }
+  history.back();
+}
+
+// ─── popstate — botão físico voltar/avançar ───────────────────────────────
+window.addEventListener('popstate', async (e)=>{
+  if(_popBusy) return;
+
+  // Overlays têm prioridade
+  if($('ctxOverlay')?.classList.contains('open')){
+    closeCtx();
+    try{ history.pushState({ _navIdx: _navStack.length - 1 }, ''); }catch(_){}
+    return;
+  }
+  if($('queueSheet')?.classList.contains('open')){
+    closeQueue();
+    try{ history.pushState({ _navIdx: _navStack.length - 1 }, ''); }catch(_){}
+    return;
+  }
+  if(sheet.classList.contains('open')){
+    closePlayer();
+    try{ history.pushState({ _navIdx: _navStack.length - 1 }, ''); }catch(_){}
     return;
   }
 
-  _navStack.pop();
-  const prev = _navStack[_navStack.length - 1];
-  if(!prev){ navTo('home'); return; }
+  // Chegou no sentinel (fundo da pilha)
+  if(!e.state || e.state._sentinel){
+    _pushSentinel();
+    if(_navStack.length <= 1) return; // já na raiz
+    if(_navBusy) return;
+    _navBusy = true;
+    try{
+      _saveCurrentEntry();
+      _navStack.pop();
+      await _renderEntry(_navStack[_navStack.length - 1], true);
+      try{ history.replaceState({ _navIdx: _navStack.length - 1 }, ''); }catch(_){}
+    } finally { _navBusy = false; }
+    return;
+  }
 
-  S.currentView = prev.view;
-  S.prevView = _navStack.length >= 2 ? _navStack[_navStack.length - 2].view : 'home';
+  // Navegação normal dentro da pilha
+  const targetIdx  = e.state._navIdx;
+  const currentIdx = _navStack.length - 1;
+  if(targetIdx === currentIdx) return;
 
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.bottomnav a').forEach(a => a.classList.remove('active'));
+  if(targetIdx < 0 || targetIdx >= _navStack.length){
+    _navStack.length = 1;
+    _navStack[0] = { view:'home', payload:null, scrollTop:0 };
+    _activateView('home');
+    _pushSentinel();
+    try{ history.pushState({ _navIdx: 0 }, ''); }catch(_){}
+    return;
+  }
 
-  const el = $('view-' + prev.view);
-  if(el) el.classList.add('active');
+  if(_navBusy) return;
+  _navBusy = true;
+  try{
+    _saveCurrentEntry();
+    _navStack.length = targetIdx + 1;
+    await _renderEntry(_navStack[targetIdx], true);
+  } finally { _navBusy = false; }
+});
 
-  // Destaca o nav correto
-  const rootInStack = [..._navStack].reverse().find(e => _ROOT_VIEWS.has(e.view));
-  const navTarget = _ROOT_VIEWS.has(prev.view) ? prev.view : (rootInStack?.view || 'home');
-  $('nav-' + navTarget)?.classList.add('active');
+// ─── Inicialização ────────────────────────────────────────────────────────
+_navStack.push({ view:'home', payload:null, scrollTop:0 });
+try{
+  history.replaceState(_SENTINEL_STATE, '');
+  history.pushState({ _navIdx: 0 }, '');
+}catch(_){}
 
-  if(prev.view === 'library') renderLibrary();
-  if(prev.view === 'explore') renderExplore();
+// ─── Aliases: salva as funções de render brutas antes de sobrescrever ─────
+const _rawOpenDetail     = openDetail;
+const _rawOpenArtistById = openArtistById;
+const _rawDoSearch       = doSearch;
 
-  requestAnimationFrame(() => { $('mainEl').scrollTop = prev.scrollTop || 0; });
+// ─── Funções públicas roteadas pela pilha ─────────────────────────────────
+function openDetail(it)                  { return navTo('detail', { payload: it }); }
+function openArtistById(id, name, avatar){ return navTo('artist', { payload: { id, name, avatar } }); }
+function doSearch(q, type='all'){
+  q = (q||'').trim();
+  if(!q){ navTo('home'); return; }
+  const top = _navStack[_navStack.length - 1];
+  if(top && top.view === 'search'){
+    // Já na search — atualiza payload e re-renderiza sem empilhar
+    _saveCurrentEntry();
+    top.payload = { q, type };
+    _rawDoSearch(q, type);
+    return;
+  }
+  navTo('search', { payload: { q, type } });
 }
 
-window.addEventListener('popstate', () => {
-  history.pushState(null, '', location.href);
-  navBack();
-});
-history.pushState(null, '', location.href);
-// Inicializa a pilha com home
-_navStack.push({ view: 'home', scrollTop: 0 });
-
 // ══════════════════════════════════════════
-//  HOME FEED — chart Deezer
+//  HOME FEED — múltiplas fontes Deezer
 // ══════════════════════════════════════════
 const shelves={};
 const skCard='<div class="shelf-card"><div class="skeleton sk-thumb"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line-sm"></div></div>';
@@ -864,6 +1191,23 @@ async function dzFetch(path, params={}){
   const d = await r.json();
   if(d.error) throw new Error(d.error?.message||'Deezer API error');
   return d;
+}
+
+// Busca todas as páginas de um endpoint paginado (usa campo "next" do Deezer)
+async function dzFetchAll(path, params={}, maxItems=200){
+  let data = await dzFetch(path, params);
+  const allData = [...(data.data||[])];
+  let nextUrl = data.next||null;
+  while(nextUrl && allData.length < maxItems){
+    try{
+      // "next" é uma URL completa; troca o domínio pelo proxy local
+      const rel = nextUrl.replace('https://api.deezer.com','');
+      const extra = await dzFetch(rel);
+      allData.push(...(extra.data||[]));
+      nextUrl = extra.next||null;
+    }catch(e){ break; }
+  }
+  return { data: allData };
 }
 
 function normTrack(t){
@@ -893,7 +1237,7 @@ function normAlbum(a){
 function normPlaylist(p){
   return{
     id:String(p.id||''), title:p.title||'Sem título',
-    uploader:(p.creator||{}).name||(p.user||{}).name||'',
+    uploader:(p.creator||{}).name||(p.user||{}).name||'Deezer',
     thumbnail:p.picture_medium||p.picture||'',
     cover_xl:p.picture_xl||p.picture_big||'',
     nb_tracks:p.nb_tracks||0, _type:'playlist'
@@ -908,34 +1252,174 @@ function normArtist(a){
   };
 }
 
-async function loadHomeFeed(){
-  try{
-    const d=await dzFetch('/chart/0');
-    const tracks    = (d.tracks?.data||[]).slice(0,20).map(normTrack);
-    const albums    = (d.albums?.data||[]).slice(0,12).map(normAlbum);
-    const playlists = (d.playlists?.data||[]).slice(0,8).map(normPlaylist);
-    const artists   = (d.artists?.data||[]).slice(0,10).map(normArtist);
+// ── Enriquece álbuns com cover_xl real buscando detalhes individualmente ──
+async function enrichAlbums(albums, max=6){
+  const toEnrich = albums.filter(a => !a.cover_xl).slice(0, max);
+  await Promise.allSettled(toEnrich.map(async (a)=>{
+    try{
+      const info = await dzFetch(`/album/${a.id}`);
+      a.cover_xl  = info.cover_xl||info.cover_big||a.thumbnail||'';
+      a.thumbnail = info.cover_medium||a.thumbnail||'';
+      a.nb_tracks = info.nb_tracks||a.nb_tracks||0;
+      a.release_date = info.release_date||a.release_date||'';
+      if(info.artist) a.uploader = info.artist.name||a.uploader;
+    }catch(e){}
+  }));
+  return albums;
+}
 
-    if(tracks.length){
-      shelves['trending']=tracks;
-      $('shelf-trending').innerHTML=buildShelf(tracks,'trending');
-    }
-    if(albums.length){
-      shelves['albums']=albums;
-      $('shelf-albums').innerHTML=buildShelf(albums,'albums');
-    }
-    if(playlists.length){
-      shelves['playlists']=playlists;
-      $('shelf-playlists').innerHTML=buildShelf(playlists,'playlists');
-    }
-    if(artists.length){
-      shelves['artists']=artists;
-      $('shelf-artists').innerHTML=buildArtistShelf(artists);
-    }
-  }catch(e){
-    ['shelf-trending','shelf-albums','shelf-playlists','shelf-artists'].forEach(id=>{
-      $(id).innerHTML='<span style="color:var(--dim);font-size:12px;padding:8px 16px">Erro ao carregar</span>';
+// ── Enriquece playlists com picture_xl real ──
+async function enrichPlaylists(playlists, max=6){
+  const toEnrich = playlists.filter(p => !p.cover_xl).slice(0, max);
+  await Promise.allSettled(toEnrich.map(async (p)=>{
+    try{
+      const info = await dzFetch(`/playlist/${p.id}`);
+      p.cover_xl  = info.picture_xl||info.picture_big||p.thumbnail||'';
+      p.thumbnail = info.picture_medium||p.thumbnail||'';
+      p.nb_tracks = info.nb_tracks||p.nb_tracks||0;
+      p.uploader  = (info.creator||{}).name||p.uploader||'Deezer';
+    }catch(e){}
+  }));
+  return playlists;
+}
+
+// ── Hero banner ──────────────────────────────────────────────────────────────
+let _heroInterval = null;
+let _heroIdx = 0;
+let _heroItems = [];
+
+function buildHeroBanner(items){
+  if(!items||!items.length) return;
+  _heroItems = items;
+  _heroIdx   = 0;
+  const wrap = $('hero-banner-wrap');
+  if(!wrap) return;
+  wrap.innerHTML = `
+    <div class="hero-slides" id="heroSlides">
+      ${items.map((it,i)=>{
+        const img  = it.cover_xl||it.thumbnail||'';
+        const type = it._type==='playlist'?'Playlist':'Álbum';
+        const sub  = it.uploader||'';
+        return `<div class="hero-slide" onclick="heroClick(${i})">
+          <img src="${esc(img)}" alt="${esc(it.title||'')}" loading="${i===0?'eager':'lazy'}" onerror="this.style.opacity='.3'"/>
+          <div class="hero-slide-overlay"></div>
+          <div class="hero-slide-info">
+            <div class="hero-slide-badge">${type}</div>
+            <div class="hero-slide-title">${esc(it.title||'')}</div>
+            ${sub?`<div class="hero-slide-sub">${esc(sub)}</div>`:''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="hero-dots" id="heroDots">
+      ${items.map((_,i)=>`<div class="hero-dot ${i===0?'active':''}" id="hdot${i}"></div>`).join('')}
+    </div>`;
+  // Auto-rotate
+  if(_heroInterval) clearInterval(_heroInterval);
+  if(items.length > 1){
+    _heroInterval = setInterval(()=>{ _heroStep(1); }, 4500);
+  }
+  // Touch/swipe no banner
+  let _hx=0, _hactive=false;
+  const slides = $('heroSlides');
+  if(slides){
+    slides.addEventListener('touchstart', e=>{ _hx=e.touches[0].clientX; _hactive=true; },{passive:true});
+    slides.addEventListener('touchend', e=>{
+      if(!_hactive) return; _hactive=false;
+      const dx = e.changedTouches[0].clientX - _hx;
+      if(Math.abs(dx)>40){ _heroStep(dx<0?1:-1); if(_heroInterval){clearInterval(_heroInterval);_heroInterval=setInterval(()=>_heroStep(1),4500);} }
     });
+  }
+}
+function _heroStep(dir){
+  _heroIdx = (_heroIdx + dir + _heroItems.length) % _heroItems.length;
+  const slides=$('heroSlides'); if(!slides)return;
+  slides.style.transform=`translateX(-${_heroIdx*100}%)`;
+  document.querySelectorAll('.hero-dot').forEach((d,i)=>d.classList.toggle('active',i===_heroIdx));
+}
+function heroClick(i){
+  if(_heroItems[i]) openDetail(_heroItems[i]);
+}
+
+async function loadHomeFeed(){
+  // ── 1. Carrega chart global (base) em paralelo com chart Brasil e editorial ──
+  const [chartGlobal, chartBrasil, editorial] = await Promise.allSettled([
+    dzFetch('/chart/0', {limit:100}),
+    dzFetch('/chart/23', {limit:50}),           // chart Brasil (genre_id=23 = Brasileiro)
+    dzFetch('/editorial/0/releases', {limit:20}),
+  ]);
+
+  const cgData  = chartGlobal.status==='fulfilled'  ? chartGlobal.value  : {};
+  const cbData  = chartBrasil.status==='fulfilled'  ? chartBrasil.value  : {};
+  const edData  = editorial.status==='fulfilled'    ? editorial.value    : {};
+
+  // ── 2. Tracks "Em alta" (chart global) ──────────────────────────────────────
+  const tracks = (cgData.tracks?.data||[]).slice(0,20).map(normTrack);
+  if(tracks.length){
+    shelves['trending']=tracks;
+    $('shelf-trending').innerHTML=buildShelf(tracks,'trending');
+  } else {
+    $('shelf-trending').innerHTML='<span style="color:var(--dim);font-size:12px;padding:0 16px">Indisponível</span>';
+  }
+
+  // ── 3. Álbuns em destaque — chart + enriquecimento ──────────────────────────
+  let albums = (cgData.albums?.data||[]).slice(0,12).map(normAlbum);
+  if(albums.length){
+    // Enriquece os primeiros 8 com cover_xl e metadata completo
+    albums = await enrichAlbums(albums, 8);
+    shelves['albums']=albums;
+    $('shelf-albums').innerHTML=buildShelf(albums,'albums');
+  } else {
+    $('shelf-albums').innerHTML='<span style="color:var(--dim);font-size:12px;padding:0 16px">Indisponível</span>';
+  }
+
+  // ── 4. Playlists editoriais — chart + enriquecimento ────────────────────────
+  let playlists = (cgData.playlists?.data||[]).slice(0,10).map(normPlaylist);
+  if(playlists.length){
+    playlists = await enrichPlaylists(playlists, 6);
+    shelves['playlists']=playlists;
+    $('shelf-playlists').innerHTML=buildShelf(playlists,'playlists');
+  } else {
+    $('shelf-playlists').innerHTML='<span style="color:var(--dim);font-size:12px;padding:0 16px">Indisponível</span>';
+  }
+
+  // ── 5. Artistas em destaque ──────────────────────────────────────────────────
+  const artists = (cgData.artists?.data||[]).slice(0,10).map(normArtist);
+  if(artists.length){
+    shelves['artists']=artists;
+    $('shelf-artists').innerHTML=buildArtistShelf(artists);
+  }
+
+  // ── 6. Em alta no Brasil ─────────────────────────────────────────────────────
+  const brasilTracks = (cbData.tracks?.data||[]).slice(0,20).map(normTrack);
+  if(brasilTracks.length){
+    shelves['brasil']=brasilTracks;
+    $('shelf-brasil').innerHTML=buildShelf(brasilTracks,'brasil');
+    const secBrasil=$('sec-brasil');
+    if(secBrasil) secBrasil.style.display='';
+  }
+
+  // ── 7. Novidades — editorial releases ────────────────────────────────────────
+  let newReleases = (edData.data||[]).slice(0,12).map(normAlbum);
+  if(newReleases.length){
+    newReleases = await enrichAlbums(newReleases, 8);
+    shelves['new-releases']=newReleases;
+    $('shelf-new-releases').innerHTML=buildShelf(newReleases,'new-releases');
+    const secNew=$('sec-new-releases');
+    if(secNew) secNew.style.display='';
+  }
+
+  // ── 8. Hero banner — usa as melhores playlists + top álbuns com cover ────────
+  const heroPool = [
+    ...playlists.filter(p=>p.cover_xl).slice(0,4),
+    ...albums.filter(a=>a.cover_xl).slice(0,4),
+  ].filter(it=>it.cover_xl).slice(0,6);
+  if(heroPool.length){
+    buildHeroBanner(heroPool);
+  } else {
+    // Esconde o placeholder de skeleton
+    const wrap=$('hero-banner-wrap');
+    if(wrap) wrap.innerHTML='';
   }
 }
 
@@ -1055,16 +1539,33 @@ async function openArtistById(id, name, avatarFallback){
     const [info, topR, albR] = await Promise.all([
       dzFetch(`/artist/${id}`),
       dzFetch(`/artist/${id}/top`, {limit:20}),
-      dzFetch(`/artist/${id}/albums`, {limit:30}),
+      dzFetch(`/artist/${id}/albums`, {limit:100}),
     ]);
     let related = [];
     try{ const relR=await dzFetch(`/artist/${id}/related`,{limit:8}); related=(relR.data||[]).map(normArtist); }catch(e){}
     if(ctrl.signal.aborted) return;
 
     const top_tracks = (topR.data||[]).map(normTrack);
-    const allAlbums  = (albR.data||[]).map(normAlbum);
-    const singles    = allAlbums.filter(a=>['single','ep'].includes(a.record_type));
-    const albums     = allAlbums.filter(a=>a.record_type==='album');
+    // Normaliza título: minúsculo, sem conteúdo entre parênteses/colchetes, sem espaços extras
+    function _normTitle(t){
+      return (t||'').toLowerCase()
+        .replace(/\s*[\(\[].*?[\)\]]/g,'')  // remove (Edição Luxo), [Ao Vivo], etc.
+        .replace(/\s+/g,' ').trim();
+    }
+    // Deduplica: por id, depois por título normalizado + ano (4 dígitos)
+    const _raw = (albR.data||[]).map(normAlbum);
+    const _seenId  = new Set();
+    const _seenKey = new Set();
+    const allAlbums = _raw.filter(a => {
+      if(_seenId.has(a.id)) return false;
+      _seenId.add(a.id);
+      const key = _normTitle(a.title) + '|' + (a.release_date||'').slice(0,4);
+      if(_seenKey.has(key)) return false;
+      _seenKey.add(key);
+      return true;
+    });
+    const singles = allAlbums.filter(a=>['single','ep'].includes(a.record_type));
+    const albums  = allAlbums.filter(a=>a.record_type==='album');
     const d = { ...normArtist(info), top_tracks, albums, singles, related,
                 avatar:info.picture_medium||info.picture||'',
                 banner:info.picture_xl||'', nb_fans:info.nb_fan||0 };
@@ -1082,6 +1583,7 @@ async function openArtistById(id, name, avatarFallback){
 
     S.detailItems    = d.top_tracks||[];
     S.artistTopTracks= d.top_tracks||[];
+    S._currentArtistId = id; // guarda para o expandArtistShelf poder paginar
 
     let html='';
 
@@ -1092,12 +1594,15 @@ async function openArtistById(id, name, avatarFallback){
     }
 
     // ── Álbuns ──
+    const SHELF_LIMIT = 8;
     if(d.albums?.length){
       const albumItems=d.albums;
       window._artistAlbums=albumItems;
+      const visible = albumItems.slice(0, SHELF_LIMIT);
+      const hasMore = albumItems.length > SHELF_LIMIT;
       html+=`<div class="artist-section-title">💿 Álbuns</div>
-        <div class="shelf" style="padding:0 16px 4px;gap:12px;overflow-x:auto;display:flex;scroll-snap-type:x mandatory">
-        ${albumItems.map((al,i)=>`
+        <div class="shelf" id="shelf-artist-albums" style="padding:0 16px 4px;gap:12px;overflow-x:auto;display:flex;scroll-snap-type:x mandatory">
+        ${visible.map((al,i)=>`
           <div class="shelf-card" style="flex-shrink:0;width:130px;scroll-snap-align:start;cursor:pointer" onclick="openDetail(window._artistAlbums[${i}])">
             <div class="thumb" style="width:130px;height:130px;border-radius:10px;overflow:hidden;background:var(--s3);position:relative">
               <img src="${esc(al.cover_xl||al.thumbnail||'')}" style="width:100%;height:100%;object-fit:cover" loading="lazy"/>
@@ -1106,6 +1611,15 @@ async function openArtistById(id, name, avatarFallback){
             <div class="card-title" style="font-size:12px;font-weight:600;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(al.title)}</div>
             <div class="card-sub" style="font-size:11px;color:var(--dim)">${esc(al.release_date||'')}</div>
           </div>`).join('')}
+        ${hasMore ? `
+          <div class="shelf-card" style="flex-shrink:0;width:90px;scroll-snap-align:start;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="expandArtistShelf('albums')">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--acc)">
+              <div style="width:48px;height:48px;border-radius:50%;background:var(--s3);border:2px solid var(--acc);display:flex;align-items:center;justify-content:center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+              </div>
+              <span style="font-size:11px;font-weight:700;text-align:center;line-height:1.3">Ver mais<br/>(${albumItems.length - SHELF_LIMIT})</span>
+            </div>
+          </div>` : ''}
         </div>`;
     }
 
@@ -1113,9 +1627,11 @@ async function openArtistById(id, name, avatarFallback){
     if(d.singles?.length){
       const singleItems=d.singles;
       window._artistSingles=singleItems;
+      const visibleS = singleItems.slice(0, SHELF_LIMIT);
+      const hasMoreS = singleItems.length > SHELF_LIMIT;
       html+=`<div class="artist-section-title">🎵 Singles & EPs</div>
-        <div class="shelf" style="padding:0 16px 4px;gap:12px;overflow-x:auto;display:flex;scroll-snap-type:x mandatory">
-        ${singleItems.map((si,i)=>`
+        <div class="shelf" id="shelf-artist-singles" style="padding:0 16px 4px;gap:12px;overflow-x:auto;display:flex;scroll-snap-type:x mandatory">
+        ${visibleS.map((si,i)=>`
           <div class="shelf-card" style="flex-shrink:0;width:130px;scroll-snap-align:start;cursor:pointer" onclick="openDetail(window._artistSingles[${i}])">
             <div class="thumb" style="width:130px;height:130px;border-radius:10px;overflow:hidden;background:var(--s3);position:relative">
               <img src="${esc(si.cover_xl||si.thumbnail||'')}" style="width:100%;height:100%;object-fit:cover" loading="lazy"/>
@@ -1124,6 +1640,15 @@ async function openArtistById(id, name, avatarFallback){
             <div class="card-title" style="font-size:12px;font-weight:600;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(si.title)}</div>
             <div class="card-sub" style="font-size:11px;color:var(--dim)">${esc(si.release_date||'')}</div>
           </div>`).join('')}
+        ${hasMoreS ? `
+          <div class="shelf-card" style="flex-shrink:0;width:90px;scroll-snap-align:start;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="expandArtistShelf('singles')">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--acc)">
+              <div style="width:48px;height:48px;border-radius:50%;background:var(--s3);border:2px solid var(--acc);display:flex;align-items:center;justify-content:center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+              </div>
+              <span style="font-size:11px;font-weight:700;text-align:center;line-height:1.3">Ver mais<br/>(${singleItems.length - SHELF_LIMIT})</span>
+            </div>
+          </div>` : ''}
         </div>`;
     }
 
@@ -1157,6 +1682,49 @@ function shuffleArtistTop(){
   S.queue=[...S.artistTopTracks]; S.shuffle=true;
   $('ps-shuffle').classList.add('active');
   playIdx(Math.floor(Math.random()*S.queue.length));
+}
+
+// Expande a shelf de álbuns/singles mostrando todos os itens
+async function expandArtistShelf(type){
+  const isAlbums = type === 'albums';
+  const shelfId = isAlbums ? 'shelf-artist-albums' : 'shelf-artist-singles';
+  const shelf = document.getElementById(shelfId);
+  if(!shelf) return;
+
+  // Mostra spinner no lugar do botão "Ver mais"
+  const lastCard = shelf.querySelector('.shelf-card:last-child');
+  if(lastCard) lastCard.innerHTML = '<div class="spinner" style="margin:40px auto 0"></div>';
+
+  // Busca todas as páginas da API se ainda não buscou
+  const artId = S._currentArtistId;
+  const winKey = isAlbums ? '_artistAlbums' : '_artistSingles';
+  if(artId){
+    try{
+      const endpoint = isAlbums ? `/artist/${artId}/albums` : `/artist/${artId}/albums`;
+      const all = await dzFetchAll(endpoint, {limit:100}, 500);
+      const mapped = (all.data||[]).map(normAlbum);
+      if(isAlbums){
+        window._artistAlbums = mapped.filter(a=>a.record_type==='album');
+      } else {
+        window._artistSingles = mapped.filter(a=>['single','ep'].includes(a.record_type));
+      }
+    }catch(e){}
+  }
+
+  const items = window[winKey];
+  if(!items || !items.length){ if(lastCard) lastCard.remove(); return; }
+
+  const badge = isAlbums ? 'Álbum' : 'Single';
+  shelf.innerHTML = items.map((it, i) => `
+    <div class="shelf-card" style="flex-shrink:0;width:130px;scroll-snap-align:start;cursor:pointer" onclick="openDetail(window.${winKey}[${i}])">
+      <div class="thumb" style="width:130px;height:130px;border-radius:10px;overflow:hidden;background:var(--s3);position:relative">
+        <img src="${esc(it.cover_xl||it.thumbnail||'')}" style="width:100%;height:100%;object-fit:cover" loading="lazy"/>
+        <span class="type-badge">${badge}</span>
+      </div>
+      <div class="card-title" style="font-size:12px;font-weight:600;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(it.title)}</div>
+      <div class="card-sub" style="font-size:11px;color:var(--dim)">${esc(it.release_date||'')}</div>
+    </div>`).join('');
+  requestAnimationFrame(()=>{ shelf.scrollLeft = 0; });
 }
 
 // ══════════════════════════════════════════
@@ -1312,7 +1880,7 @@ function openCtxFromList(i, items){
   $('ctx-img').src=thumb(it);
   $('ctx-title').textContent=it.title||it.name||'';
   $('ctx-artist').textContent=it.uploader||'';
-  $('ctxOverlay').classList.add('open');history.pushState({sheet:'ctx'},'',location.href);
+  $('ctxOverlay').classList.add('open');try{history.pushState({ _navIdx: _navStack.length-1, _sheet:'ctx' }, '');}catch(_){}
 }
 
 // ══════════════════════════════════════════
@@ -1328,6 +1896,8 @@ async function playIdx(i){
   _transitioning = true;
   S.idx=i;
   _errCount=0; _lastErrId=null;
+  // Reseta preload — a faixa mudou, recalcula qual é a próxima
+  _preloadId = null;
   const it=S.queue[i];
   const t=thumb(it);
 
@@ -1343,6 +1913,7 @@ async function playIdx(i){
   $('ps-like').classList.toggle('liked', S.liked.has(it.id));
   document.title=(it.title||'')+ ' – Deezer Music';
   npbar.classList.add('visible');
+  $('mainEl').classList.add('has-player');
   updateHighlight();
 
   S.history=S.history.filter(x=>x.id!==it.id);
@@ -1363,7 +1934,18 @@ async function playIdx(i){
   // Se um token mais novo já existe, aborta esta execução
   if(token !== _playToken){ _transitioning=false; return; }
 
-  audio.src='/api/stream?id='+encodeURIComponent(it.id);
+  // Aproveita pré-carregamento: se o audioPreload já está com esta faixa e carregou dados,
+  // transfere o src diretamente, evitando nova requisição ao servidor
+  const preloadSrc = '/api/stream?id=' + encodeURIComponent(it.id);
+  if(audioPreload.src && audioPreload.src.endsWith(encodeURIComponent(it.id))
+     && audioPreload.readyState >= 2){
+    audio.src = audioPreload.src;
+    // Limpa o preload para não bloquear o próximo
+    audioPreload.removeAttribute('src');
+    _preloadId = null;
+  } else {
+    audio.src = preloadSrc;
+  }
 
   audio.addEventListener('loadedmetadata', function onMeta(){
     audio.removeEventListener('loadedmetadata', onMeta);
@@ -1388,21 +1970,31 @@ async function playIdx(i){
   }
 }
 
-let _userPaused = false;
 function togglePlay(){
   if(!audio.src||audio.src===location.href)return;
   if(audio.paused){
-    _userPaused = false;
     const p = audio.play();
     if(p && p.catch) p.catch(()=>{}).then(()=>setPlayIcons(!audio.paused));
-  } else { _userPaused = true; audio.pause(); setPlayIcons(false); }
+  } else { audio.pause(); setPlayIcons(false); }
+}
+
+// Navega para o perfil do artista da faixa em reprodução
+function goToCurrentArtist(){
+  const it = S.queue[S.idx];
+  if(!it) return;
+  const aid  = it.artist_id || '';
+  const name = it.uploader  || '';
+  const av   = it.thumbnail || it.cover_xl || '';
+  if(!aid) return;
+  // Fecha o player sheet se estiver aberto, para poder ver o perfil
+  closePlayer();
+  openArtistById(aid, name, av);
 }
 function prevTrack(){
   if(audio.currentTime>3){audio.currentTime=0;return;}
   let n=S.idx-1; if(n<0)n=S.queue.length-1; playIdx(n);
 }
 function nextTrack(){
-  if(_transitioning) return; // evita encadeamento durante troca
   if(!S.queue.length) return;
   if(S.shuffle && S.queue.length>1){
     let n; do { n=Math.floor(Math.random()*S.queue.length); } while(n===S.idx);
@@ -1460,20 +2052,14 @@ function downloadCurrent(){
 }
 function shareTrack(){
   const it=S.queue[S.idx];if(!it)return;
-  // song.link reconhece IDs do Deezer automaticamente
   const deezerUrl=`https://www.deezer.com/track/${it.id}`;
-  const songLinkUrl=`https://song.link/d/${it.id}`;
   if(navigator.share){
-    navigator.share({title:it.title, url:songLinkUrl}).catch(()=>{
-      navigator.clipboard?.writeText(songLinkUrl).then(()=>toast('🔗 Link copiado!'));
+    navigator.share({title:it.title, url:deezerUrl}).catch(()=>{
+      navigator.clipboard?.writeText(deezerUrl).then(()=>toast('🔗 Link copiado!'));
     });
   } else {
-    navigator.clipboard?.writeText(songLinkUrl).then(()=>toast('🔗 Link song.link copiado!'));
+    navigator.clipboard?.writeText(deezerUrl).then(()=>toast('🔗 Link copiado!'));
   }
-}
-function openSongLink(){
-  const it=S.queue[S.idx];if(!it)return;
-  window.open(`https://song.link/d/${it.id}`,'_blank','noopener');
 }
 function updateHighlight(){
   const curId = S.queue[S.idx]?.id;
@@ -1508,29 +2094,8 @@ audio.addEventListener('timeupdate',()=>{
   $('ps-cur').textContent=fmt(audio.currentTime);
 });
 audio.addEventListener('loadedmetadata',()=>{ $('ps-dur').textContent=fmt(audio.duration); });
-
-audio.addEventListener('play',()=>{ _userPaused=false; setPlayIcons(true); });
-audio.addEventListener('pause',()=>{
-  setPlayIcons(false);
-  // Auto-resume: se a pausa não foi pedida pelo usuário e a faixa ainda não acabou,
-  // tenta retomar a reprodução (corrige pausas espúrias por buffering/foco/sistema)
-  if(_userPaused || _transitioning) return;
-  if(!audio.src || audio.ended) return;
-  if(audio.duration && audio.currentTime >= audio.duration - 0.25) return;
-  setTimeout(()=>{
-    if(_userPaused || _transitioning || !audio.paused) return;
-    const p = audio.play();
-    if(p && p.catch) p.catch(()=>{});
-  }, 350);
-});
-audio.addEventListener('stalled', ()=>{
-  if(_userPaused || _transitioning) return;
-  setTimeout(()=>{ if(!_userPaused && audio.paused){ const p=audio.play(); if(p&&p.catch) p.catch(()=>{}); } }, 500);
-});
-audio.addEventListener('waiting', ()=>{
-  if(_userPaused || _transitioning) return;
-  setTimeout(()=>{ if(!_userPaused && audio.paused){ const p=audio.play(); if(p&&p.catch) p.catch(()=>{}); } }, 700);
-});
+audio.addEventListener('play',()=>setPlayIcons(true));
+audio.addEventListener('pause',()=>setPlayIcons(false));
 let _endedLock = false;
 audio.addEventListener('ended',()=>{
   if(_endedLock || _transitioning) return;
@@ -1582,7 +2147,7 @@ audio.addEventListener('error', async ()=>{
     toast('Nenhuma faixa disponível na fila.');
     return;
   }
-  setTimeout(()=>nextTrack(), 800);
+  nextTrack();
 });
 audio.addEventListener('play', ()=>{ _errCount=0; _lastErrId=null; if(S.queue[S.idx]) _retried.delete(S.queue[S.idx].id); });
 
@@ -1599,12 +2164,132 @@ $('seekTrack').addEventListener('touchstart',e=>{_sk=true;e.preventDefault();see
 document.addEventListener('touchmove',e=>{if(_sk){e.preventDefault();seekTo(e);}},{passive:false});
 document.addEventListener('touchend',()=>{_sk=false;});
 
-// ── Player sheet ──
-function openPlayer(){sheet.classList.add('open');history.pushState({sheet:'player'},'',location.href);}
-function closePlayer(){sheet.classList.remove('open');}
-let _sy=0;
-sheet.addEventListener('touchstart',e=>{_sy=e.touches[0].clientY;},{passive:true});
-sheet.addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-_sy>80)closePlayer();});
+// ── Player sheet — drag-to-collapse (Deezer style) ──
+let _playerOpen = false;
+let _dragActive = false;
+let _dragStartY = 0;
+let _dragStartX = 0;
+let _dragProgress = 0; // 0=full, 1=mini
+const _SNAP_THRESHOLD = 0.42; // fraction of screen height to snap closed
+
+function openPlayer(){
+  _playerOpen = true;
+  npbar.style.transition = 'none';
+  npbar.style.opacity = '0';
+  npbar.style.pointerEvents = 'none';
+  sheet.style.transition = 'transform .35s cubic-bezier(.4,0,.2,1)';
+  sheet.style.transform = 'translateY(0)';
+  sheet.style.borderRadius = '0';
+  sheet.classList.add('open');
+  sheet.style.setProperty('--ps-content-opacity', '1');
+  document.body.style.overflow = 'hidden';
+  document.querySelector('.bottomnav').style.display = 'none';
+  try{ history.pushState({ _navIdx: _navStack.length-1, _sheet:'player' }, ''); }catch(_){}
+}
+
+function closePlayer(){
+  _playerOpen = false;
+  sheet.style.transition = 'transform .35s cubic-bezier(.4,0,.2,1), border-radius .35s';
+  sheet.style.transform = 'translateY(110%)';
+  sheet.style.borderRadius = '14px 14px 0 0';
+  sheet.classList.remove('open');
+  npbar.style.transition = 'opacity .25s, transform .25s';
+  npbar.style.opacity = '1';
+  npbar.style.transform = 'translateY(0)';
+  npbar.style.pointerEvents = '';
+  document.body.style.overflow = '';
+  document.querySelector('.bottomnav').style.display = '';
+  setTimeout(()=>{
+    if(!_playerOpen){
+      sheet.style.transform = '';
+      sheet.style.borderRadius = '';
+      sheet.style.setProperty('--ps-content-opacity','1');
+    }
+  }, 380);
+}
+
+// Interpola estado visual entre player cheio (p=0) e fechado (p=1)
+function _applyPlayerProgress(p){
+  p = Math.max(0, Math.min(1, p));
+  _dragProgress = p;
+
+  const vh = window.innerHeight;
+  // O player desliza para baixo até sair completamente da tela
+  const ty = p * vh;
+  sheet.style.transform = `translateY(${ty}px)`;
+
+  // Bordas arredondadas aparecem conforme desce
+  const radius = Math.min(p * 28, 18);
+  sheet.style.borderRadius = `${radius}px ${radius}px 0 0`;
+
+  // Conteúdo do player some rápido no início do gesto
+  const contentOpacity = Math.max(0, 1 - p * 4);
+  sheet.style.setProperty('--ps-content-opacity', contentOpacity);
+
+  // npbar permanece invisível durante o arrasto (evita o "vazamento" violeta)
+  npbar.style.opacity = '0';
+  npbar.style.pointerEvents = 'none';
+}
+
+// Touch drag no player — somente para baixo (fecha)
+let _shDragY = 0;
+let _shDragging = false;
+let _shMoved = false;
+let _shDragStartX = 0;
+
+sheet.addEventListener('touchstart', e => {
+  if(!_playerOpen) return;
+  const touch = e.touches[0];
+  const rect = sheet.getBoundingClientRect();
+  const localY = touch.clientY - rect.top;
+  // Permite arrastar de qualquer lugar no topo 140px (handle + header)
+  if(localY > 140) return;
+  _shDragY = touch.clientY;
+  _shDragStartX = touch.clientX;
+  _shDragging = true;
+  _shMoved = false;
+  sheet.style.transition = 'none';
+}, {passive: true});
+
+sheet.addEventListener('touchmove', e => {
+  if(!_shDragging) return;
+  const touch = e.touches[0];
+  const dy = touch.clientY - _shDragY;
+  const dx = Math.abs(touch.clientX - _shDragStartX);
+
+  // Se o primeiro movimento é horizontal, cancela
+  if(!_shMoved && dx > Math.abs(dy) + 5){ _shDragging = false; return; }
+  // Bloqueia arrasto para cima — player já está no topo
+  if(dy <= 0){ return; }
+
+  _shMoved = true;
+  const vh = window.innerHeight;
+  const p = Math.max(0, Math.min(1, dy / (vh * 0.65)));
+  _applyPlayerProgress(p);
+}, {passive: true});
+
+sheet.addEventListener('touchend', () => {
+  if(!_shDragging){ return; }
+  _shDragging = false;
+  if(!_shMoved){
+    // Toque sem movimento — garante que tudo está ok
+    npbar.style.opacity = '0';
+    return;
+  }
+  sheet.style.transition = 'transform .3s cubic-bezier(.4,0,.2,1), border-radius .3s';
+  if(_dragProgress >= _SNAP_THRESHOLD){
+    closePlayer();
+  } else {
+    // Snap de volta para aberto
+    _playerOpen = true;
+    sheet.style.transform = 'translateY(0)';
+    sheet.style.borderRadius = '0';
+    sheet.classList.add('open');
+    sheet.style.setProperty('--ps-content-opacity','1');
+    npbar.style.opacity = '0';
+    npbar.style.pointerEvents = 'none';
+  }
+});
 
 // ── Atualiza capas vizinhas (preview prev/next) ──
 function _updateAdjacentCovers(){
@@ -1671,10 +2356,8 @@ function _updateAdjacentCovers(){
       const dir=dx<0?-1:1;
       art.style.transform=`translateX(${dir*w}px) rotate(${dir*8}deg)`;
       art.style.opacity='0';
-      setTimeout(()=>{
-        reset(false);
-        if(dir<0) nextTrack(); else prevTrack();
-      },220);
+      reset(false);
+      if(dir<0) nextTrack(); else prevTrack();
     } else {
       reset(true);
     }
@@ -1684,7 +2367,7 @@ function _updateAdjacentCovers(){
 // ══════════════════════════════════════════
 //  QUEUE SHEET
 // ══════════════════════════════════════════
-function openQueue(){renderQueueList();$('queueSheet').classList.add('open');history.pushState({sheet:'queue'},'',location.href);}
+function openQueue(){renderQueueList();$('queueSheet').classList.add('open');try{history.pushState({ _navIdx: _navStack.length-1, _sheet:'queue' }, '');}catch(_){}}
 function closeQueue(){$('queueSheet').classList.remove('open');}
 function renderQueueList(){
   if(!S.queue.length){$('queueList').innerHTML='<div class="empty"><p>Fila vazia</p></div>';return;}
@@ -1709,7 +2392,7 @@ function openCtx(i, fromDetail){
   $('ctx-img').src=thumb(it);
   $('ctx-title').textContent=it.title||it.name||'';
   $('ctx-artist').textContent=it.uploader||'';
-  $('ctxOverlay').classList.add('open');history.pushState({sheet:'ctx'},'',location.href);
+  $('ctxOverlay').classList.add('open');try{history.pushState({ _navIdx: _navStack.length-1, _sheet:'ctx' }, '');}catch(_){}
 }
 function closeCtx(){$('ctxOverlay').classList.remove('open');}
 function ctxAction(action){
@@ -1742,14 +2425,10 @@ function ctxAction(action){
   }
   else if(action==='share'){
     const deezerUrl=`https://www.deezer.com/track/${it.id}`;
-    const songLinkUrl=`https://song.link/d/${it.id}`;
-    if(navigator.share) navigator.share({title:it.title,url:songLinkUrl}).catch(()=>{
-      navigator.clipboard?.writeText(songLinkUrl).then(()=>toast('🔗 Link copiado!'));
+    if(navigator.share) navigator.share({title:it.title,url:deezerUrl}).catch(()=>{
+      navigator.clipboard?.writeText(deezerUrl).then(()=>toast('🔗 Link copiado!'));
     });
-    else navigator.clipboard?.writeText(songLinkUrl).then(()=>toast('🔗 song.link copiado!'));
-  }
-  else if(action==='songlink'){
-    window.open(`https://song.link/d/${it.id}`,'_blank','noopener');
+    else navigator.clipboard?.writeText(deezerUrl).then(()=>toast('🔗 Link copiado!'));
   }
 }
 
@@ -1910,148 +2589,7 @@ async function checkArlStatus(){
 checkArlStatus();
 loadHomeFeed();
 
-// ══════════════════════════════════════════════════════════════════
-//  🔧 OVERRIDE — Paginação completa estilo Deezer (append-only)
-//  Mantém 100% do código original. Substitui dinamicamente navTo/
-//  navBack/openDetail/openArtistById/doSearch para suportar pilha
-//  de páginas com payload (várias telas de detalhe empilháveis,
-//  voltar restaura conteúdo + scroll, botão voltar do navegador).
-// ══════════════════════════════════════════════════════════════════
-(function(){
-  const ROOTS = new Set(['home','explore','library','search']);
-  const stack = [{view:'home', payload:null, scrollTop:0}];
-  let _navigating = false;
 
-  const _origOpenDetail     = window.openDetail;
-  const _origOpenArtistById = window.openArtistById;
-  const _origDoSearch       = window.doSearch;
-  const _origRenderLibrary  = window.renderLibrary;
-  const _origRenderExplore  = window.renderExplore;
-
-  function setActiveView(view){
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-    document.querySelectorAll('.bottomnav a').forEach(a=>a.classList.remove('active'));
-    const el = document.getElementById('view-'+view);
-    if(el) el.classList.add('active');
-    const navTarget = ROOTS.has(view) && view!=='search' ? view :
-      ([...stack].reverse().find(e=>ROOTS.has(e.view) && e.view!=='search')?.view || 'home');
-    document.getElementById('nav-'+navTarget)?.classList.add('active');
-    S.currentView = view;
-  }
-
-  async function renderEntry(entry, opts={}){
-    setActiveView(entry.view);
-    const mainEl = document.getElementById('mainEl');
-    if(entry.view === 'detail' && entry.payload){
-      await _origOpenDetail.call(window, entry.payload);
-    } else if(entry.view === 'artist' && entry.payload){
-      const p = entry.payload;
-      await _origOpenArtistById.call(window, p.id, p.name, p.avatar);
-    } else if(entry.view === 'search' && entry.payload){
-      await _origDoSearch.call(window, entry.payload.q, entry.payload.type||'all');
-    } else if(entry.view === 'library'){
-      _origRenderLibrary?.call(window);
-    } else if(entry.view === 'explore'){
-      _origRenderExplore?.call(window);
-    }
-    requestAnimationFrame(()=>{
-      if(mainEl) mainEl.scrollTop = opts.restoreScroll ? (entry.scrollTop||0) : 0;
-    });
-  }
-
-  function pushHistoryState(){
-    try{ history.pushState({_pageIdx: stack.length-1}, '', location.href); }catch(_){}
-  }
-
-  function saveScroll(){
-    const top = stack[stack.length-1];
-    const m = document.getElementById('mainEl');
-    if(top && m) top.scrollTop = m.scrollTop;
-  }
-
-  async function goTo(entry, {replaceTop=false} = {}){
-    if(_navigating) return;
-    _navigating = true;
-    try{
-      saveScroll();
-      if(ROOTS.has(entry.view) && !entry.payload){
-        const top = stack[stack.length-1];
-        if(top && top.view === entry.view){ setActiveView(entry.view); return; }
-        const idx = stack.findIndex(e=>e.view===entry.view && !e.payload);
-        if(idx >= 0){
-          stack.splice(idx+1);
-          await renderEntry(stack[stack.length-1], {restoreScroll:true});
-          pushHistoryState();
-          return;
-        }
-      }
-      if(replaceTop) stack.pop();
-      stack.push({...entry, scrollTop:0});
-      await renderEntry(entry);
-      pushHistoryState();
-    } finally { _navigating = false; }
-  }
-
-  async function back(){
-    if(sheet.classList.contains('open')){ closePlayer(); return; }
-    if(document.getElementById('queueSheet')?.classList.contains('open')){ closeQueue(); return; }
-    if(document.getElementById('ctxOverlay')?.classList.contains('open')){ closeCtx(); return; }
-    if(stack.length <= 1){
-      if(stack[0].view !== 'home'){
-        stack.length = 0;
-        stack.push({view:'home', payload:null, scrollTop:0});
-        setActiveView('home');
-      }
-      return;
-    }
-    _navigating = true;
-    try{
-      stack.pop();
-      await renderEntry(stack[stack.length-1], {restoreScroll:true});
-    } finally { _navigating = false; }
-  }
-
-  window.navTo = function(view){ goTo({view, payload:null}); };
-  window.navBack = back;
-  window.openDetail = function(it){ return goTo({view:'detail', payload: it}); };
-  window.openArtistById = function(id, name, avatar){
-    return goTo({view:'artist', payload:{id, name, avatar}});
-  };
-  window.doSearch = function(q, type='all'){
-    q = (q||'').trim();
-    if(!q){ goTo({view:'home', payload:null}); return; }
-    const top = stack[stack.length-1];
-    const replaceTop = !!(top && top.view === 'search');
-    return goTo({view:'search', payload:{q, type}}, {replaceTop});
-  };
-
-  window.addEventListener('popstate', ()=>{
-    const qOpen = document.getElementById('queueSheet')?.classList.contains('open');
-    const cOpen = document.getElementById('ctxOverlay')?.classList.contains('open');
-    const pOpen = sheet.classList.contains('open');
-    if(cOpen){ closeCtx(); try{ history.pushState({_pageIdx: stack.length-1}, '', location.href); }catch(_){ } return; }
-    if(qOpen){ closeQueue(); try{ history.pushState({_pageIdx: stack.length-1}, '', location.href); }catch(_){ } return; }
-    if(pOpen){ closePlayer(); try{ history.pushState({_pageIdx: stack.length-1}, '', location.href); }catch(_){ } return; }
-    back();
-    try{ history.pushState({_pageIdx: stack.length-1}, '', location.href); }catch(_){}
-  });
-  try{ history.replaceState({_pageIdx:0}, '', location.href); }catch(_){}
-
-  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') back(); });
-
-  // ── Mantém o mini-player visível ao navegar entre abas/seções ──
-  const _keepMiniPlayer = ()=>{
-    try{
-      if(audio && audio.src && audio.src !== location.href){
-        npbar.classList.add('visible');
-      }
-    }catch(_){}
-  };
-  const _origSetActiveView = setActiveView;
-  setActiveView = function(v){ _origSetActiveView(v); _keepMiniPlayer(); };
-
-  console.log('[nav] paginação Deezer-like ativada');
-})();
 
 // ── Bloqueia cópia, seleção e menu de contexto (mas mantém em inputs) ──
 (function(){
@@ -2060,131 +2598,56 @@ loadHomeFeed();
     document.addEventListener(ev, (e)=>{
       if(!allowIn(e.target)) e.preventDefault();
     }, {capture:true});
-});
+  });
 })();
 </script>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     SPOTIFY-LIKE THEME + ANTI-DELAY TRACK TRANSITIONS
-     Aditivo — não altera marcação nem lógica existente.
-     ═══════════════════════════════════════════════════════════════ -->
-<style id="spotify-polish">
-:root{
-  --acc:#1ed760 !important;
-  --acc2:#169c46 !important;
-  --acc-rgb:30,215,96 !important;
-  --bg:#000 !important;
-  --s1:#0b0b0b !important;
-  --s2:#181818 !important;
-  --s3:#242424 !important;
-  --s4:#2a2a2a !important;
-  --radius:12px !important;
-  --font:'Circular','Google Sans','Segoe UI',-apple-system,sans-serif !important;
-}
-html,body{background:#000 !important}
-
-/* Topbar — mais clean */
-.topbar{background:rgba(0,0,0,.85) !important;border-bottom:none !important;height:60px !important}
-.logo-icon{background:#1ed760 !important;border-radius:50% !important;box-shadow:0 4px 14px rgba(30,215,96,.35)}
-.logo-icon svg{fill:#000 !important}
-.logo-text,.logo-text span{color:#fff !important;font-weight:900 !important;letter-spacing:-.4px}
-.search-bar{background:#1a1a1a !important;border:1px solid transparent !important;border-radius:500px !important;height:42px !important;transition:background .18s ease, box-shadow .18s ease}
-.search-bar:focus-within{background:#2a2a2a !important;border-color:#fff !important;box-shadow:0 0 0 2px rgba(255,255,255,.06)}
-
-/* Bottom nav — pill icons Spotify style */
-.bottomnav{background:rgba(0,0,0,.96) !important;border-top:1px solid rgba(255,255,255,.04) !important}
-.bottomnav a{font-weight:600 !important;letter-spacing:.02em}
-.bottomnav a.active svg{fill:#fff !important}
-.bottomnav a.active{color:#fff !important}
-
-/* Cards / shelves */
-.shelf-card,.lib-card,.explore-card{border-radius:8px !important;background:#181818 !important;transition:background .25s ease, transform .25s ease}
-.shelf-card:hover,.lib-card:hover{background:#252525 !important}
-.shelf-card .thumb,.lib-thumb{border-radius:6px !important;box-shadow:0 8px 24px rgba(0,0,0,.55)}
-
-/* Mini player (npbar) — Spotify-like */
-.npbar{background:linear-gradient(180deg,#1f1f1f,#121212) !important;border-top:none !important;border-radius:8px !important;left:8px !important;right:8px !important;bottom:calc(var(--nav) + 6px) !important;height:64px !important;box-shadow:0 8px 28px rgba(0,0,0,.6)}
-.npbar .np-thumb{width:48px !important;height:48px !important;border-radius:4px !important}
-.npbar .np-title{font-weight:700 !important}
-.npbar .np-btns .play-btn{background:#fff !important;width:36px !important;height:36px !important;box-shadow:0 2px 8px rgba(0,0,0,.5)}
-.npbar .np-btns .play-btn svg{width:18px !important;height:18px !important}
-.np-progress-fill{background:#1ed760 !important}
-
-/* Full player */
-.player-sheet{background:linear-gradient(180deg,#2b2b2b 0%,#0a0a0a 55%,#000 100%) !important}
-.ps-art{border-radius:8px !important;box-shadow:0 30px 80px -10px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.04) !important;margin:28px auto 28px !important}
-.ps-title{font-size:22px !important;font-weight:900 !important;letter-spacing:-.4px !important}
-.ps-artist{font-size:14px !important;color:#b3b3b3 !important;font-weight:500 !important}
-.ps-like.liked{color:#1ed760 !important}
-
-/* Botões do player — mais finos e elegantes (Spotify) */
-.ps-controls{padding:6px 18px 0 !important}
-.ps-controls .ic{width:44px !important;height:44px !important;color:#b3b3b3 !important}
-.ps-controls .ic svg{width:22px !important;height:22px !important}
-.ps-controls .ic.active{color:#1ed760 !important}
-.ps-controls .big-play{width:64px !important;height:64px !important;background:#fff !important;box-shadow:0 6px 20px rgba(0,0,0,.55) !important;transition:transform .15s ease, background .15s ease}
-.ps-controls .big-play:active{transform:scale(.94) !important;background:#f0f0f0 !important;box-shadow:0 4px 14px rgba(0,0,0,.4) !important}
-.ps-controls .big-play svg{fill:#000 !important;width:28px !important;height:28px !important}
-
-/* Seek bar verde Spotify on press */
-.seek-track:active .seek-fill{background:#1ed760 !important}
-
-/* Extras */
-.ps-extras{border-top:1px solid rgba(255,255,255,.06) !important}
-.ps-extras button{font-weight:600 !important}
-.ps-extras button.on{color:#1ed760 !important}
-.ps-extras button.downloading{color:#1ed760 !important}
-
-/* ═══ ANTI-DELAY: animações suaves ao trocar de música ═══ */
-@keyframes trackFadeIn{
-  0%{opacity:0;transform:translateY(6px) scale(.985);filter:blur(4px)}
-  100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
-}
-@keyframes coverFadeIn{
-  0%{opacity:0;transform:scale(.94);filter:blur(8px)}
-  100%{opacity:1;transform:scale(1);filter:blur(0)}
-}
-.track-fade{animation:trackFadeIn .42s cubic-bezier(.2,.8,.2,1) both}
-.cover-fade{animation:coverFadeIn .55s cubic-bezier(.2,.8,.2,1) both}
-
-/* Suaviza qualquer mudança de src nas capas — transição padrão */
-#ps-art,#np-thumb,.ps-art-slot{transition:opacity .35s ease, transform .35s cubic-bezier(.2,.8,.2,1), filter .35s ease}
-</style>
 
 <script>
-/* ANTI-DELAY: aplica fade suave no card do player e mini-player
-   sempre que a faixa muda. Observa mutações de texto/src sem
-   alterar nenhum trecho do código original. */
+// ── SW Keepalive: impede suspensão em segundo plano ──
 (function(){
-  function bump(el, cls){
-    if(!el) return;
-    el.classList.remove(cls);
-    // force reflow
-    void el.offsetWidth;
-    el.classList.add(cls);
-  }
-  const titles = ['ps-title','ps-artist','np-title','np-art']
-    .map(id=>document.getElementById(id)).filter(Boolean);
-  const covers = ['ps-art','np-thumb']
-    .map(id=>document.getElementById(id)).filter(Boolean);
-
-  const titleObs = new MutationObserver(muts=>{
-    const seen = new Set();
-    muts.forEach(m=>{
-      const el = m.target.nodeType===3 ? m.target.parentElement : m.target;
-      if(el && !seen.has(el)){ seen.add(el); bump(el,'track-fade'); }
-    });
-  });
-  titles.forEach(el=>titleObs.observe(el,{characterData:true,childList:true,subtree:true}));
-
-  const coverObs = new MutationObserver(muts=>{
-    muts.forEach(m=>{
-      if(m.attributeName==='src'){ bump(m.target,'cover-fade'); }
-    });
-  });
-  covers.forEach(el=>coverObs.observe(el,{attributes:true,attributeFilter:['src']}));
+  if(!('serviceWorker' in navigator)) return;
+  setInterval(()=>{
+    navigator.serviceWorker.ready.then(reg => {
+      if(reg.active) reg.active.postMessage('keepalive');
+    }).catch(()=>{});
+  }, 20000);
 })();
 </script>
 
+<style id="spotify-polish">
+:root{--acc:#1ed760;--acc2:#169c46;--acc-rgb:30,215,96}
+.ps-art,.np-thumb{transition:opacity .35s ease, transform .35s cubic-bezier(.2,.8,.2,1), filter .35s ease}
+.ps-title,.ps-artist,.np-title{transition:opacity .3s ease, transform .3s cubic-bezier(.2,.8,.2,1)}
+.ps-art{border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.55)}
+.player-sheet{background:linear-gradient(180deg,#1f1f1f 0%, #0a0a0a 70%)}
+.ps-extras{background:rgba(255,255,255,.02);border-top:1px solid rgba(255,255,255,.06)}
+.npbar{background:linear-gradient(90deg,#1a1a1a,#242424);border-radius:10px}
+@keyframes trackFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes coverFadeIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+.track-fade{animation:trackFadeIn .35s ease both}
+.cover-fade{animation:coverFadeIn .4s cubic-bezier(.2,.8,.2,1) both}
+</style>
+<script>
+(function(){
+  const bump=(el,cls)=>{ if(!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+  const textIds=['ps-title','ps-artist','np-title'];
+  const coverIds=['ps-art','np-thumb'];
+  const obs=new MutationObserver(muts=>{
+    muts.forEach(m=>{
+      const el=m.target.nodeType===1?m.target:m.target.parentElement;
+      if(!el) return;
+      if(textIds.includes(el.id)) bump(el,'track-fade');
+      if(coverIds.includes(el.id)) bump(el,'cover-fade');
+    });
+  });
+  const start=()=>{
+    [...textIds,...coverIds].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) obs.observe(el,{characterData:true,childList:true,subtree:true,attributes:true,attributeFilter:['src']});
+    });
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
+})();
+</script>
 </body>
 </html>
