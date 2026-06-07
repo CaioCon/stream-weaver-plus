@@ -2060,8 +2060,131 @@ loadHomeFeed();
     document.addEventListener(ev, (e)=>{
       if(!allowIn(e.target)) e.preventDefault();
     }, {capture:true});
-  });
+});
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SPOTIFY-LIKE THEME + ANTI-DELAY TRACK TRANSITIONS
+     Aditivo — não altera marcação nem lógica existente.
+     ═══════════════════════════════════════════════════════════════ -->
+<style id="spotify-polish">
+:root{
+  --acc:#1ed760 !important;
+  --acc2:#169c46 !important;
+  --acc-rgb:30,215,96 !important;
+  --bg:#000 !important;
+  --s1:#0b0b0b !important;
+  --s2:#181818 !important;
+  --s3:#242424 !important;
+  --s4:#2a2a2a !important;
+  --radius:12px !important;
+  --font:'Circular','Google Sans','Segoe UI',-apple-system,sans-serif !important;
+}
+html,body{background:#000 !important}
+
+/* Topbar — mais clean */
+.topbar{background:rgba(0,0,0,.85) !important;border-bottom:none !important;height:60px !important}
+.logo-icon{background:#1ed760 !important;border-radius:50% !important;box-shadow:0 4px 14px rgba(30,215,96,.35)}
+.logo-icon svg{fill:#000 !important}
+.logo-text,.logo-text span{color:#fff !important;font-weight:900 !important;letter-spacing:-.4px}
+.search-bar{background:#1a1a1a !important;border:1px solid transparent !important;border-radius:500px !important;height:42px !important;transition:background .18s ease, box-shadow .18s ease}
+.search-bar:focus-within{background:#2a2a2a !important;border-color:#fff !important;box-shadow:0 0 0 2px rgba(255,255,255,.06)}
+
+/* Bottom nav — pill icons Spotify style */
+.bottomnav{background:rgba(0,0,0,.96) !important;border-top:1px solid rgba(255,255,255,.04) !important}
+.bottomnav a{font-weight:600 !important;letter-spacing:.02em}
+.bottomnav a.active svg{fill:#fff !important}
+.bottomnav a.active{color:#fff !important}
+
+/* Cards / shelves */
+.shelf-card,.lib-card,.explore-card{border-radius:8px !important;background:#181818 !important;transition:background .25s ease, transform .25s ease}
+.shelf-card:hover,.lib-card:hover{background:#252525 !important}
+.shelf-card .thumb,.lib-thumb{border-radius:6px !important;box-shadow:0 8px 24px rgba(0,0,0,.55)}
+
+/* Mini player (npbar) — Spotify-like */
+.npbar{background:linear-gradient(180deg,#1f1f1f,#121212) !important;border-top:none !important;border-radius:8px !important;left:8px !important;right:8px !important;bottom:calc(var(--nav) + 6px) !important;height:64px !important;box-shadow:0 8px 28px rgba(0,0,0,.6)}
+.npbar .np-thumb{width:48px !important;height:48px !important;border-radius:4px !important}
+.npbar .np-title{font-weight:700 !important}
+.npbar .np-btns .play-btn{background:#fff !important;width:36px !important;height:36px !important;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+.npbar .np-btns .play-btn svg{width:18px !important;height:18px !important}
+.np-progress-fill{background:#1ed760 !important}
+
+/* Full player */
+.player-sheet{background:linear-gradient(180deg,#2b2b2b 0%,#0a0a0a 55%,#000 100%) !important}
+.ps-art{border-radius:8px !important;box-shadow:0 30px 80px -10px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.04) !important;margin:28px auto 28px !important}
+.ps-title{font-size:22px !important;font-weight:900 !important;letter-spacing:-.4px !important}
+.ps-artist{font-size:14px !important;color:#b3b3b3 !important;font-weight:500 !important}
+.ps-like.liked{color:#1ed760 !important}
+
+/* Botões do player — mais finos e elegantes (Spotify) */
+.ps-controls{padding:6px 18px 0 !important}
+.ps-controls .ic{width:44px !important;height:44px !important;color:#b3b3b3 !important}
+.ps-controls .ic svg{width:22px !important;height:22px !important}
+.ps-controls .ic.active{color:#1ed760 !important}
+.ps-controls .big-play{width:64px !important;height:64px !important;background:#fff !important;box-shadow:0 6px 20px rgba(0,0,0,.55) !important;transition:transform .15s ease, background .15s ease}
+.ps-controls .big-play:active{transform:scale(.94) !important;background:#f0f0f0 !important;box-shadow:0 4px 14px rgba(0,0,0,.4) !important}
+.ps-controls .big-play svg{fill:#000 !important;width:28px !important;height:28px !important}
+
+/* Seek bar verde Spotify on press */
+.seek-track:active .seek-fill{background:#1ed760 !important}
+
+/* Extras */
+.ps-extras{border-top:1px solid rgba(255,255,255,.06) !important}
+.ps-extras button{font-weight:600 !important}
+.ps-extras button.on{color:#1ed760 !important}
+.ps-extras button.downloading{color:#1ed760 !important}
+
+/* ═══ ANTI-DELAY: animações suaves ao trocar de música ═══ */
+@keyframes trackFadeIn{
+  0%{opacity:0;transform:translateY(6px) scale(.985);filter:blur(4px)}
+  100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+}
+@keyframes coverFadeIn{
+  0%{opacity:0;transform:scale(.94);filter:blur(8px)}
+  100%{opacity:1;transform:scale(1);filter:blur(0)}
+}
+.track-fade{animation:trackFadeIn .42s cubic-bezier(.2,.8,.2,1) both}
+.cover-fade{animation:coverFadeIn .55s cubic-bezier(.2,.8,.2,1) both}
+
+/* Suaviza qualquer mudança de src nas capas — transição padrão */
+#ps-art,#np-thumb,.ps-art-slot{transition:opacity .35s ease, transform .35s cubic-bezier(.2,.8,.2,1), filter .35s ease}
+</style>
+
+<script>
+/* ANTI-DELAY: aplica fade suave no card do player e mini-player
+   sempre que a faixa muda. Observa mutações de texto/src sem
+   alterar nenhum trecho do código original. */
+(function(){
+  function bump(el, cls){
+    if(!el) return;
+    el.classList.remove(cls);
+    // force reflow
+    void el.offsetWidth;
+    el.classList.add(cls);
+  }
+  const titles = ['ps-title','ps-artist','np-title','np-art']
+    .map(id=>document.getElementById(id)).filter(Boolean);
+  const covers = ['ps-art','np-thumb']
+    .map(id=>document.getElementById(id)).filter(Boolean);
+
+  const titleObs = new MutationObserver(muts=>{
+    const seen = new Set();
+    muts.forEach(m=>{
+      const el = m.target.nodeType===3 ? m.target.parentElement : m.target;
+      if(el && !seen.has(el)){ seen.add(el); bump(el,'track-fade'); }
+    });
+  });
+  titles.forEach(el=>titleObs.observe(el,{characterData:true,childList:true,subtree:true}));
+
+  const coverObs = new MutationObserver(muts=>{
+    muts.forEach(m=>{
+      if(m.attributeName==='src'){ bump(m.target,'cover-fade'); }
+    });
+  });
+  covers.forEach(el=>coverObs.observe(el,{attributes:true,attributeFilter:['src']}));
+})();
+</script>
+
 </body>
 </html>
